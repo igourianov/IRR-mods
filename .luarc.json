@@ -1,0 +1,32 @@
+{
+    "runtime.version": "Lua 5.4",
+    "diagnostics.globals": [
+        "print",
+        "RegisterKeyBind",
+        "RegisterHook",
+        "UnregisterHook",
+        "NotifyOnNewObject",
+        "RegisterConsoleCommandHandler",
+        "ExecuteInGameThread",
+        "ExecuteAsync",
+        "ExecuteWithDelay",
+        "LoopAsync",
+        "FindFirstOf",
+        "FindAllOf",
+        "FindObject",
+        "StaticFindObject",
+        "CreateInvalidObject",
+        "IsKeyBindRegistered",
+        "Key",
+        "ModifierKey",
+        "EInputEvent",
+        "PropertyTypes",
+        "UEHelpers"
+    ],
+    "workspace.library": [
+        "./tools/UE4SS-Lua-Types"
+    ],
+    "diagnostics.disable": [
+        "lowercase-global"
+    ]
+}

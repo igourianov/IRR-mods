@@ -1,0 +1,11 @@
+{
+  "game": {
+    "dir": "D:\\SteamLibrary\\steamapps\\common\\PROJECT QUARANTINE",
+    "module": "Test_C"
+  },
+  "ue4ss": {
+    "//": "Path relative to game.dir where UE4SS lives. Recent UE4SS keeps",
+    "//2": "only dwmapi.dll in Win64 and everything else in ue4ss/.",
+    "modsDir": "Test_C\\Binaries\\Win64\\ue4ss\\Mods"
+  }
+}

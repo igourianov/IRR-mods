@@ -1,0 +1,13 @@
+# Machine-specific
+build.config.json
+nexus-api.key
+
+# UE4SS dumps & generated SDK - large, regenerate per game patch
+tools/dumps/*
+!tools/dumps/.gitkeep
+*.usmap
+*.hpp
+*.log
+
+.vscode/
+__pycache__/
