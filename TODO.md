@@ -30,7 +30,7 @@
       `os.clock()` is CPU time on some builds — swap if it drifts.
 - [ ] Find a real key-release source so `hold` mode stops being a timeout
       approximation (see header of `likhos-keybinds/Scripts/triggers.lua`).
-- [ ] Implement `input.steal_key()` once the IMC property layout is known.
+- [ ] Implement key stealing (rewrite the conflicting `FEnhancedActionKeyMapping.Key` in the active IMC) once the IMC property layout is known.
 - [ ] Confirm the `context.lua` UI gate actually blocks while the stash
       search box has focus.
 

@@ -38,6 +38,7 @@ local function register_binds()
         end
     end
     log.info("%d of %d bind(s) active", count, #config.binds)
+    return count
 end
 
 local loop_started = false
@@ -46,20 +47,21 @@ local function start_tick_loop()
     if loop_started then return end
     loop_started = true
 
-    LoopAsync(config.tick_ms or 16, function()
+    local tick_ms = config.tick_ms or 16
+    LoopAsync(tick_ms, function()
         ExecuteInGameThread(function()
             util.safe("tick", triggers.tick, config.binds)
         end)
         return false   -- never stop
     end)
-    log.debug("tick loop started at %dms", config.tick_ms or 16)
+    log.debug("tick loop started at %dms", tick_ms)
 end
 
 --------------------------------------------------------------------------
 
 local function init()
     log.set_level(config.log_level)
-    log.info("loading (build %s)", "0.1.0")
+    log.info("loading")
 
     if not config.enabled then
         log.warn("config.enabled is false - loaded inert")
@@ -74,8 +76,8 @@ local function init()
         actions.reset()
     end)
 
-    register_binds()
-    start_tick_loop()
+    -- The tick loop queues a game-thread task every tick_ms. Skip it when nothing can use it.
+    if register_binds() > 0 then start_tick_loop() end
 
     RegisterConsoleCommandHandler("kb_dump_imc", function()
         input.dump_mapping_contexts()

@@ -2,9 +2,7 @@
 name="Likho's Keybinds"
 id="likhos-keybinds"
 version="0.1.0"
-prefix="[likho-keybinds]"
 description="Toggle/hold conversion, double-tap and tap-hold behaviour for any keybind"
-debug=false
 
 [ue4ss]
 ; UE4SS version this mod was developed and tested against.
@@ -12,6 +10,3 @@ ue4ss_version="experimental v3.0.1-1136-g35d1795d"
 ; Game build ID this mod was last verified on. Update on every retest.
 game_build="22417726"
 engine_version="5.6"
-
-[registry]
-enabled=true

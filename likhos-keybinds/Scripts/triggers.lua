@@ -16,12 +16,12 @@ local actions = require("actions")
 
 local M = {}
 
-local state = {}   -- bind.id -> { phase, since, taps, latched, action }
+local state = {}   -- bind.id -> { phase, since, latched }
 
 local function get(bind)
     local s = state[bind.id]
     if not s then
-        s = { phase = "idle", since = 0, taps = 0, latched = false }
+        s = { phase = "idle", since = 0, latched = false }
         state[bind.id] = s
     end
     return s
@@ -50,14 +50,12 @@ function M.on_press(bind)
         local window = bind.double_tap_window_ms or 250
         if s.phase == "pending" and (now - s.since) <= window then
             s.phase = "idle"
-            s.taps  = 0
             actions.invoke(bind.action, "press")
             actions.invoke(bind.action, "release")
             log.debug("bind '%s' double-tap fired", bind.id)
         else
             s.phase = "pending"
             s.since = now
-            s.taps  = 1
         end
 
     elseif bind.mode == "tap_hold" then
@@ -87,7 +85,6 @@ function M.tick(binds)
                         -- behaviour, otherwise it would double-fire with
                         -- the game's own binding.
                         s.phase = "idle"
-                        s.taps  = 0
                     end
 
                 elseif bind.mode == "tap_hold" and s.phase == "pending" then

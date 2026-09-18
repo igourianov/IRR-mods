@@ -11,19 +11,12 @@ local util = require("util")
 
 local M = {}
 
---- Cached PlayerController, refreshed by input.lua on level load.
-local pc = nil
-
-function M.set_player_controller(new_pc)
-    pc = new_pc
-end
-
 --- True when the game has a UI element holding keyboard focus, or the input
 --- mode is UI-only / game-and-UI.
 ---
 --- RECON REQUIRED: confirm the property names below against the UHT dump.
 --- UE exposes these differently across versions and games may wrap them.
-local function ui_has_focus()
+local function ui_has_focus(pc)
     if not util.valid(pc) then return false end
 
     -- Most common: the controller tracks whether the mouse cursor is shown,
@@ -37,10 +30,10 @@ local function ui_has_focus()
 end
 
 --- Returns true if the bind may fire.
-function M.allows(bind)
+function M.allows(bind, pc)
     if not bind.block_in_ui then return true end
 
-    local ok, blocked = pcall(ui_has_focus)
+    local ok, blocked = pcall(ui_has_focus, pc)
     if not ok then
         log.debug("context check errored; allowing bind '%s'", bind.id)
         return true

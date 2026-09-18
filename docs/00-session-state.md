@@ -75,7 +75,7 @@ warning appears on healthy runs too — not fatal.
   needed; until then a timeout ends the action.
 - `util.now_ms()` uses `os.clock()`, which is CPU time on some builds. Verify
   it tracks wall clock under UE4SS Lua 5.4 or swap it.
-- `input.steal_key()` is a stub. It is the answer to the core obstacle:
+- Key stealing is not implemented (the stub was removed). It is the answer to the core obstacle:
   `RegisterKeyBind` does **not** consume the keystroke, so the game's own
   binding still fires and a naive toggle double-fires. Intended fix is to
   rewrite the conflicting `FEnhancedActionKeyMapping.Key` in the active IMC.

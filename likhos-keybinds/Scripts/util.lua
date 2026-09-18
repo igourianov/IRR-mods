@@ -25,10 +25,4 @@ function M.valid(obj)
     return obj ~= nil and obj.IsValid ~= nil and obj:IsValid()
 end
 
-function M.shallow_copy(t)
-    local out = {}
-    for k, v in pairs(t) do out[k] = v end
-    return out
-end
-
 return M

@@ -29,13 +29,6 @@ M.ACTIONS = {
 --- the failure once rather than every keypress.
 local disabled = {}
 
---- Find the live object that owns an action's handler.
-local function resolve_owner(spec)
-    local obj = FindFirstOf(spec.class)
-    if not util.valid(obj) then return nil end
-    return obj
-end
-
 --- Invoke one side of an action. `phase` is "press" or "release".
 --- MUST be called from the game thread - see input.lua.
 function M.invoke(name, phase)
@@ -54,8 +47,8 @@ function M.invoke(name, phase)
         return true
     end
 
-    local owner = resolve_owner(spec)
-    if not owner then
+    local owner = FindFirstOf(spec.class)
+    if not util.valid(owner) then
         log.debug("action '%s': no live '%s' right now", name, spec.class)
         return false
     end
@@ -69,11 +62,10 @@ function M.invoke(name, phase)
     end
 
     local args = spec.args and spec.args() or nil
-    local ok = util.safe(("action %s:%s"):format(name, phase), function()
-        if args then owner[fn_name](owner, table.unpack(args))
-        else owner[fn_name](owner) end
+    return util.safe(("action %s:%s"):format(name, phase), function()
+        if args then fn(owner, table.unpack(args))
+        else fn(owner) end
     end)
-    return ok
 end
 
 --- Clear the permanent-disable list. Called on level load so a transient

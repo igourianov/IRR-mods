@@ -23,12 +23,6 @@ return {
     -- 16ms ~= one frame at 60fps. Raise if you see CPU cost in the console.
     tick_ms = 16,
 
-    -- If true, the mod rewrites conflicting entries in the game's
-    -- InputMappingContexts so the original binding stops firing.
-    -- Requires recon to confirm the Enhanced Input path exists. See
-    -- docs/01-recon.md. Leave false until that is verified.
-    intercept_via_imc = false,
-
     binds = {
         {
             id      = "example_sprint_toggle",

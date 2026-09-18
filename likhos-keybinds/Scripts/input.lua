@@ -1,4 +1,4 @@
--- input.lua : key registration, PlayerController lifecycle, IMC interception.
+-- input.lua : key registration, PlayerController lifecycle, IMC dump.
 
 local log      = require("log")
 local util     = require("util")
@@ -24,7 +24,6 @@ function M.watch_player_controller(on_ready)
         if pc:GetFName():ToString():find("^Default__") then return end
 
         player_controller = pc
-        context.set_player_controller(pc)
         triggers.reset()
 
         log.info("PlayerController acquired: %s", pc:GetFullName())
@@ -37,7 +36,6 @@ function M.get_player_controller()
     local pc = FindFirstOf("PlayerController")
     if util.valid(pc) then
         player_controller = pc
-        context.set_player_controller(pc)
         return pc
     end
     return nil
@@ -82,7 +80,7 @@ function M.register(bind)
         -- IMPORTANT: RegisterKeyBind callbacks run on UE4SS's own thread.
         -- Touching UObjects from here will crash. Hop to the game thread.
         ExecuteInGameThread(function()
-            if not context.allows(bind) then
+            if not context.allows(bind, M.get_player_controller()) then
                 log.debug("bind '%s' suppressed by context gate", bind.id)
                 return
             end
@@ -107,44 +105,11 @@ function M.register(bind)
 end
 
 --------------------------------------------------------------------------
--- Enhanced Input interception  (OPTIONAL - requires recon)
+-- Recon
 --------------------------------------------------------------------------
---
--- Problem: RegisterKeyBind does NOT consume the keystroke. The game's own
--- binding still fires, so a naive toggle double-fires.
---
--- Fix: walk the active InputMappingContext, find the FEnhancedActionKeyMapping
--- entries bound to our key, and repoint them at an unused key. We then own
--- the real key outright.
---
--- Everything below is inert until docs/01-recon.md confirms:
---   * EnhancedInputLocalPlayerSubsystem exists
---   * the IMC asset path(s) in use
---   * the property names on FEnhancedActionKeyMapping in this build
-
-function M.get_enhanced_input_subsystem()
-    local pc = M.get_player_controller()
-    if not pc then return nil end
-
-    local ok, subsys = pcall(function()
-        local lp = pc.Player
-        if not util.valid(lp) then return nil end
-        -- RECON: confirm the accessor. In some builds this is reachable via
-        -- USubsystemBlueprintLibrary; in others FindFirstOf works directly.
-        return FindFirstOf("EnhancedInputLocalPlayerSubsystem")
-    end)
-
-    if not ok or not util.valid(subsys) then
-        log.warn("EnhancedInputLocalPlayerSubsystem not found - " ..
-                 "IMC interception unavailable")
-        return nil
-    end
-    return subsys
-end
 
 --- Dump every loaded InputMappingContext and its mappings to the console.
---- This is a RECON TOOL, not part of normal operation. Call it from the
---- UE4SS console: require("input").dump_mapping_contexts()
+--- Used to find the action behind a vanilla key. Console: kb_dump_imc
 function M.dump_mapping_contexts()
     local contexts = FindAllOf("InputMappingContext")
     if not contexts then
@@ -171,14 +136,6 @@ function M.dump_mapping_contexts()
             end
         end
     end
-end
-
---- Repoint a mapping away from our key so the vanilla binding stops firing.
---- NOT SAFE until recon confirms the property layout. Guarded by
---- config.intercept_via_imc.
-function M.steal_key(imc_name, key_name, park_key_name)
-    log.warn("steal_key is a stub - implement after recon (see docs/01-recon.md)")
-    return false
 end
 
 return M
