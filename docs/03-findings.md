@@ -73,9 +73,14 @@ Output of `kb_dump_imc` during an active raid:
 
 | Role | Class name |
 |---|---|
-| PlayerController | |
+| PlayerController (raid) | `BP_InGamePlayerController_C` `/Game/Blueprints/Gameloop/InGame/BP_InGamePlayerController` |
+| PlayerController (hideout) | `BP_HideoutPlayerController_C` `/Game/Blueprints/Gameloop/Hideout/BP_HideoutPlayerController` |
+| PlayerController (main menu) | `PC_MenuController_C` `/Game/ThirdParty/UltimateShooterKit/UltimateMenu/Blueprints/Framework/PC_MenuController` |
+| PlayerController (other) | `BP_RadialInputPlayerController_C` `/Game/ThirdParty/GenericRadialMenus/Blueprints/BP_RadialInputPlayerController`. Role unknown. |
 | Player pawn | |
 | Input handler owner | |
+
+PlayerController classes observed 2026-09-18 via `NotifyOnNewObject("/Script/Engine.PlayerController")`, all loaded at startup as class default objects (`Default__...`). The only live instance at the main menu was `LVL_Menu:PersistentLevel.PC_MenuController_C_<n>`. The raid and hideout rows are named by asset path only. Confirm each one is live in its level.
 
 ## Action handlers
 

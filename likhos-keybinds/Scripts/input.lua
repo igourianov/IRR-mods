@@ -16,9 +16,12 @@ local player_controller = nil
 
 --- The PlayerController survives respawns; the pawn does not. Bind here.
 function M.watch_player_controller(on_ready)
-    NotifyOnNewObject("/Script/Engine.PlayerController", function(ctx)
-        local pc = ctx:get()
+    -- The callback receives the UObject itself, not a RemoteUnrealParam. No :get().
+    -- It also fires for each Blueprint subclass's class default object as the class loads.
+    -- Those are templates, not live controllers, so skip them by name.
+    NotifyOnNewObject("/Script/Engine.PlayerController", function(pc)
         if not util.valid(pc) then return end
+        if pc:GetFName():ToString():find("^Default__") then return end
 
         player_controller = pc
         context.set_player_controller(pc)
