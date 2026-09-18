@@ -2,7 +2,9 @@
 
 ## Blocking — do these first
 
-- [ ] **Verify UE4SS injects on the current game build.** Install the zDev
+- [x] **Verify UE4SS injects on the current game build.** DONE — needs the
+      experimental build and `MinorVersion = 6`. See `docs/03-findings.md`.
+- [ ] ~~old note~~ Install the zDev
       build, launch, confirm the GUI console appears and `UE4SS.log` is
       written. If it fails, this is an AOB signature mismatch — check
       `ue4ss\UE4SS_Signatures\` before considering the UEVR fallback.

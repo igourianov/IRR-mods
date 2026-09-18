@@ -1,6 +1,6 @@
 # IRR-mods
 
-UE4SS mods for **Incursion Red River** (Games of Tomorrow, UE 5.4, Steam).
+UE4SS mods for **Incursion Red River** (Games of Tomorrow, UE 5.6, Steam).
 
 | | |
 |---|---|

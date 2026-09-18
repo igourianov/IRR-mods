@@ -25,7 +25,8 @@ This decides the project. Do it before writing any code.
    GuiConsoleVisible = 1
    GraphicsAPI       = dx12
    ```
-   The game is DX12. If the GUI console fails to render, try `dx11`.
+   Valid values are only `dx11`, `d3d11`, `opengl`. There is no dx12 option;
+   `opengl` works.
 4. Launch. A separate console window should appear.
 
 **If it does not**, read `ue4ss\UE4SS.log`:
@@ -36,9 +37,10 @@ This decides the project. Do it before writing any code.
 | Log exists, "failed to find AOB" | Signature mismatch | Patch `ue4ss\UE4SS_Signatures\` |
 | Crash on launch | Engine version detection | Set `[EngineVersionOverride] MajorVersion=5 / MinorVersion=4` |
 
-UE 5.4 is well inside UE4SS's supported range — the known pain is 5.6/5.7.
-So a failure here is most likely a per-build signature issue, not a dead end.
-Only fall back to the UEVR Lua runtime if signature patching fails.
+RESOLVED 2026-09-18: the game is **UE 5.6**, not 5.4. Stable 3.0.1 cannot scan
+it at all; the experimental build can. `MinorVersion` must be 6 — setting 4
+produces a deterministic access violation at the first tick. See
+`03-findings.md` for the working config.
 
 ## Step 2 — dumps
 

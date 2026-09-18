@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-UE4SS Lua mods for **Incursion Red River** (UE 5.4, Steam, no anti-cheat).
+**Resuming? Read `docs/00-session-state.md` first.**
+
+UE4SS Lua mods for **Incursion Red River** (UE 5.6, Steam, no anti-cheat).
 
 ## Before changing code
 
@@ -42,5 +44,5 @@ In-game console: `kb_status`, `kb_dump_imc`.
 
 ## Current state
 
-Scaffold complete, action table empty. See `TODO.md` — the blocking item is
-verifying UE4SS injects on the current game build.
+Scaffold complete, action table empty, UE4SS verified working.
+See `docs/00-session-state.md` for where things stand and what is next.
