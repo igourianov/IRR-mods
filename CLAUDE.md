@@ -26,6 +26,7 @@ The load-bearing ones:
 - `docs/solutions/` — session level docs: solution docs, recon findings
   (`findings.md`) and notes for one piece of work. Read them only when the
   task points at one.
+  A solution doc records what was done at the time and why. Do not update it when later work changes or supersedes that solution.
 
 ## Do not fabricate game internals
 

@@ -23,7 +23,7 @@ Hold mode only (no toggle). Recommended to bind the new key to a mouse side butt
    ```
 
 3. Launch the game once. If `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS.log` appears, UE4SS works.
-4. Extract `likhos-point-and-shoot.zip` into `steamapps\common\PROJECT QUARANTINE\`. It places the mod in `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\Mods\likhos-point-and-shoot\`.
+4. Extract `likhos-point-and-shoot.zip` into `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\Mods\`. You should end up with a `likhos-point-and-shoot` folder there.
 5. Launch the game and assign a key under Settings > Controls > "Point Shooting (Direct)".
 
 ## Uninstall

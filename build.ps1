@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     A build bumps the patch segment of the mod's version in mod.txt when the mod folder has uncommitted changes.
-    The zip is laid out relative to the game install root, so extracting it there installs the mod.
+    The zip holds the bare mod folder, so extracting it into ue4ss\Mods installs the mod.
 
 .EXAMPLE
     .\build.ps1                             # deploy all mods
@@ -84,7 +84,6 @@ $versionPattern = '(?m)^(\s*version\s*=\s*")(\d+)\.(\d+)\.(\d+)(")'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $distDir = Join-Path $root 'dist'
 New-Item -ItemType Directory -Force $distDir | Out-Null
-$zipPrefix = ($cfg.ue4ss.modsDir -replace '\\', '/').Trim('/')
 
 foreach ($m in $Mods) {
     $src    = Join-Path $root $m
@@ -124,7 +123,7 @@ foreach ($m in $Mods) {
     $zip = [System.IO.Compression.ZipFile]::Open($zipPath, 'Create')
     try {
         foreach ($file in Get-ChildItem $src -Recurse -File) {
-            $entry = "$zipPrefix/$m/" + ($file.FullName.Substring($src.Length + 1) -replace '\\', '/')
+            $entry = "$m/" +($file.FullName.Substring($src.Length + 1) -replace '\\', '/')
             [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $entry) | Out-Null
         }
     } finally {
