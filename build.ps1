@@ -1,9 +1,10 @@
 <#
 .SYNOPSIS
-    Copy mods from this workspace into the game's UE4SS Mods folder.
+    Copy mods from this workspace into the game's UE4SS Mods folder and package each as dist\<mod>.zip.
 
 .DESCRIPTION
     A build bumps the patch segment of the mod's version in mod.txt when the mod folder has uncommitted changes.
+    The zip is laid out relative to the game install root, so extracting it there installs the mod.
 
 .EXAMPLE
     .\build.ps1                             # deploy all mods
@@ -67,6 +68,8 @@ if ($Unlink) {
 }
 
 # ---------------------------------------------------------------- validate
+# A tab-completed argument like .\likhos-point-and-shoot\ would otherwise leak into deploy paths and zip entry names.
+$Mods = $Mods | ForEach-Object { Split-Path $_.TrimEnd('\', '/') -Leaf }
 foreach ($m in $Mods) {
     if (-not (Test-Path (Join-Path $root $m))) { Write-Error "No such mod: $m" }
 }
@@ -77,6 +80,11 @@ foreach ($m in $Mods) {
 $gitAvailable = (Get-Command git -ErrorAction SilentlyContinue) -and (git -C $root rev-parse --is-inside-work-tree 2>$null) -eq 'true'
 if (-not $gitAvailable) { Write-Warning 'Git not available. Every build bumps the version.' }
 $versionPattern = '(?m)^(\s*version\s*=\s*")(\d+)\.(\d+)\.(\d+)(")'
+
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$distDir = Join-Path $root 'dist'
+New-Item -ItemType Directory -Force $distDir | Out-Null
+$zipPrefix = ($cfg.ue4ss.modsDir -replace '\\', '/').Trim('/')
 
 foreach ($m in $Mods) {
     $src    = Join-Path $root $m
@@ -109,22 +117,20 @@ foreach ($m in $Mods) {
     Copy-Item $src $dest -Recurse -Force
     $label = if ($version) { "$m v$version" } else { $m }
     Write-Host "copied   $label  -> $dest" -ForegroundColor Green
-}
 
-# ---------------------------------------------------------------- mods.txt
-# UE4SS reads Mods/mods.txt for load order. Ensure each mod has an entry.
-$modsTxt = Join-Path $modsDir 'mods.txt'
-$lines = if (Test-Path $modsTxt) { Get-Content $modsTxt } else { @() }
-$changed = $false
-foreach ($m in $Mods) {
-    if (-not ($lines | Where-Object { $_ -match "^\s*$([regex]::Escape($m))\s*:" })) {
-        $lines += "$m : 1"
-        $changed = $true
+    # Entries are written one by one so their names use '/'. Backslash names extract as flat files outside Windows Explorer.
+    $zipPath = Join-Path $distDir "$m.zip"
+    if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
+    $zip = [System.IO.Compression.ZipFile]::Open($zipPath, 'Create')
+    try {
+        foreach ($file in Get-ChildItem $src -Recurse -File) {
+            $entry = "$zipPrefix/$m/" + ($file.FullName.Substring($src.Length + 1) -replace '\\', '/')
+            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $entry) | Out-Null
+        }
+    } finally {
+        $zip.Dispose()
     }
-}
-if ($changed) {
-    Set-Content -Path $modsTxt -Value $lines -Encoding ASCII
-    Write-Host "mods.txt updated" -ForegroundColor Green
+    Write-Host "packed   $label  -> $zipPath" -ForegroundColor Green
 }
 
 Write-Host ''

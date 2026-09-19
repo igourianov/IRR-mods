@@ -9,3 +9,6 @@ nexus-api.key
 
 .vscode/
 __pycache__/
+
+# Distribution zips, rebuilt on every build
+dist/

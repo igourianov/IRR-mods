@@ -21,7 +21,8 @@ UE4SS mods for **Incursion Red River** (Games of Tomorrow, UE 5.6, Steam).
 ```
 likhos-<name>/     one mod: mod.txt + Scripts/ + README
 docs/solutions/    per-task solution docs, recon findings and session notes
-build.ps1          deploy mods into the game (symlink by default)
+build.ps1          copy mods into the game and package each as dist/<mod>.zip
+dist/              distribution zips, laid out to extract into the game install folder (gitignored)
 ```
 
 ## First-time setup
