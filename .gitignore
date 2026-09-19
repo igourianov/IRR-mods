@@ -12,3 +12,6 @@ __pycache__/
 
 # Distribution zips, rebuilt on every build
 dist/
+
+# ephemeral bbcode conversion
+*.bbcode
