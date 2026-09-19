@@ -213,6 +213,21 @@ Material paths: `/Game/ThirdParty/SKGShooterFramework/Assets/Firearm/FirearmPart
 - Native hooks (`RegisterHook`) on `TacticalComponent` and `WeaponComponent` functions registered fine, and the game crashed without a dump when the vanilla toggle fired `WeaponComponent:ToggleCurrentTacticalOption` with them active. The toggle didn't crash without the hooks. Don't hook these.
 - Reading `LocalAttachmentBase.LaserIndex` / `FlashlightIndex` returned a `TrivialObject`, not a number. `GameplayTags` could not be enumerated with `ForEach`. Neither is needed.
 
+Lights, from `kb_probe_devices` / `kb_probe_dev_set`, 2026-09-19 in the hideout, on a SCAR-L (PEQ-15 LA-5, SureFire Mini Scout):
+
+- Lights are `BP_FlashlightComponent_C` (`/Game/Blueprints/InventorySystem/Components/ItemComponents/BP_FlashlightComponent`), one per device, named `BP_FlashlightComponent`. Native parent `/Script/Test_C.FlashlightComponent` (object dump). The probe's `IsA` against it matched both lights.
+- `bHasInfraredMode` tells lights apart: `true` on the PEQ-15's light, `false` on the Mini Scout. `bDeviceInfraredOn` and `IsInInfraredMode()` read false on both. Per the user, the PEQ-15's light is the only IR light in the game and it is IR only.
+- `TacticalAttachments` order on that SCAR-L: PEQ-15 `Laser_B` (red), `Laser_A` (green), PEQ-15 light, Mini Scout light.
+- `SetDeviceState(1)` / `SetDeviceState(0)` on the Mini Scout's light turns it on and off on screen, and `DeviceState` follows.
+
+## Night vision
+
+From the object dump and `kb_probe_nvg`, 2026-09-19 in the hideout.
+
+- `IRRNightVision_Subsystem` (`/Script/IRRNightVision`) is a per-level object: `LVL_HideoutNEW:IRRNightVision_Subsystem_<n>`, one live instance, found with `FindFirstOf("IRRNightVision_Subsystem")`.
+- `IsInfraredModeEnabledOnPlayer()` (no parameters) read `false` with NVG off and `true` with NVG on.
+- Toggled by `IA_ToggleNightVision` through `SGA_NightVision_C`. The goggles view is `BP_FPCC_NightVision_C`, a first person core subobject.
+
 ## Lua threading
 
 Seven crashes between 20:16 and 21:01 on 2026-09-18, all `EXCEPTION_ACCESS_VIOLATION` inside UE4SS's Lua runtime on the game thread (`lua_getiuservalue`, `lua_rawgeti`, `lua_getfield`, `push_nameproperty`), at different call sites. Six entered through `process_simple_actions` (the `ExecuteInGameThread` queue), one through a console command. Crash reports: `%LOCALAPPDATA%\Test_C\Saved\Crashes\*\CrashContext.runtime-xml`. `UE4SS.log` loses its tail on a hard crash, and a relaunch overwrites it.

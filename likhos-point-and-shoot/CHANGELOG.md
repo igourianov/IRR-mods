@@ -1,3 +1,9 @@
+# 1.0.47
+* direct point aim picks the aiming device by night vision state:
+  * NVG off: the first visible laser, or the first visible flashlight if the weapon has no visible laser
+  * NVG on: the first IR laser and the first IR light, or the first visible laser if the weapon has neither; a visible flashlight is never turned on
+* devices the hold turned on are turned off on release; a device that was already on is left on
+
 # 1.0.45
 * direct point aim turns on the weapon's visible laser while held and turns it off on release; a laser that was already on is left on
 * fixed the mod failing to load when the controls menu was not ready at game start
