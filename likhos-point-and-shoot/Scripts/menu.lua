@@ -128,23 +128,27 @@ local function on_row_constructed(context)
     end)
 end
 
+--- Returns false when RegisterHook refuses the function.
 local function hook()
-    hooked = true
-    RegisterHook(HOOK_FN, function(context)
+    -- At startup the function can be found while its class is still loading. Its Func pointer is still null then and RegisterHook throws.
+    local ok, err = pcall(RegisterHook, HOOK_FN, function(context)
         util.safe("menu hook", on_row_constructed, context)
     end)
+    if not ok then
+        log.debug("menu: %s not hookable yet: %s", HOOK_FN, tostring(err))
+        return false
+    end
+    hooked = true
     log.info("menu: hooked %s", HOOK_FN)
+    return true
 end
 
---- Hook the vanilla row class once it is loaded. RegisterHook needs the function in memory.
+--- Hook the vanilla row class once it is loaded. RegisterHook needs the function in memory and linked.
 function M.install()
     if hooked then return end
-    if util.valid(StaticFindObject(HOOK_FN)) then
-        hook()
-        return
-    end
+    if util.valid(StaticFindObject(HOOK_FN)) and hook() then return end
     NotifyOnNewObject(ROW_CLASS, function()
-        if not hooked then util.safe("menu install", hook) end
+        if not hooked then hook() end
         return true
     end)
 end

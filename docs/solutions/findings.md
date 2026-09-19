@@ -186,6 +186,32 @@ From the object dump and `kb_probe_row` / `kb_probe_clone`, 2026-09-18.
 - The row then rebinds, applies and saves like a vanilla row, keyed by the mod's mapping name.
 - `PanelWidget` has no `InsertChildAt` UFunction (`parent.InsertChildAt` returns a non-nil stub). A row lands after `PointShooting` by removing the children below it, adding the new row, then re-adding them. `AddChild` creates a fresh `VerticalBoxSlot`, so padding, size and alignments are copied from the old slot. Layout and navigation were unaffected in-game.
 - Adding a second mod row to the same page (as after a hot reload) left two rows on one mapping name. A bound key did not survive that session.
+- At startup `StaticFindObject` can find `WB_SingleSettingBar_C:On_WidgetConstructed` while its class is still loading. `RegisterHook` then throws "Was unable to register a hook" with `UFunction::Func: 0x0`, `FUNC_Native: 0` (2026-09-19). Retrying from a `NotifyOnNewObject` on the row class succeeds before the main menu is up.
+
+## Tactical devices
+
+From the object dump and `kb_probe_laser` / `kb_probe_laser_set`, 2026-09-19 in the hideout, on an AUG A3 (CQBL-1 laser, APLc flashlight) and a SCAR-L (PEQ-15, Klesch 2IKS3, CQBL-1).
+
+- `WeaponComponent:TacticalAttachments` on the equipped weapon's `BP_WeaponComponent` lists one component per emitter across all mounted devices. Lasers are `LaserComponent` (native, subclass of `TacticalComponent`). Lights are `BP_FlashlightComponent_C`.
+- Each laser emitter is its own component. Two-laser devices name them `Laser_A` and `Laser_B`. The single-laser Klesch names it `Laser`.
+- `TacticalComponent` state: `DeviceState` (`EIRRTacticalDeviceState`: `Off` = 0, `On` = 1), `GetDeviceState()`, `IsDeviceActive()`.
+- The infrared flags don't mark IR lasers. `bHasInfraredMode`, `bDeviceInfraredOn` and `IsInInfraredMode()` read false on every laser, including the on IR ones. The PEQ-15's flashlight has `bHasInfraredMode = true` (IR illuminator mode).
+- Visible vs IR laser shows in `LaserComponent.LaserSettings.DefaultLaserMaterial.Laser` (`IRRLaserSettings` → `IRRLaserMaterial`), an asset reference. `LaserSettings.InfraredLaserMaterial.Laser` is nil on all lasers seen.
+
+| Device | Component | `DefaultLaserMaterial.Laser` | Seen in game |
+|---|---|---|---|
+| Steiner CQBL-1 | `Laser_A` | `MI_LaserGreen` | IR |
+| Steiner CQBL-1 | `Laser_B` | `MI_LaserRed` | visible |
+| PEQ-15 LA-5 | `Laser_A` | `MI_LaserGreen` | IR |
+| PEQ-15 LA-5 | `Laser_B` | `MI_LaserRed` | visible |
+| Zenitco Klesch 2IKS3 | `Laser` | `MI_LaserRed` | not checked |
+
+Material paths: `/Game/ThirdParty/SKGShooterFramework/Assets/Firearm/FirearmParts/LightLaser/Materials/Red/MI_LaserRed.MI_LaserRed` and `.../Green/MI_LaserGreen.MI_LaserGreen`. The laser mesh itself carries a per-instance `MaterialInstanceDynamic` (`MID_MI_LaserRed_<n>`) made from it.
+
+- `SetDeviceState(1)` / `SetDeviceState(0)` on one laser component, called from Lua, turns that emitter on and off on screen, alone. The vanilla toggle key, cycle key and radial menu keep working normally afterwards.
+- `LocTacticalAttachmentOptions` is the vanilla cycle list: an array of `IRRTacticalAttachmentOption` (`TacticalAttachments`, `bEnabled`), one per combination of emitters (5 on the AUG, 35 on the SCAR). `GetCurrentTacticalOption().bEnabled` followed a probe `SetDeviceState` on the AUG.
+- Native hooks (`RegisterHook`) on `TacticalComponent` and `WeaponComponent` functions registered fine, and the game crashed without a dump when the vanilla toggle fired `WeaponComponent:ToggleCurrentTacticalOption` with them active. The toggle didn't crash without the hooks. Don't hook these.
+- Reading `LocalAttachmentBase.LaserIndex` / `FlashlightIndex` returned a `TrivialObject`, not a number. `GameplayTags` could not be enumerated with `ForEach`. Neither is needed.
 
 ## Lua threading
 

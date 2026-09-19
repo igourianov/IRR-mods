@@ -17,10 +17,20 @@ local M = {}
 local IA_AIM = "/Game/Blueprints/InputSystem/InputActions/IA_Aim.IA_Aim"
 local AIM_VALUE = { X = 1.0, Y = 0.0, Z = 0.0 }
 
+-- The laser held on for the hold (docs/solutions/point-aim-auto-laser.md).
+-- The infrared flags read false on IR lasers too. Visible and IR emitters differ only in their default laser material.
+local LASER_CLASS = "/Script/Test_C.LaserComponent"
+local VISIBLE_LASER_MATERIAL = "/Game/ThirdParty/SKGShooterFramework/Assets/Firearm/FirearmParts/LightLaser/Materials/Red/MI_LaserRed.MI_LaserRed"
+local DEVICE_OFF, DEVICE_ON = 0, 1   -- EIRRTacticalDeviceState
+
 -- Non-nil while a PointAim hold is live. Plain values only, no UObjects.
 --   flipped : the mode was regular on press and this action switched it to point
 --   weapon  : full name of the weapon component the mode was flipped on
+--   laser   : full name of the laser component this hold turned on, or nil
 local point_aim = nil
+
+--- Laser failures log once per session, so a renamed game name doesn't flood the log every press.
+local laser_error_logged = false
 
 --- Aiming subobject and the equipped weapon's WeaponComponent, or nil.
 local function resolve_aim_objects()
@@ -52,6 +62,40 @@ local function inject_aim()
     subsystem:InjectInputVectorForAction(ia, AIM_VALUE, {}, {})
 end
 
+--- Set one laser to `state`: the laser component with full name `name`, or without it the weapon's first visible laser.
+--- Returns the laser's full name if it was switched, nil if it was already in `state` or there is none.
+local function switch_laser(wc, state, name)
+    local laser_cls = StaticFindObject(LASER_CLASS)
+    if not util.valid(laser_cls) then error(LASER_CLASS .. " not found") end
+
+    local laser = nil
+    wc.TacticalAttachments:ForEach(function(_, elem)
+        if laser then return end
+        local dev = elem:get()
+        if not (util.valid(dev) and dev:IsA(laser_cls)) then return end
+        if name then
+            if dev:GetFullName() == name then laser = dev end
+            return
+        end
+        local mat = dev.LaserSettings.DefaultLaserMaterial.Laser
+        if util.valid(mat) and mat:GetFullName():match("^%S+ (.+)$") == VISIBLE_LASER_MATERIAL then laser = dev end
+    end)
+    if not laser or laser.DeviceState == state then return nil end
+    laser:SetDeviceState(state)
+    return laser:GetFullName()
+end
+
+--- switch_laser that never fails the caller, so a broken laser lookup still leaves point aim working.
+local function try_switch_laser(wc, state, name)
+    local ok, res = pcall(switch_laser, wc, state, name)
+    if ok then return res end
+    if not laser_error_logged then
+        laser_error_logged = true
+        log.error("PointAim: laser handling failed, point aim continues without it: %s", tostring(res))
+    end
+    return nil
+end
+
 local function point_aim_press()
     local ads, wc = resolve_aim_objects()
     if not ads then
@@ -62,7 +106,7 @@ local function point_aim_press()
     -- TriggerPointSight works while not aimed, so aim comes up already in point sight.
     local flipped = not wc.bIsPointSight
     if flipped then ads:TriggerPointSight() end
-    point_aim = { flipped = flipped, weapon = wc:GetFullName() }
+    point_aim = { flipped = flipped, weapon = wc:GetFullName(), laser = try_switch_laser(wc, DEVICE_ON) }
     inject_aim()
 end
 
@@ -74,16 +118,17 @@ local function point_aim_release()
     -- Injection has already stopped, so the game sees the aim input released and ends aim itself.
     local state = point_aim
     point_aim = nil
-    if not (state and state.flipped) then return end
+    if not (state and (state.flipped or state.laser)) then return end
 
     local ads, wc = resolve_aim_objects()
     if not ads then return end
     if wc:GetFullName() ~= state.weapon then
-        log.debug("PointAim: weapon changed during hold, mode not restored")
+        log.debug("PointAim: weapon changed during hold, mode and laser not restored")
         return
     end
     -- The user may have switched the mode back themselves mid-hold.
-    if wc.bIsPointSight then ads:TriggerPointSight() end
+    if state.flipped and wc.bIsPointSight then ads:TriggerPointSight() end
+    if state.laser then try_switch_laser(wc, DEVICE_OFF, state.laser) end
 end
 
 --- Each entry describes one logical action. press, held and release are Lua functions.
