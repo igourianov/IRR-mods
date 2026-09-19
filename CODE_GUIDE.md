@@ -34,12 +34,12 @@ raid transition and respawn; the reference becomes a dangling pointer.
 
 Bind by name (`/Script/Test_C.SomeClass:SomeFunction`), resolved lazily.
 A game patch that renames a handler should log once and disable that single
-bind, not error out of the whole mod. See `actions.lua` for the pattern.
+bind, not error out of the whole mod.
 
 ## Hot reload
 
 `main.lua` is re-executed on Ctrl+R. Guard anything that must happen once
-(key registration, the tick loop) so a reload does not double-register.
+(registrations, the tick loop) so a reload does not double-register.
 
 ## Error handling
 

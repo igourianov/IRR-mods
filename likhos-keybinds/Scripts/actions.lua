@@ -86,16 +86,8 @@ local function point_aim_release()
     if wc.bIsPointSight then ads:TriggerPointSight() end
 end
 
---- Each entry describes one logical action. Two kinds:
----
---- UFunction entry:
----   class   : object class to search for at call time ("PlayerController",
----             the pawn class, whatever owns the handler).
----   press   : UFunction name to call on press.
----   release : UFunction name to call on release. nil for fire-and-forget.
----   args    : optional function returning the argument table for the call.
----
---- Scripted entry: press, held and release are Lua functions. held runs every tick while a hold bind is down.
+--- Each entry describes one logical action. press, held and release are Lua functions. held runs every tick while a hold
+--- bind is down.
 M.ACTIONS = {
     ["PointAim"] = {
         press   = point_aim_press,
@@ -120,38 +112,13 @@ function M.invoke(name, phase)
         return false
     end
 
-    local fn_name = spec[phase]
-    if not fn_name then
-        -- Legitimately nothing to do on this phase.
-        return true
-    end
-    if type(fn_name) == "function" then
-        return util.safe(("action %s:%s"):format(name, phase), fn_name)
-    end
-
-    local owner = FindFirstOf(spec.class)
-    if not util.valid(owner) then
-        log.debug("action '%s': no live '%s' right now", name, spec.class)
-        return false
-    end
-
-    local fn = owner[fn_name]
-    if fn == nil then
-        log.error("action '%s': '%s' has no function '%s' - bind disabled " ..
-                  "(likely renamed by a game patch)", name, spec.class, fn_name)
-        disabled[name] = true
-        return false
-    end
-
-    local args = spec.args and spec.args() or nil
-    return util.safe(("action %s:%s"):format(name, phase), function()
-        if args then fn(owner, table.unpack(args))
-        else fn(owner) end
-    end)
+    local fn = spec[phase]
+    -- Legitimately nothing to do on a phase without a function.
+    if not fn then return true end
+    return util.safe(("action %s:%s"):format(name, phase), fn)
 end
 
---- Clear the permanent-disable list and per-hold state. Called on level load so a transient
---- failure does not kill a bind for the rest of the session.
+--- Clear the disabled list and per-hold state. Called on level load.
 function M.reset()
     disabled = {}
     point_aim = nil
@@ -162,11 +129,8 @@ end
 function M.audit(binds)
     local missing = {}
     for _, b in ipairs(binds) do
-        for _, key in ipairs({ "action", "action_tap", "action_hold" }) do
-            local a = b[key]
-            if a and not M.ACTIONS[a] then
-                missing[a] = true
-            end
+        if b.action and not M.ACTIONS[b.action] then
+            missing[b.action] = true
         end
     end
     return missing

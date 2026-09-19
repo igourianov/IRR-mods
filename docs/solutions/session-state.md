@@ -11,7 +11,7 @@ Read `CLAUDE.md` and `docs/solutions/findings.md` alongside this.
 - `docs/solutions/point-aim-bind.md`: the aim action, polling and hold release. Its fixed H key and `engine_key` are superseded by `point-aim-keybind-menu.md`.
 - `docs/solutions/point-aim-keybind-menu.md`: the mapping and the controls menu row (`keymap.lua`, `menu.lua`).
 
-The trigger modes in `triggers.lua` (toggle, double_tap, tap_hold) exist, but the only defined action is `PointAim` and `point_aim` is the only bind in `config.lua`.
+`point_aim` is the only bind in `config.lua` and `PointAim` the only action. Every bind is a held key: `input.lua` polls its mapped key and `triggers.lua` runs press, held and release. Toggle, double-tap and tap-hold modes and `RegisterKeyBind` binds were removed as unused.
 
 Game-state awareness is the entire justification for injecting. Pure remapping would be better served by AutoHotkey, reWASD or Steam Input with zero patch fragility. An external tool cannot know the stash is open.
 
@@ -51,7 +51,6 @@ Unverified:
 Known issues:
 
 - Unreproduced crash on 2026-09-18 20:16: `EXCEPTION_ACCESS_VIOLATION reading address 0x70` while toggling the vanilla point sight mode with the bind held, in the tick loop. It matches the time of the first `LoopAsync` crash. That loop has since been replaced and there was no crash after, so this is probably the same cause, but it is not confirmed. Full notes are in git history (`TODO.md` at commit `7e25a79`). If it recurs, save `ue4ss\UE4SS.log` before relaunching, since a launch overwrites it.
-- `hold` mode for binds with a UE4SS `key` is still a timeout approximation. Only `mapping` binds get a real release (`docs/solutions/point-aim-bind.md`, open questions).
 - A weapon switch while the bind is held ends the aim until the key is released and pressed again. The flipped weapon keeps point mode.
 
 Housekeeping:

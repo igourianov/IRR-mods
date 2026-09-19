@@ -2,7 +2,7 @@
 --
 -- Entry point. UE4SS loads this once at startup for every enabled mod.
 -- Hot reload (Ctrl+R in the UE4SS console) re-runs this file, so keep it
--- idempotent: no duplicate key registrations, no duplicate loops.
+-- idempotent: no duplicate registrations, no duplicate loops.
 
 local log      = require("log")
 local util     = require("util")
@@ -75,8 +75,7 @@ local function init()
     validate()
 
     input.watch_player_controller(function()
-        -- A patch may rename a handler; clear the per-session disable list
-        -- on every level load so one bad raid does not kill a bind forever.
+        -- Clear per-session action state on every level load.
         actions.reset()
         -- This callback runs inside the PlayerController's construction. Build and register the mod's input objects a tick later.
         -- A hot reload needs no call: the registration lives in the engine's user settings, not in Lua.
@@ -96,8 +95,8 @@ local function init()
         log.info("player controller: %s",
                  input.get_player_controller() and "acquired" or "none")
         for _, b in ipairs(config.binds) do
-            log.info("  %-28s %-12s %-6s %s",
-                     b.id, b.key or keymap.describe(b.mapping), b.mode, b.enabled and "on" or "off")
+            log.info("  %-28s %-12s %s",
+                     b.id, keymap.describe(b.mapping), b.enabled and "on" or "off")
         end
         return true
     end)

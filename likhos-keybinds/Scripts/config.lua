@@ -1,18 +1,10 @@
 -- config.lua : USER-EDITABLE. Hot-reloadable (Ctrl+R in the UE4SS console).
 --
--- mode:
---   "passthrough" - fire the action once per press. Remap only.
---   "toggle"      - press flips a latched state; sends press or release.
---   "hold"        - action stays active only while the key is physically down.
---   "double_tap"  - fires only on two presses inside double_tap_window_ms.
---   "tap_hold"    - short press => action_tap, long press => action_hold.
+-- Binds are held keys. The key is set in the game's controls menu under the mapping's name (keymap.lua) and polled every
+-- tick, so the action gets a real release. The action runs from press until release.
 --
--- key: a name from the UE4SS `Key` table (Key.F2, Key.LEFT_SHIFT, ...).
---      Given here as a string; input.lua resolves it and disables the bind
---      if the name does not exist, rather than erroring the whole mod.
---
--- mapping: a player-mappable key name from keymap.lua, used instead of `key`.
---      The key is set in the game's controls menu and polled every tick, so "hold" gets a real release.
+-- mapping: a player-mappable key name from keymap.lua.
+-- action:  a key into the ACTIONS table in actions.lua.
 
 return {
     -- "error" | "warn" | "info" | "debug"
@@ -31,7 +23,6 @@ return {
             id      = "point_aim",
             enabled = true,
             mapping = "LikhosPointShootingDirect",   -- Settings > Controls > Point Shooting (Direct)
-            mode    = "hold",
             action  = "PointAim",     -- hold to aim straight into point sight
             block_in_ui = true,
         },
