@@ -3,9 +3,9 @@
 -- UE4SS RegisterKeyBind only gives us a press event - no release, no repeat.
 -- So "is the key still down?" has to be inferred. Two consequences:
 --
---   * "hold" mode needs a real key-down/key-up source. Until recon confirms
---     one (hooking UPlayerInput::InputKey, or reading the IMC), hold mode is
---     approximated: the press starts the action and a timeout ends it.
+--   * "hold" mode on a RegisterKeyBind bind is approximated: the press starts
+--     the action and a timeout ends it. An engine_key bind is polled instead
+--     (input.lua) and gets a real release through on_release.
 --   * Everything time-based runs off tick(), not off the press callback.
 --
 -- States: idle -> pending -> active -> idle
@@ -68,6 +68,15 @@ function M.on_press(bind)
     end
 end
 
+--- Called from the game thread when a polled (engine_key) bind's key goes up,
+--- or when the context gate starts blocking while it is held. No-op unless a hold is active.
+function M.on_release(bind)
+    local s = state[bind.id]
+    if not (s and bind.mode == "hold" and s.phase == "active") then return end
+    s.phase = "idle"
+    actions.invoke(bind.action, "release")
+end
+
 --- Called every tick_ms from the game thread. Resolves timeouts.
 function M.tick(binds)
     local now = util.now_ms()
@@ -95,9 +104,11 @@ function M.tick(binds)
                     end
 
                 elseif bind.mode == "hold" and s.phase == "active" then
+                    if bind.engine_key then
+                        actions.invoke(bind.action, "held")
                     -- Approximation: see header note. Ends the action after
-                    -- the threshold since we cannot observe key release yet.
-                    if elapsed >= (bind.hold_release_ms or 150) then
+                    -- the threshold since we cannot observe key release.
+                    elseif elapsed >= (bind.hold_release_ms or 150) then
                         s.phase = "idle"
                         actions.invoke(bind.action, "release")
                     end

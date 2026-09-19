@@ -50,7 +50,10 @@ local function start_tick_loop()
     local tick_ms = config.tick_ms or 16
     LoopAsync(tick_ms, function()
         ExecuteInGameThread(function()
-            util.safe("tick", triggers.tick, config.binds)
+            util.safe("tick", function()
+                input.poll(config.binds)
+                triggers.tick(config.binds)
+            end)
         end)
         return false   -- never stop
     end)
@@ -89,7 +92,7 @@ local function init()
                  input.get_player_controller() and "acquired" or "none")
         for _, b in ipairs(config.binds) do
             log.info("  %-28s %-12s %-6s %s",
-                     b.id, b.key, b.mode, b.enabled and "on" or "off")
+                     b.id, b.key or b.engine_key, b.mode, b.enabled and "on" or "off")
         end
         return true
     end)

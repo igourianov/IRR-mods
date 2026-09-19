@@ -10,6 +10,9 @@
 -- key: a name from the UE4SS `Key` table (Key.F2, Key.LEFT_SHIFT, ...).
 --      Given here as a string; input.lua resolves it and disables the bind
 --      if the name does not exist, rather than erroring the whole mod.
+--
+-- engine_key: an Unreal key name ("H", "ThumbMouseButton", ...), used instead
+--      of `key`. The key is polled every tick, so "hold" gets a real release.
 
 return {
     -- "error" | "warn" | "info" | "debug"
@@ -24,6 +27,14 @@ return {
     tick_ms = 16,
 
     binds = {
+        {
+            id      = "point_aim",
+            enabled = true,
+            engine_key = "H",
+            mode    = "hold",
+            action  = "PointAim",     -- hold to aim straight into point sight
+            block_in_ui = true,
+        },
         {
             id      = "example_sprint_toggle",
             enabled = false,          -- turn on after filling in `action`

@@ -34,6 +34,15 @@
 - [ ] Confirm the `context.lua` UI gate actually blocks while the stash
       search box has focus.
 
+## Known issues
+
+- [ ] **Unreproduced crash: vanilla mode toggle while holding the PointAim bind (H).** Seen once on 2026-09-18 20:16 and not reproduced since, including with trace logging.
+      - Report: `%LOCALAPPDATA%\Test_C\Saved\Crashes\UECC-Windows-4C745A2D4FE1CFD2397E0EADB3F9B37E_0000` (`CrashContext.runtime-xml`, `UEMinidump.dmp`, `Test_C.log`).
+      - Error: `EXCEPTION_ACCESS_VIOLATION reading address 0x70`. `pcall` can't catch it.
+      - Stack: `engine_tick_hook` -> `process_simple_actions`, so an `ExecuteInGameThread` callback, meaning our tick loop. The failing call ran two `pcall`s deep (`util.safe("tick")` -> `util.safe` in `actions.invoke`) and was a built-in UE4SS UObject member function (`UObjectBase::setup_member_functions` lambda_17), not a UFunction call.
+      - Suspects in `PointAim` (`likhos-keybinds/Scripts/actions.lua`): `IsValid` (via `util.valid`) or `GetFullName` on an object the toggle had just replaced. The game log ends with `SGA_PointSight_C` activating while aimed (`BP_PointSight Sight Triggered false`, `BP_SightComponent Sight Triggered true`).
+      - If it happens again, don't relaunch before saving `ue4ss\UE4SS.log`, which is overwritten on launch. Then re-add per-step trace logging around every UObject call in `PointAim` and `input.poll`.
+
 ## Before release
 
 - [ ] Test in co-op as host and as client.

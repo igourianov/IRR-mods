@@ -8,6 +8,8 @@ local context  = require("context")
 local M = {}
 
 local registered = {}   -- bind.id -> true
+local polled_keys = {}  -- bind.id -> FKey table for engine_key binds
+local key_down = {}     -- bind.id -> key state seen on the previous poll
 local player_controller = nil
 
 --------------------------------------------------------------------------
@@ -71,6 +73,14 @@ end
 function M.register(bind)
     if registered[bind.id] then return true end
 
+    -- engine_key binds are polled from the tick loop (M.poll), so they get a release event.
+    if bind.engine_key then
+        registered[bind.id] = true
+        polled_keys[bind.id] = { KeyName = FName(bind.engine_key) }
+        log.info("registered bind '%s' on %s (%s, polled)", bind.id, bind.engine_key, bind.mode)
+        return true
+    end
+
     local key = resolve_key(bind.key)
     if not key then return false end
 
@@ -102,6 +112,34 @@ function M.register(bind)
         log.info("registered bind '%s' on %s (%s)", bind.id, bind.key, bind.mode)
     end
     return ok
+end
+
+--- Turn engine_key state changes into press and release events. Game thread, every tick.
+function M.poll(binds)
+    local pc = M.get_player_controller()
+    if not pc then return end
+
+    for _, bind in ipairs(binds) do
+        local key = polled_keys[bind.id]
+        if key and bind.enabled then
+            local down = pc:IsInputKeyDown(key)
+            local was = key_down[bind.id]
+            key_down[bind.id] = down
+
+            if down and not was then
+                if context.allows(bind, pc) then
+                    triggers.on_press(bind)
+                else
+                    log.debug("bind '%s' suppressed by context gate", bind.id)
+                end
+            elseif not down and was then
+                triggers.on_release(bind)
+            elseif down and not context.allows(bind, pc) then
+                -- A menu opened mid-hold. Release now; the next press starts a fresh hold.
+                triggers.on_release(bind)
+            end
+        end
+    end
 end
 
 --------------------------------------------------------------------------
