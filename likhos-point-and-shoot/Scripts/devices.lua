@@ -9,7 +9,6 @@ local util = require("util")
 local M = {}
 
 local LASER_CLASS = "/Script/Test_C.LaserComponent"
-local LIGHT_CLASS = "/Script/Test_C.FlashlightComponent"
 local NVG_SUBSYSTEM = "IRRNightVision_Subsystem"
 local DEVICE_OFF, DEVICE_ON = 0, 1   -- EIRRTacticalDeviceState
 
@@ -20,10 +19,8 @@ local LASER_MATERIALS = {
     ["/Game/ThirdParty/SKGShooterFramework/Assets/Firearm/FirearmParts/LightLaser/Materials/Green/MI_LaserGreen.MI_LaserGreen"] = "ir_laser",
 }
 
---- "vis_laser", "ir_laser", "vis_light", "ir_light" or nil.
-local function classify(dev, laser_cls, light_cls)
-    -- On lights, unlike lasers, bHasInfraredMode marks the IR one. The PEQ-15's light is the only IR light and it is IR only.
-    if dev:IsA(light_cls) then return dev.bHasInfraredMode and "ir_light" or "vis_light" end
+--- "vis_laser", "ir_laser" or nil.
+local function classify(dev, laser_cls)
     if not dev:IsA(laser_cls) then return nil end
     local mat = dev.LaserSettings.DefaultLaserMaterial.Laser
     if not util.valid(mat) then return nil end
@@ -37,38 +34,25 @@ local function nvg_on()
     return nvg:IsInfraredModeEnabledOnPlayer()
 end
 
---- Turn on the devices that suit the player's vision and return the full names of those it switched on.
---- A chosen device already on is left alone and not returned. Classes are picked by presence, not state.
+--- Turn on the laser that suits the player's vision and return the full names of those it switched on.
+--- A chosen laser already on is left alone and not returned. Classes are picked by presence, not state.
 function M.activate(wc)
     local laser_cls = StaticFindObject(LASER_CLASS)
-    local light_cls = StaticFindObject(LIGHT_CLASS)
     if not util.valid(laser_cls) then error(LASER_CLASS .. " not found") end
-    if not util.valid(light_cls) then error(LIGHT_CLASS .. " not found") end
 
     local first = {}
     wc.TacticalAttachments:ForEach(function(_, elem)
         local dev = elem:get()
         if not util.valid(dev) then return end
-        local class = classify(dev, laser_cls, light_cls)
+        local class = classify(dev, laser_cls)
         if class and not first[class] then first[class] = dev end
     end)
 
-    local picks
-    if nvg_on() then
-        -- A visible flashlight is never used under NVG.
-        picks = (first.ir_laser or first.ir_light) and { first.ir_laser, first.ir_light } or { first.vis_laser }
-    else
-        picks = { first.vis_laser or first.vis_light }
-    end
-
-    local switched = {}
-    for _, dev in pairs(picks) do
-        if dev.DeviceState ~= DEVICE_ON then
-            dev:SetDeviceState(DEVICE_ON)
-            table.insert(switched, dev:GetFullName())
-        end
-    end
-    return switched
+    -- Under NVG with no IR laser this falls through to the visible laser.
+    local pick = nvg_on() and first.ir_laser or first.vis_laser
+    if not pick or pick.DeviceState == DEVICE_ON then return {} end
+    pick:SetDeviceState(DEVICE_ON)
+    return { pick:GetFullName() }
 end
 
 --- Turn off each device named in `names`, a list from activate, that is still on.

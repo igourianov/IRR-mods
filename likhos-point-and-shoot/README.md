@@ -6,6 +6,11 @@ Point aim is a quick aiming mode for close range engagement. Its advantage over 
 
 Hold mode only (no toggle). Recommended to bind the new key to a mouse side button for quick access.
 
+While the key is held, the weapon's laser is turned on and turned off again on release. A laser that was already on is left alone.
+
+- **NVG off:** the first visible laser.
+- **NVG on:** the first IR laser. If the weapon has no IR laser, the first visible laser.
+
 ## Requirements
 
 - Incursion Red River, Steam version. Tested on build 22417726.
