@@ -14,14 +14,13 @@ UE4SS mods for **Incursion Red River** (Games of Tomorrow, UE 5.6, Steam).
 
 | Folder | Status | Description |
 |---|---|---|
-| `likhos-keybinds` | pre-alpha | Toggle/hold conversion, double-tap, tap-hold for any bind |
+| `likhos-keybinds` | pre-alpha | Point Shooting (Direct) keybind: hold to aim straight into point shooting |
 
 ## Layout
 
 ```
 likhos-<name>/     one mod: mod.txt + Scripts/ + README
-docs/              recon notes and findings
-tools/dumps/       UE4SS dumps (gitignored, regenerate per patch)
+docs/solutions/    per-task solution docs, recon findings and session notes
 build.ps1          deploy mods into the game (symlink by default)
 ```
 
@@ -34,16 +33,3 @@ Copy-Item build.config.example.json build.config.json
 ```
 
 Then launch the game. The UE4SS console should log the mod loading.
-
-**Before anything else**, confirm UE4SS actually injects into the current
-game build — see `docs/01-recon.md`. That is the project's single largest
-risk, not the mod code.
-
-## Conventions
-
-- Never hardcode memory offsets. Resolve everything by UFunction/class name
-  through UE4SS reflection, lazily, at call time.
-- Never cache a `UObject` across a level load.
-- A renamed handler after a game patch must disable *one bind*, not the mod.
-- `RegisterKeyBind` callbacks run off the game thread — always hop via
-  `ExecuteInGameThread` before touching a UObject.

@@ -5,8 +5,8 @@ after a game patch.
 
 ## Threading
 
-`RegisterKeyBind` and `LoopAsync` callbacks run on UE4SS's own thread.
-Touching a `UObject` from there crashes the game, often not immediately.
+`RegisterKeyBind` callbacks run on UE4SS's own thread. Touching a `UObject`
+from there crashes the game, often not immediately.
 
 ```lua
 RegisterKeyBind(Key.F2, function()
@@ -15,6 +15,10 @@ RegisterKeyBind(Key.F2, function()
     end)
 end)
 ```
+
+Never use `LoopAsync` or `ExecuteAsync`. A `LoopAsync` callback that calls
+`ExecuteInGameThread` every tick corrupts the Lua state and crashes the game
+at random call sites. Use `LoopInGameThreadWithDelay` for per-tick work.
 
 ## Object lifetime
 

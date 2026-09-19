@@ -40,7 +40,7 @@ This decides the project. Do it before writing any code.
 RESOLVED 2026-09-18: the game is **UE 5.6**, not 5.4. Stable 3.0.1 cannot scan
 it at all; the experimental build can. `MinorVersion` must be 6 — setting 4
 produces a deterministic access violation at the first tick. See
-`03-findings.md` for the working config.
+`findings.md` for the working config.
 
 ## Step 2 — dumps
 
@@ -49,8 +49,6 @@ UE4SS GUI → Dumpers tab:
 - **Dump CXX headers** → class/function/property names
 - **Dump usmap** → needed by FModel to read the cooked assets
 - **Dump all objects** → snapshot of the live object graph
-
-Move the output into `tools/dumps/` (gitignored).
 
 ## Step 3 — which input stack?
 
@@ -64,7 +62,7 @@ In Live View, search for:
 | `EnhancedInputUserSettings` | Sanctioned runtime rebind API (`MapPlayerKey`) exists |
 | `PlayerInput` with `ActionMappings` / `AxisMappings` | Legacy input; different approach entirely |
 
-Record the answer in `03-findings.md`.
+Record the answer in `findings.md`.
 
 ## Step 4 — enumerate mappings
 

@@ -1,6 +1,6 @@
 -- actions.lua : action name -> how to invoke it on the pawn / controller.
 --
--- Every game name here comes from docs/03-findings.md. Nothing is guessed from the real game.
+-- Every game name here comes from docs/solutions/findings.md. Nothing is guessed from the real game.
 --
 -- Design rule: resolve lazily, per call, and never cache a UObject across a
 -- level load. Caching the *name* is fine; caching the object is what crashes.
@@ -11,7 +11,7 @@ local util = require("util")
 local M = {}
 
 --------------------------------------------------------------------------
--- PointAim: hold to aim straight into point sight (docs/04-point-aim-bind.md)
+-- PointAim: hold to aim straight into point sight (docs/solutions/point-aim-bind.md)
 --------------------------------------------------------------------------
 
 local IA_AIM = "/Game/Blueprints/InputSystem/InputActions/IA_Aim.IA_Aim"

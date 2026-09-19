@@ -35,35 +35,5 @@ return {
             action  = "PointAim",     -- hold to aim straight into point sight
             block_in_ui = true,
         },
-        {
-            id      = "example_sprint_toggle",
-            enabled = false,          -- turn on after filling in `action`
-            key     = "LEFT_SHIFT",
-            modifiers = {},           -- e.g. { "CONTROL" }, { "SHIFT", "ALT" }
-            mode    = "toggle",
-            action  = "Sprint",       -- key into actions.lua ACTIONS table
-            block_in_ui = true,
-        },
-        {
-            id      = "example_lean_double_tap",
-            enabled = false,
-            key     = "Q",
-            modifiers = {},
-            mode    = "double_tap",
-            action  = "LeanLeft",
-            double_tap_window_ms = 250,
-            block_in_ui = true,
-        },
-        {
-            id      = "example_use_tap_hold",
-            enabled = false,
-            key     = "F",
-            modifiers = {},
-            mode    = "tap_hold",
-            action_tap  = "Interact",
-            action_hold = "InteractAlt",
-            hold_threshold_ms = 300,
-            block_in_ui = true,
-        },
     },
 }

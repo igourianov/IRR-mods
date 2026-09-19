@@ -26,7 +26,7 @@ local function validate()
         log.warn("%d action(s) referenced by config.lua but not defined in " ..
                  "actions.lua: %s", #names, table.concat(names, ", "))
         log.warn("Fill these in from recon before enabling those binds. " ..
-                 "See docs/01-recon.md.")
+                 "See docs/solutions/recon.md.")
     end
 end
 

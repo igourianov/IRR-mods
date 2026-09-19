@@ -4,15 +4,15 @@
 
 Make the key for the mod's point aim bind configurable through the game's own controls menu. A row labelled "Point Shooting (Direct)" sits in the vanilla keyboard bindings list, directly under the vanilla "Point Shooting" row. The label tells it apart from the vanilla row, which is the point aim mode switch. The user rebinds it like any vanilla row. The key persists with the rest of the user's bindings and is reset by the page's reset to defaults.
 
-It replaces the fixed H key in `config.lua`. The bind's behaviour (hold to aim straight into point aim, restore the sticky mode on release) is unchanged and stays as `docs/04-point-aim-bind.md` describes it.
+It replaces the fixed H key in `config.lua`. The bind's behaviour (hold to aim straight into point aim, restore the sticky mode on release) is unchanged and stays as `docs/solutions/point-aim-bind.md` describes it.
 
 ## Constraints and assumptions
 
 Constraints:
 
-- Game class, function and property names come from recon recorded in `docs/03-findings.md` (project rule). Engine names (Enhanced Input, UMG) are not game internals and may be used directly.
+- Game class, function and property names come from recon recorded in `docs/solutions/findings.md` (project rule). Engine names (Enhanced Input, UMG) are not game internals and may be used directly.
 - UObject access happens on the game thread only. UObjects are never cached across a level load, and validity is checked with `util.valid` (`CODE_GUIDE.md`). The mod holds no reference to a page or row.
-- Nothing runs Lua off the game thread. The tick is a game-thread timer (`docs/04-point-aim-bind.md`). `LoopAsync` crashed the game (`docs/03-findings.md`, Lua threading).
+- Nothing runs Lua off the game thread. The tick is a game-thread timer (`docs/solutions/point-aim-bind.md`). `LoopAsync` crashed the game (`docs/solutions/findings.md`, Lua threading).
 - The bind is unbound by default. It does nothing until the user assigns a key. So it never collides with a vanilla binding on first install.
 - The key is not consumed. If the user assigns a key that a vanilla action also uses, both fire. The mod adds no conflict check of its own beyond what the vanilla row logic does.
 - Keyboard and mouse only. A gamepad row is out of scope.
@@ -20,7 +20,7 @@ Constraints:
 - A pak or Blueprint asset override of the controls page is ruled out. It breaks on every game patch that touches the page and needs a cooked asset toolchain the project doesn't have.
 - A page holds at most one mod row. Two rows on one mapping name lost the bound key.
 
-Verified by recon (`docs/03-findings.md`, Enhanced Input user settings and Controls menu):
+Verified by recon (`docs/solutions/findings.md`, Enhanced Input user settings and Controls menu):
 
 - The mod's `InputAction`, its `PlayerMappableKeySettings` and an `InputMappingContext` with one unbound mapping can be built at runtime in `/Engine/Transient`. Registering the context with `EnhancedInputUserSettings` adds a row for the mapping name to the active key profile. The objects survive hot reload and are found again by path.
 - A `WB_SingleSettingBar_C` created at runtime becomes a working keybinding row when its setup is copied from the `PointShooting` row, its label and `Keybindings` entry point at the mod's action and mapping name, and it runs its own `On_WidgetConstructed` and `Toggle_Widget(false, 0)` after being added. The vanilla row logic then shows, rebinds, applies and saves the key under the mod's mapping name.
@@ -41,10 +41,10 @@ Owned:
 - `likhos-keybinds/Scripts/triggers.lua`: recognising mapped binds as polled, so `hold` gets a real release.
 - `likhos-keybinds/Scripts/config.lua`: the `point_aim` bind entry.
 - `likhos-keybinds/Scripts/main.lua`: startup wiring.
-- `likhos-keybinds/INSTRUCTIONS.md`: how the user sets the key.
-- `docs/03-findings.md`: recon results.
+- `likhos-keybinds/README.md`: how the user sets the key.
+- `docs/solutions/findings.md`: recon results.
 
-Context only: `actions.lua` (`PointAim`, unchanged), `context.lua` (UI gate, unchanged), `util.lua`, `log.lua`, the tick loop in `main.lua` (`docs/04-point-aim-bind.md`), the vanilla controls page and Enhanced Input user settings.
+Context only: `actions.lua` (`PointAim`, unchanged), `context.lua` (UI gate, unchanged), `util.lua`, `log.lua`, the tick loop in `main.lua` (`docs/solutions/point-aim-bind.md`), the vanilla controls page and Enhanced Input user settings.
 
 ## Solution
 
@@ -85,7 +85,7 @@ If the page's container, the `PointShooting` row or the mod's mapping can't be f
 
 `kb_status` shows each mapped bind's current keys, or "unbound".
 
-### Instructions: `INSTRUCTIONS.md`
+### Instructions: `README.md`
 
 Tells the user to set the key under Settings, Controls, "Point Shooting (Direct)", and that it's unbound until they do.
 
@@ -99,4 +99,4 @@ The vanilla keyboard bindings list shows "Point Shooting (Direct)" under "Point 
 - Adding the context to the input stack at the lowest priority, over registering it with user settings only: the row shows the saved key like a vanilla row, at the cost of an Enhanced Input action firing on the key with no listener, and of re-adding the context on each PlayerController acquire. The key is still not consumed, so a vanilla action on the same key fires too.
 - Cloning the vanilla row over building a new widget: it looks and behaves exactly like vanilla rows, at the cost of depending on `WB_SingleSettingBar_C`'s variables (`BarType`, `SettingBar`, `Keybindings`) and events (`On_WidgetConstructed`, `Toggle_Widget`), which a game patch can rename.
 - Placing the row under Point Shooting over appending it to the list: it sits in the right section, at the cost of detaching and re-adding every row below it on each page build.
-- Polling the mapped key over reading the action's value: `FInputActionValue` can't be read from UE4SS Lua (`docs/03-findings.md`), so polling is the only option. It keeps the one-tick latency of the current bind.
+- Polling the mapped key over reading the action's value: `FInputActionValue` can't be read from UE4SS Lua (`docs/solutions/findings.md`), so polling is the only option. It keeps the one-tick latency of the current bind.

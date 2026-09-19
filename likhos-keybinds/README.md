@@ -1,42 +1,39 @@
 # Likho's Keybinds
 
-Keybinding behaviour overhaul for Incursion Red River.
+Extra keybinds for Incursion Red River.
 
-**Status: pre-alpha.** The scaffold is complete; the game-specific action
-table is empty pending recon. It loads and logs, but does nothing yet.
+**Status: pre-alpha.** Tested on Steam build 22417726 with UE4SS experimental `v3.0.1-1136-g35d1795d`.
 
-## What it will do
+## Features
 
-| Mode | Behaviour |
-|---|---|
-| `passthrough` | Fire once per press. Remap only. |
-| `toggle` | Press flips a latched state — hold-to-sprint becomes toggle-sprint. |
-| `hold` | Active only while held. |
-| `double_tap` | Fires only on two presses inside the window. |
-| `tap_hold` | Short press → one action, long press → another. |
+**Point Shooting (Direct).** Hold a key to aim straight into point shooting. Release it to stop. Adds a row to Settings > Controls, directly under "Point Shooting". The row is unbound until you assign a key. It is saved with your other bindings and cleared by "reset to defaults".
 
-All binds are context-gated: they will not fire while a menu is open or a
-text field has focus.
+## Installation
 
-## Config
+1. Download the UE4SS experimental release from `https://github.com/UE4SS-RE/RE-UE4SS/releases` (the stable 3.0.1 cannot scan this game) and extract it into `...\steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\`. You should end up with `dwmapi.dll` and a `ue4ss` folder there.
+2. In `ue4ss\UE4SS-settings.ini` set the engine version. The game crashes on the first tick without it:
 
-Edit `Scripts/config.lua`. Hot-reloadable — Ctrl+R in the UE4SS console
-reloads it without restarting the game.
+   ```ini
+   [EngineVersionOverride]
+   MajorVersion = 5
+   MinorVersion = 6
+   ```
 
-## Console commands
+3. Launch the game once. If `ue4ss\UE4SS.log` appears, UE4SS works.
+4. Copy the `likhos-keybinds` folder into `ue4ss\Mods\`.
+5. Add this line to `ue4ss\Mods\mods.txt`:
 
-| Command | Effect |
-|---|---|
-| `kb_status` | List binds and whether the PlayerController is acquired |
-| `kb_dump_imc` | Print every loaded InputMappingContext and its mappings |
+   ```
+   likhos-keybinds : 1
+   ```
 
-## Co-op
+6. Launch the game and assign a key under Settings > Controls > "Point Shooting (Direct)".
 
-Client-side and local only. Input is unreplicated, so this produces the same
-server calls the vanilla binding would. Other players do not need it
-installed, and there is no host requirement.
+## Uninstall
 
-## Requirements
+Delete the `likhos-keybinds` folder and its line from `mods.txt`.
 
-- UE4SS (see the workspace README)
-- Incursion Red River — build recorded in `mod.txt`
+## Troubleshooting
+
+- **Nothing happens.** Set `GuiConsoleEnabled = 1` in `ue4ss\UE4SS-settings.ini`, relaunch and look for `[KeybindOverhaul]` lines.
+- **Broke after a game update.** Expected. Check for a new version.

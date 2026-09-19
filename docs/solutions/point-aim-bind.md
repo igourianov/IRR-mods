@@ -10,18 +10,18 @@ Today point aim is reachable only as a mode of regular aim: aim, then press the 
 
 Constraints:
 
-- Game class, function and property names come from recon recorded in `docs/03-findings.md` (project rule). Engine names (`APlayerController`, Enhanced Input) are not game internals and may be used directly.
+- Game class, function and property names come from recon recorded in `docs/solutions/findings.md` (project rule). Engine names (`APlayerController`, Enhanced Input) are not game internals and may be used directly.
 - The bind is client-local. No replication, no host requirement.
 - UObject access happens on the game thread only, UObjects are never cached across a level load and validity is checked with `util.valid` (`CODE_GUIDE.md`).
 - The key is fixed to H in `config.lua`. User-facing configuration of this bind (an unbound default, a row in the game's controls menu) is out of scope for now.
 - The `hold` timeout approximation in `triggers.lua` is ruled out for this bind. Aim ending 150 ms after the press is not hold.
 - Aim is driven through the game's own `IA_Aim` input action, not by calling `FirstPersonWeaponADS:TriggerAim`. A direct call aims on screen but skips the `SGA_Aim_C` ability, so the game doesn't treat the player as aiming (the sprint key sprints instead of holding breath).
-- `IA_Aim` is held by injecting a one-frame press every tick. Continuous injection is ruled out: its `FInputActionValue` parameter can't be built from UE4SS Lua (`docs/03-findings.md`, Enhanced Input injection).
-- The tick runs on the game thread through UE4SS's `LoopInGameThreadWithDelay`. `LoopAsync` with an `ExecuteInGameThread` hop per tick is ruled out: it corrupted the Lua state and crashed the game within minutes (`docs/03-findings.md`, Lua threading).
+- `IA_Aim` is held by injecting a one-frame press every tick. Continuous injection is ruled out: its `FInputActionValue` parameter can't be built from UE4SS Lua (`docs/solutions/findings.md`, Enhanced Input injection).
+- The tick runs on the game thread through UE4SS's `LoopInGameThreadWithDelay`. `LoopAsync` with an `ExecuteInGameThread` hop per tick is ruled out: it corrupted the Lua state and crashed the game within minutes (`docs/solutions/findings.md`, Lua threading).
 - While H is held, pressing the vanilla aim key changes nothing, and point aim stays. H injects the same `IA_Aim` input the aim key produces, so the game can't tell them apart. Handing control to the aim key would mean polling the physical aim key, which the mod can't identify without reading the player's bindings. That's ruled out until configurable bindings are in scope. Releasing H while the aim key is held leaves the player aimed in the restored mode.
 - The mode is read from `BP_WeaponComponent.bIsPointSight` on the equipped weapon. The aiming subobject's own `bIsPointSight` doesn't track the mode.
 
-Verified by recon (`docs/03-findings.md`): `IsInputKeyDown` polling reports H press and release. Per-tick injection of `IA_Aim` holds aim, follows the sticky mode and behaves like vanilla aim (the sprint key holds breath). `TriggerPointSight` on the aiming subobject flips the sticky mode while not aimed.
+Verified by recon (`docs/solutions/findings.md`): `IsInputKeyDown` polling reports H press and release. Per-tick injection of `IA_Aim` holds aim, follows the sticky mode and behaves like vanilla aim (the sprint key holds breath). `TriggerPointSight` on the aiming subobject flips the sticky mode while not aimed.
 
 Assumptions, unverified:
 
@@ -38,7 +38,7 @@ Owned:
 - `likhos-keybinds/Scripts/config.lua`: the `point_aim` bind entry.
 - `likhos-keybinds/Scripts/main.lua`: startup wiring and the game-thread tick loop.
 - `likhos-keybinds/Scripts/probe.lua`: throwaway recon. Not part of the end state.
-- `docs/03-findings.md`: recon results.
+- `docs/solutions/findings.md`: recon results.
 
 Context only: `context.lua` (UI gate, reused unchanged), `util.lua`, `log.lua`, the game's own aim and point sight bindings.
 
