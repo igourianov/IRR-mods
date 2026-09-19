@@ -48,14 +48,13 @@ local function start_tick_loop()
     loop_started = true
 
     local tick_ms = config.tick_ms or 16
-    LoopAsync(tick_ms, function()
-        ExecuteInGameThread(function()
-            util.safe("tick", function()
-                input.poll(config.binds)
-                triggers.tick(config.binds)
-            end)
+    -- LoopAsync runs its callback on UE4SS's async thread. Calling ExecuteInGameThread from there every tick corrupted the Lua state (random crashes inside UE4SS's Lua runtime).
+    -- This timer runs on the game thread only.
+    LoopInGameThreadWithDelay(tick_ms, function()
+        util.safe("tick", function()
+            input.poll(config.binds)
+            triggers.tick(config.binds)
         end)
-        return false   -- never stop
     end)
     log.debug("tick loop started at %dms", tick_ms)
 end
@@ -79,7 +78,7 @@ local function init()
         actions.reset()
     end)
 
-    -- The tick loop queues a game-thread task every tick_ms. Skip it when nothing can use it.
+    -- The tick loop runs Lua every tick_ms. Skip it when nothing can use it.
     if register_binds() > 0 then start_tick_loop() end
 
     RegisterConsoleCommandHandler("kb_dump_imc", function()

@@ -17,6 +17,7 @@ Constraints:
 - The `hold` timeout approximation in `triggers.lua` is ruled out for this bind. Aim ending 150 ms after the press is not hold.
 - Aim is driven through the game's own `IA_Aim` input action, not by calling `FirstPersonWeaponADS:TriggerAim`. A direct call aims on screen but skips the `SGA_Aim_C` ability, so the game doesn't treat the player as aiming (the sprint key sprints instead of holding breath).
 - `IA_Aim` is held by injecting a one-frame press every tick. Continuous injection is ruled out: its `FInputActionValue` parameter can't be built from UE4SS Lua (`docs/03-findings.md`, Enhanced Input injection).
+- The tick runs on the game thread through UE4SS's `LoopInGameThreadWithDelay`. `LoopAsync` with an `ExecuteInGameThread` hop per tick is ruled out: it corrupted the Lua state and crashed the game within minutes (`docs/03-findings.md`, Lua threading).
 - While H is held, pressing the vanilla aim key changes nothing, and point aim stays. H injects the same `IA_Aim` input the aim key produces, so the game can't tell them apart. Handing control to the aim key would mean polling the physical aim key, which the mod can't identify without reading the player's bindings. That's ruled out until configurable bindings are in scope. Releasing H while the aim key is held leaves the player aimed in the restored mode.
 - The mode is read from `BP_WeaponComponent.bIsPointSight` on the equipped weapon. The aiming subobject's own `bIsPointSight` doesn't track the mode.
 
@@ -24,7 +25,7 @@ Verified by recon (`docs/03-findings.md`): `IsInputKeyDown` polling reports H pr
 
 Assumptions, unverified:
 
-- A2. Per-tick injection from the 16 ms tick loop holds aim without flicker at any game frame rate. No flicker was seen on a setup using Radeon driver frame generation. Generated frames don't run game ticks, so that setup's real game tick rate was lower than its displayed frame rate. At a native game frame rate above roughly 60 fps, some frames get no injection, which may read as a release. This doesn't block the build. If it fails, the fix is to inject from a per-frame source instead of the tick loop.
+- A2. Per-tick injection from the 16 ms tick loop holds aim without flicker at any game frame rate. No flicker was seen on a setup using Radeon driver frame generation. Generated frames don't run game ticks, so that setup's real game tick rate was lower than its displayed frame rate. At a native game frame rate above roughly 60 fps, some frames get no injection, which may read as a release. This doesn't block the build. If it fails, the fix is to run the tick per frame with `LoopInGameThreadAfterFrames`.
 - A3. Flipping the mode with `TriggerPointSight` just before injected aim starts brings aim up directly in point aim. Flipping it back right after the injection stops, while aim is transitioning out, leaves the mode restored.
 
 ## Scope
@@ -35,7 +36,7 @@ Owned:
 - `likhos-keybinds/Scripts/input.lua`: bind registration for polled binds.
 - `likhos-keybinds/Scripts/actions.lua`: the `PointAim` action.
 - `likhos-keybinds/Scripts/config.lua`: the `point_aim` bind entry.
-- `likhos-keybinds/Scripts/main.lua`: startup wiring.
+- `likhos-keybinds/Scripts/main.lua`: startup wiring and the game-thread tick loop.
 - `likhos-keybinds/Scripts/probe.lua`: throwaway recon. Not part of the end state.
 - `docs/03-findings.md`: recon results.
 

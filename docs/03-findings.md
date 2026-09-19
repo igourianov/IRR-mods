@@ -163,6 +163,14 @@ Unconfirmed:
 - `SGA_Aim_C` and `SGA_PointSight_C` cast to `FPCC_Aiming_Base`, but the live aiming subobject is `BP_FPCC_ADS_C`. How the two relate is unknown.
 - Aim runs through an ability. Calling `TriggerAim` directly skips `SGA_Aim_C`, so ability state such as tags, movement speed or sprint cancel may not follow.
 
+## Lua threading
+
+Seven crashes between 20:16 and 21:01 on 2026-09-18, all `EXCEPTION_ACCESS_VIOLATION` inside UE4SS's Lua runtime on the game thread (`lua_getiuservalue`, `lua_rawgeti`, `lua_getfield`, `push_nameproperty`), at different call sites. Six entered through `process_simple_actions` (the `ExecuteInGameThread` queue), one through a console command. Crash reports: `%LOCALAPPDATA%\Test_C\Saved\Crashes\*\CrashContext.runtime-xml`. `UE4SS.log` loses its tail on a hard crash, and a relaunch overwrites it.
+
+They started when the first always-on bind started a 16 ms `LoopAsync` whose callback called `ExecuteInGameThread`. Non-fatal symptoms of the same corruption: `ipairs` "number expected, got function" and `IsInputKeyDown` "expected 1 parameters, received 2". With no loop running, and later with the loop on `LoopInGameThreadWithDelay`, no crash occurred across several sessions of menu probing and play.
+
+This UE4SS build deprecates `LoopAsync` and `ExecuteAsync` in favour of the game-thread delayed actions (`LoopInGameThreadWithDelay`, `LoopInGameThreadAfterFrames`, `ExecuteInGameThreadWithDelay`), citing thread safety. See `ue4ss\Changelog.md` and `ue4ss\Docs\lua-api\global-functions\delayedactions.md`.
+
 ## UI focus detection
 
 Property that reliably differs menu-open vs menu-closed:
