@@ -1,20 +1,19 @@
 # Likho's Point and Shoot
 
-Hold a key to aim straight into point shooting in Incursion Red River.
+Adds a keybinding, **Point Shooting (Direct)**, that goes straight into point aim without passing through regular aim.
 
-**Status: pre-alpha.** Tested on Steam build 22417726 with UE4SS experimental build `f6d5f942`.
+Point aim is a quick aiming mode for close range engagement. Its advantage over gun sights is speed, which is lost when it takes an extra step through regular aim. This mod restores that use case.
 
-## Features
-
-**Point Shooting (Direct).** Hold a key to aim straight into point shooting. Release it to stop. Adds a row to Settings > Controls, directly under "Point Shooting". The row is unbound until you assign a key. It is saved with your other bindings and cleared by "reset to defaults".
+Hold mode only (no toggle). Recommended to bind the new key to a mouse side button for quick access.
 
 ## Requirements
 
-- [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) experimental release, installed separately. It is not included in the mod zip. Tested with build `f6d5f942` (UE4SS.log reports `v3.0.1 Beta #0 - Git SHA #f6d5f942`). The stable 3.0.1 does not work with this game. This is the same UE4SS setup the other IRR Lua mods on Nexus use, described on [UE4SS Experimental for Incursion Red River](https://www.nexusmods.com/incursionredriver/mods/42). If you already have it installed for another mod, skip to step 4.
+- Incursion Red River, Steam version. Tested on build 22417726.
+- [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) experimental release, installed separately. It is not included in the mod zip. Tested with the release of 2026-09-16. The stable 3.0.1 does not work with this game. If you already have it installed for another mod, skip to step 4.
 
 ## Installation
 
-1. Download the `UE4SS_v3.0.1-*.zip` file from `https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest` (the stable 3.0.1 cannot scan this game) and extract it into `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\`. You should end up with `dwmapi.dll` and a `ue4ss` folder there.
+1. Download the `UE4SS_v3.0.1-*.zip` file from `https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest` and extract it into `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\`. You should end up with `dwmapi.dll` and a `ue4ss` folder there.
 2. In `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS-settings.ini` set the engine version. The game crashes on the first tick without it:
 
    ```ini
@@ -33,5 +32,5 @@ Delete the `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\Mods
 
 ## Troubleshooting
 
-- **Nothing happens.** Set `GuiConsoleEnabled = 1` in `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS-settings.ini`, relaunch and look for `[PointAndShoot]` lines.
-- **Broke after a game update.** Expected. Check for a new version.
+- **Nothing happens.** Open `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS.log` and look for `[PointAndShoot]` lines.
+- **Broke after a game update.** Expected. Wait for the mod update.
