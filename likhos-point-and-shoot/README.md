@@ -2,7 +2,7 @@
 
 Hold a key to aim straight into point shooting in Incursion Red River.
 
-**Status: pre-alpha.** Tested on Steam build 22417726 with UE4SS experimental `v3.0.1-1136-g35d1795d`.
+**Status: pre-alpha.** Tested on Steam build 22417726 with UE4SS experimental build `f6d5f942`.
 
 ## Features
 
@@ -10,11 +10,11 @@ Hold a key to aim straight into point shooting in Incursion Red River.
 
 ## Requirements
 
-- [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases) experimental release, installed separately. It is not included in the mod zip. Tested with `v3.0.1-1136-g35d1795d`. The stable 3.0.1 does not work with this game.
+- [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) experimental release, installed separately. It is not included in the mod zip. Tested with build `f6d5f942` (UE4SS.log reports `v3.0.1 Beta #0 - Git SHA #f6d5f942`). The stable 3.0.1 does not work with this game. This is the same UE4SS setup the other IRR Lua mods on Nexus use, described on [UE4SS Experimental for Incursion Red River](https://www.nexusmods.com/incursionredriver/mods/42). If you already have it installed for another mod, skip to step 4.
 
 ## Installation
 
-1. Download the UE4SS experimental release from `https://github.com/UE4SS-RE/RE-UE4SS/releases` (the stable 3.0.1 cannot scan this game) and extract it into `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\`. You should end up with `dwmapi.dll` and a `ue4ss` folder there.
+1. Download the `UE4SS_v3.0.1-*.zip` file from `https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest` (the stable 3.0.1 cannot scan this game) and extract it into `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\`. You should end up with `dwmapi.dll` and a `ue4ss` folder there.
 2. In `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS-settings.ini` set the engine version. The game crashes on the first tick without it:
 
    ```ini
