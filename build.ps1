@@ -1,22 +1,19 @@
 <#
 .SYNOPSIS
-    Deploy mods from this workspace into the game's UE4SS Mods folder.
+    Copy mods from this workspace into the game's UE4SS Mods folder.
 
 .DESCRIPTION
-    Symlinks mode is the default for development: edit here, hot-reload in game
-    with Ctrl+R in the UE4SS console. Use -Copy for a clean install test.
+    A build bumps the patch segment of the mod's version in mod.txt when the mod folder has uncommitted changes.
 
 .EXAMPLE
-    .\build.ps1                      # deploy all mods as symlinks
+    .\build.ps1                             # deploy all mods
     .\build.ps1 likhos-point-and-shoot      # deploy one mod
-    .\build.ps1 -Copy                # real copies instead of symlinks
-    .\build.ps1 -Unlink              # remove deployed mods from the game
+    .\build.ps1 -Unlink                     # remove deployed mods from the game
 #>
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
     [string[]] $Mods,
-    [switch]   $Copy,
     [switch]   $Unlink
 )
 
@@ -75,31 +72,43 @@ foreach ($m in $Mods) {
 }
 
 # ---------------------------------------------------------------- deploy
+# A version is bumped only when its mod folder has uncommitted changes, so rebuilding unchanged code keeps its version.
+# The bumped mod.txt keeps the folder dirty, so later builds bump again until it is committed.
+$gitAvailable = (Get-Command git -ErrorAction SilentlyContinue) -and (git -C $root rev-parse --is-inside-work-tree 2>$null) -eq 'true'
+if (-not $gitAvailable) { Write-Warning 'Git not available. Every build bumps the version.' }
+$versionPattern = '(?m)^(\s*version\s*=\s*")(\d+)\.(\d+)\.(\d+)(")'
+
 foreach ($m in $Mods) {
-    $src  = Join-Path $root $m
-    $dest = Join-Path $modsDir $m
+    $src    = Join-Path $root $m
+    $dest   = Join-Path $modsDir $m
+    $modTxt = Join-Path $src 'mod.txt'
+
+    $text = [System.IO.File]::ReadAllText($modTxt)
+    $match = [regex]::Match($text, $versionPattern)
+    $version = $null
+    if ($match.Success) {
+        $g = $match.Groups
+        $majorMinor = "$($g[2].Value).$($g[3].Value)"
+        $version = "$majorMinor.$($g[4].Value)"
+        if (-not $gitAvailable -or (git -C $root status --porcelain -- $m)) {
+            $version = "$majorMinor.$([int]$g[4].Value + 1)"
+            $text = $text.Remove($match.Index, $match.Length).Insert($match.Index, "$($g[1].Value)$version$($g[5].Value)")
+            [System.IO.File]::WriteAllText($modTxt, $text, [System.Text.UTF8Encoding]::new($false))
+        }
+    } else {
+        Write-Warning "${m}: mod.txt has no version=`"major.minor.patch`" line. Deploying without a version bump."
+    }
 
     if (Test-Path $dest) {
+        # A deploy from an older symlink build is removed as a link, so the workspace it points at survives.
         $item = Get-Item $dest -Force
         if ($item.LinkType) { $item.Delete() }
         else { Remove-Item $dest -Recurse -Force }
     }
 
-    if ($Copy) {
-        Copy-Item $src $dest -Recurse -Force
-        Write-Host "copied   $m  -> $dest" -ForegroundColor Green
-    } else {
-        try {
-            New-Item -ItemType SymbolicLink -Path $dest -Target $src -Force | Out-Null
-            Write-Host "linked   $m  -> $dest" -ForegroundColor Green
-        } catch {
-            Write-Warning @"
-Symlink failed. Either run this shell as Administrator, or enable
-Windows Developer Mode (Settings > System > For developers), or use -Copy.
-"@
-            throw
-        }
-    }
+    Copy-Item $src $dest -Recurse -Force
+    $label = if ($version) { "$m v$version" } else { $m }
+    Write-Host "copied   $label  -> $dest" -ForegroundColor Green
 }
 
 # ---------------------------------------------------------------- mods.txt
