@@ -1,4 +1,4 @@
--- likhos-keybinds : keybinding behaviour overhaul for Incursion Red River.
+-- likhos-point-and-shoot : hold a key to aim straight into point shooting in Incursion Red River.
 --
 -- Entry point. UE4SS loads this once at startup for every enabled mod.
 -- Hot reload (Ctrl+R in the UE4SS console) re-runs this file, so keep it idempotent: no duplicate registrations, no duplicate loops.

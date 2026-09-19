@@ -14,7 +14,7 @@ UE4SS mods for **Incursion Red River** (Games of Tomorrow, UE 5.6, Steam).
 
 | Folder | Status | Description |
 |---|---|---|
-| `likhos-keybinds` | pre-alpha | Point Shooting (Direct) keybind: hold to aim straight into point shooting |
+| `likhos-point-and-shoot` | pre-alpha | Likho's Point and Shoot: hold a key to aim straight into point shooting |
 
 ## Layout
 

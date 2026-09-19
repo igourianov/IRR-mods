@@ -1,6 +1,6 @@
-# Likho's Keybinds
+# Likho's Point and Shoot
 
-Extra keybinds for Incursion Red River.
+Hold a key to aim straight into point shooting in Incursion Red River.
 
 **Status: pre-alpha.** Tested on Steam build 22417726 with UE4SS experimental `v3.0.1-1136-g35d1795d`.
 
@@ -20,20 +20,20 @@ Extra keybinds for Incursion Red River.
    ```
 
 3. Launch the game once. If `ue4ss\UE4SS.log` appears, UE4SS works.
-4. Copy the `likhos-keybinds` folder into `ue4ss\Mods\`.
+4. Copy the `likhos-point-and-shoot` folder into `ue4ss\Mods\`.
 5. Add this line to `ue4ss\Mods\mods.txt`:
 
    ```
-   likhos-keybinds : 1
+   likhos-point-and-shoot : 1
    ```
 
 6. Launch the game and assign a key under Settings > Controls > "Point Shooting (Direct)".
 
 ## Uninstall
 
-Delete the `likhos-keybinds` folder and its line from `mods.txt`.
+Delete the `likhos-point-and-shoot` folder and its line from `mods.txt`.
 
 ## Troubleshooting
 
-- **Nothing happens.** Set `GuiConsoleEnabled = 1` in `ue4ss\UE4SS-settings.ini`, relaunch and look for `[KeybindOverhaul]` lines.
+- **Nothing happens.** Set `GuiConsoleEnabled = 1` in `ue4ss\UE4SS-settings.ini`, relaunch and look for `[PointAndShoot]` lines.
 - **Broke after a game update.** Expected. Check for a new version.

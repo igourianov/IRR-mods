@@ -8,7 +8,7 @@
 
 .EXAMPLE
     .\build.ps1                      # deploy all mods as symlinks
-    .\build.ps1 likhos-keybinds      # deploy one mod
+    .\build.ps1 likhos-point-and-shoot      # deploy one mod
     .\build.ps1 -Copy                # real copies instead of symlinks
     .\build.ps1 -Unlink              # remove deployed mods from the game
 #>

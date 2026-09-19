@@ -1,7 +1,7 @@
 -- log.lua : leveled logging. UE4SS print() goes to the GUI console.
 local M = {}
 
-local PREFIX = "[KeybindOverhaul] "
+local PREFIX = "[PointAndShoot] "
 local LEVELS = { error = 1, warn = 2, info = 3, debug = 4 }
 
 M.level = LEVELS.info

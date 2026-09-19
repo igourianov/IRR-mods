@@ -7,7 +7,7 @@ Redo the dumps after every game patch.
 
 Steam → game → Properties → Updates → **Only update when launched**.
 Back up `%LocalAppData%\Test_C\Saved\`. Record the build ID in
-`likhos-keybinds/mod.txt` under `game_build`.
+`likhos-point-and-shoot/mod.txt` under `game_build`.
 
 ## Step 1 — does UE4SS inject?
 
@@ -97,7 +97,7 @@ For each action you want to control, write down:
 - the release function name (if any)
 - any arguments
 
-Then fill in `ACTIONS` in `likhos-keybinds/Scripts/actions.lua`.
+Then fill in `ACTIONS` in `likhos-point-and-shoot/Scripts/actions.lua`.
 
 ## Step 6 — verify the context gate
 

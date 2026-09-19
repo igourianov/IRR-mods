@@ -32,12 +32,12 @@ Assumptions, unverified:
 
 Owned:
 
-- `likhos-keybinds/Scripts/triggers.lua`: hold mode.
-- `likhos-keybinds/Scripts/input.lua`: bind registration for polled binds.
-- `likhos-keybinds/Scripts/actions.lua`: the `PointAim` action.
-- `likhos-keybinds/Scripts/config.lua`: the `point_aim` bind entry.
-- `likhos-keybinds/Scripts/main.lua`: startup wiring and the game-thread tick loop.
-- `likhos-keybinds/Scripts/probe.lua`: throwaway recon. Not part of the end state.
+- `likhos-point-and-shoot/Scripts/triggers.lua`: hold mode.
+- `likhos-point-and-shoot/Scripts/input.lua`: bind registration for polled binds.
+- `likhos-point-and-shoot/Scripts/actions.lua`: the `PointAim` action.
+- `likhos-point-and-shoot/Scripts/config.lua`: the `point_aim` bind entry.
+- `likhos-point-and-shoot/Scripts/main.lua`: startup wiring and the game-thread tick loop.
+- `likhos-point-and-shoot/Scripts/probe.lua`: throwaway recon. Not part of the end state.
 - `docs/solutions/findings.md`: recon results.
 
 Context only: `context.lua` (UI gate, reused unchanged), `util.lua`, `log.lua`, the game's own aim and point sight bindings.

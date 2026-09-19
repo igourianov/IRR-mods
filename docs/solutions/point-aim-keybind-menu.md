@@ -35,13 +35,13 @@ Verified by recon (`docs/solutions/findings.md`, Enhanced Input user settings an
 
 Owned:
 
-- `likhos-keybinds/Scripts/keymap.lua`: the mod's Enhanced Input mapping (new module).
-- `likhos-keybinds/Scripts/menu.lua`: the controls menu row (new module).
-- `likhos-keybinds/Scripts/input.lua`: key resolution for mapped binds.
-- `likhos-keybinds/Scripts/triggers.lua`: recognising mapped binds as polled, so `hold` gets a real release.
-- `likhos-keybinds/Scripts/config.lua`: the `point_aim` bind entry.
-- `likhos-keybinds/Scripts/main.lua`: startup wiring.
-- `likhos-keybinds/README.md`: how the user sets the key.
+- `likhos-point-and-shoot/Scripts/keymap.lua`: the mod's Enhanced Input mapping (new module).
+- `likhos-point-and-shoot/Scripts/menu.lua`: the controls menu row (new module).
+- `likhos-point-and-shoot/Scripts/input.lua`: key resolution for mapped binds.
+- `likhos-point-and-shoot/Scripts/triggers.lua`: recognising mapped binds as polled, so `hold` gets a real release.
+- `likhos-point-and-shoot/Scripts/config.lua`: the `point_aim` bind entry.
+- `likhos-point-and-shoot/Scripts/main.lua`: startup wiring.
+- `likhos-point-and-shoot/README.md`: how the user sets the key.
 - `docs/solutions/findings.md`: recon results.
 
 Context only: `actions.lua` (`PointAim`, unchanged), `context.lua` (UI gate, unchanged), `util.lua`, `log.lua`, the tick loop in `main.lua` (`docs/solutions/point-aim-bind.md`), the vanilla controls page and Enhanced Input user settings.

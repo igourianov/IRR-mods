@@ -6,7 +6,7 @@ Read `CLAUDE.md` and `docs/solutions/findings.md` alongside this.
 
 ## Where the project is
 
-`likhos-keybinds` works in game with one feature: the **point aim** bind. Holding a key aims straight into point aim and releasing it ends the aim. The key is set in the game's Settings > Controls, in a row "Point Shooting (Direct)" that the mod adds under the vanilla "Point Shooting" row. It is unbound by default.
+`likhos-point-and-shoot` works in game with one feature: the **point aim** bind. Holding a key aims straight into point aim and releasing it ends the aim. The key is set in the game's Settings > Controls, in a row "Point Shooting (Direct)" that the mod adds under the vanilla "Point Shooting" row. It is unbound by default.
 
 - `docs/solutions/point-aim-bind.md`: the aim action, polling and hold release. Its fixed H key and `engine_key` are superseded by `point-aim-keybind-menu.md`.
 - `docs/solutions/point-aim-keybind-menu.md`: the mapping and the controls menu row (`keymap.lua`, `menu.lua`).
