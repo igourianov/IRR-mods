@@ -2,8 +2,8 @@
 --
 -- Every game name here comes from docs/solutions/findings.md. Nothing is guessed from the real game.
 --
--- Design rule: resolve lazily, per call, and never cache a UObject across a
--- level load. Caching the *name* is fine; caching the object is what crashes.
+-- Design rule: resolve lazily, per call and never cache a UObject across a level load.
+-- Caching the *name* is fine. Caching the object is what crashes.
 
 local log  = require("log")
 local util = require("util")
@@ -86,8 +86,8 @@ local function point_aim_release()
     if wc.bIsPointSight then ads:TriggerPointSight() end
 end
 
---- Each entry describes one logical action. press, held and release are Lua functions. held runs every tick while a hold
---- bind is down.
+--- Each entry describes one logical action. press, held and release are Lua functions.
+--- held runs every tick while a hold bind is down.
 M.ACTIONS = {
     ["PointAim"] = {
         press   = point_aim_press,
@@ -96,12 +96,11 @@ M.ACTIONS = {
     },
 }
 
---- Track which actions have been permanently disabled this session so we log
---- the failure once rather than every keypress.
+--- Actions found undefined this session, so the error logs once rather than every tick.
 local disabled = {}
 
 --- Invoke one side of an action. `phase` is "press", "held" or "release".
---- MUST be called from the game thread - see input.lua.
+--- MUST be called from the game thread (see input.lua).
 function M.invoke(name, phase)
     if disabled[name] then return false end
 
@@ -124,8 +123,7 @@ function M.reset()
     point_aim = nil
 end
 
---- Sanity check used at startup: report which configured actions are missing
---- a definition, without touching the game.
+--- Startup check: report which configured actions are missing a definition, without touching the game.
 function M.audit(binds)
     local missing = {}
     for _, b in ipairs(binds) do

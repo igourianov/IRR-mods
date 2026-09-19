@@ -1,7 +1,7 @@
 -- triggers.lua : hold state per bind.
 --
--- Binds are polled by input.lua, which reports the real press and release. Press starts the action, tick() runs its held
--- side every tick while the key is down and release ends it.
+-- Binds are polled by input.lua, which reports the real press and release.
+-- Press starts the action, tick() runs its held side every tick while the key is down and release ends it.
 
 local log     = require("log")
 local actions = require("actions")

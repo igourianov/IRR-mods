@@ -1,8 +1,7 @@
 -- likhos-keybinds : keybinding behaviour overhaul for Incursion Red River.
 --
 -- Entry point. UE4SS loads this once at startup for every enabled mod.
--- Hot reload (Ctrl+R in the UE4SS console) re-runs this file, so keep it
--- idempotent: no duplicate registrations, no duplicate loops.
+-- Hot reload (Ctrl+R in the UE4SS console) re-runs this file, so keep it idempotent: no duplicate registrations, no duplicate loops.
 
 local log      = require("log")
 local util     = require("util")
@@ -75,7 +74,6 @@ local function init()
     validate()
 
     input.watch_player_controller(function()
-        -- Clear per-session action state on every level load.
         actions.reset()
         -- This callback runs inside the PlayerController's construction. Build and register the mod's input objects a tick later.
         -- A hot reload needs no call: the registration lives in the engine's user settings, not in Lua.

@@ -1,26 +1,18 @@
 -- context.lua : should a bind be allowed to fire right now?
 --
--- The failure this prevents: toggling crouch while typing in the stash
--- search box. UE4SS key binds do not respect game focus on their own.
---
--- All checks are defensive - if we cannot determine state, we ALLOW the
--- bind rather than silently breaking it, except where noted.
+-- The failure this prevents: a bind firing while a menu is open or a text field has focus.
+-- If the state can't be determined, the bind is allowed rather than silently broken.
 
 local log  = require("log")
 local util = require("util")
 
 local M = {}
 
---- True when the game has a UI element holding keyboard focus, or the input
---- mode is UI-only / game-and-UI.
----
---- RECON REQUIRED: confirm the property names below against the UHT dump.
---- UE exposes these differently across versions and games may wrap them.
+--- True when the mouse cursor is shown, which is taken to mean a menu is open.
+--- Unverified: bShowMouseCursor is not confirmed to change with a menu open or a text field focused (docs/solutions/findings.md, UI focus detection).
 local function ui_has_focus(pc)
     if not util.valid(pc) then return false end
 
-    -- Most common: the controller tracks whether the mouse cursor is shown,
-    -- which in practice tracks "a menu is open" for FPS games.
     local ok, shown = pcall(function() return pc.bShowMouseCursor end)
     if ok and shown ~= nil then
         return shown == true
@@ -29,7 +21,6 @@ local function ui_has_focus(pc)
     return false
 end
 
---- Returns true if the bind may fire.
 function M.allows(bind, pc)
     if not bind.block_in_ui then return true end
 

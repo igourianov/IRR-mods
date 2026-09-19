@@ -16,7 +16,7 @@ local player_controller = nil
 -- PlayerController lifecycle
 --------------------------------------------------------------------------
 
---- The PlayerController survives respawns; the pawn does not. Bind here.
+--- The PlayerController survives respawns and the pawn does not.
 function M.watch_player_controller(on_ready)
     -- The callback receives the UObject itself, not a RemoteUnrealParam. No :get().
     -- It also fires for each Blueprint subclass's class default object as the class loads.
@@ -47,9 +47,7 @@ end
 -- Bind registration
 --------------------------------------------------------------------------
 
---- Register one bind. Returns true on success.
---- Binds take their keys from the controls menu (keymap.lua) and are polled from the tick loop (M.poll), so they get a
---- release event.
+--- Binds take their keys from the controls menu (keymap.lua) and are polled from the tick loop (M.poll), so they get a release event.
 function M.register(bind)
     if not bind.mapping then
         log.error("bind '%s' has no mapping - ignoring", bind.id)
