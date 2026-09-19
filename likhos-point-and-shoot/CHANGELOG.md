@@ -1,3 +1,6 @@
+# 1.0.48
+* fixed a crash after reloading mods from the UE4SS console
+
 # 1.0.47
 * direct point aim picks the aiming device by night vision state:
   * NVG off: the first visible laser, or the first visible flashlight if the weapon has no visible laser
