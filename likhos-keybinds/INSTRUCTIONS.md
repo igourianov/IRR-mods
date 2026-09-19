@@ -32,6 +32,11 @@ likhos-keybinds : 1
 
 ## 3. Configure
 
+**Point Shooting (Direct)** is set in the game: Settings > Controls, the row
+directly under "Point Shooting". It is unbound until you assign a key. Hold
+that key to aim straight into point shooting; release it to stop. The key is
+saved with your other bindings, and "reset to defaults" clears it.
+
 Open `likhos-keybinds\Scripts\config.lua` in a text editor. Each entry in
 `binds` has an `enabled` flag, a `key`, and a `mode`. Set `enabled = true`
 on the ones you want.

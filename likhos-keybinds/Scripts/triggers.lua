@@ -4,7 +4,7 @@
 -- So "is the key still down?" has to be inferred. Two consequences:
 --
 --   * "hold" mode on a RegisterKeyBind bind is approximated: the press starts
---     the action and a timeout ends it. An engine_key bind is polled instead
+--     the action and a timeout ends it. A mapped bind is polled instead
 --     (input.lua) and gets a real release through on_release.
 --   * Everything time-based runs off tick(), not off the press callback.
 --
@@ -68,7 +68,7 @@ function M.on_press(bind)
     end
 end
 
---- Called from the game thread when a polled (engine_key) bind's key goes up,
+--- Called from the game thread when a polled (mapped) bind's key goes up,
 --- or when the context gate starts blocking while it is held. No-op unless a hold is active.
 function M.on_release(bind)
     local s = state[bind.id]
@@ -104,7 +104,7 @@ function M.tick(binds)
                     end
 
                 elseif bind.mode == "hold" and s.phase == "active" then
-                    if bind.engine_key then
+                    if bind.mapping then
                         actions.invoke(bind.action, "held")
                     -- Approximation: see header note. Ends the action after
                     -- the threshold since we cannot observe key release.

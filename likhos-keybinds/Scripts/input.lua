@@ -4,11 +4,11 @@ local log      = require("log")
 local util     = require("util")
 local triggers = require("triggers")
 local context  = require("context")
+local keymap   = require("keymap")
 
 local M = {}
 
 local registered = {}   -- bind.id -> true
-local polled_keys = {}  -- bind.id -> FKey table for engine_key binds
 local key_down = {}     -- bind.id -> key state seen on the previous poll
 local player_controller = nil
 
@@ -73,11 +73,11 @@ end
 function M.register(bind)
     if registered[bind.id] then return true end
 
-    -- engine_key binds are polled from the tick loop (M.poll), so they get a release event.
-    if bind.engine_key then
+    -- Mapped binds take their keys from the controls menu (keymap.lua) and are polled from the tick loop (M.poll),
+    -- so they get a release event.
+    if bind.mapping then
         registered[bind.id] = true
-        polled_keys[bind.id] = { KeyName = FName(bind.engine_key) }
-        log.info("registered bind '%s' on %s (%s, polled)", bind.id, bind.engine_key, bind.mode)
+        log.info("registered bind '%s' on mapping %s (%s, polled)", bind.id, bind.mapping, bind.mode)
         return true
     end
 
@@ -114,15 +114,18 @@ function M.register(bind)
     return ok
 end
 
---- Turn engine_key state changes into press and release events. Game thread, every tick.
+--- Turn mapped key state changes into press and release events. Game thread, every tick.
 function M.poll(binds)
     local pc = M.get_player_controller()
     if not pc then return end
 
     for _, bind in ipairs(binds) do
-        local key = polled_keys[bind.id]
-        if key and bind.enabled then
-            local down = pc:IsInputKeyDown(key)
+        if bind.mapping and registered[bind.id] then
+            -- Keys are read every tick, so a rebind in the controls menu applies at once. No key mapped: never down.
+            local down = false
+            for _, key in ipairs(keymap.keys(bind.mapping)) do
+                if pc:IsInputKeyDown(key) then down = true end
+            end
             local was = key_down[bind.id]
             key_down[bind.id] = down
 

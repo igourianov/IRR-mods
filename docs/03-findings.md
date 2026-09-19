@@ -49,8 +49,8 @@ on a healthy run - it is not fatal.
 
 | Object | Present? | Full name |
 |---|---|---|
-| `EnhancedInputLocalPlayerSubsystem` | ☐ | |
-| `EnhancedInputUserSettings` | ☐ | |
+| `EnhancedInputLocalPlayerSubsystem` | ☑ | `/Engine/Transient.GameEngine_<n>:LocalPlayer_<n>.EnhancedInputLocalPlayerSubsystem_<n>` |
+| `EnhancedInputUserSettings` | ☑ | `/Engine/Transient.EnhancedInputUserSettings_<n>`, from `subsystem:GetUserSettings()`. Saved to `%LOCALAPPDATA%\Test_C\Saved\SaveGames\EnhancedInputUserSettings.sav`. |
 | `PlayerInput` (legacy mappings) | ☐ | |
 
 Decision: ☐ IMC mutation ☐ MapPlayerKey ☐ pak override ☐ no interception
@@ -162,6 +162,30 @@ Unconfirmed:
 
 - `SGA_Aim_C` and `SGA_PointSight_C` cast to `FPCC_Aiming_Base`, but the live aiming subobject is `BP_FPCC_ADS_C`. How the two relate is unknown.
 - Aim runs through an ability. Calling `TriggerAim` directly skips `SGA_Aim_C`, so ability state such as tags, movement speed or sprint cancel may not follow.
+
+## Enhanced Input user settings
+
+Probed 2026-09-18 with `kb_probe_keymap` (throwaway `probe.lua`).
+
+- An `InputAction`, its `PlayerMappableKeySettings` (outer: the action, `Name` set to the mapping name) and an `InputMappingContext` can be built at runtime with `StaticConstructObject` in `/Engine/Transient`. `imc:MapKey(action, { KeyName = FName("None") })` adds an unbound mapping. It inherits the action's mappable settings (`SettingBehavior = 0`).
+- `settings:RegisterInputMappingContext(imc)` returns true the first time, false once registered. `IsMappingContextRegistered` stays true. Registering adds a row for the mapping name to the active key profile (`settings:GetActiveKeyProfile()`).
+- `profile:GetMappedKeysInRow(FName(name), out)` fills the Lua table `out` with struct wrappers. Read a key as `out[i]:get().KeyName`, not `out[i].KeyName`. An unbound row reports one key, `None`.
+- A key bound through the controls menu is saved with the rest of the profile. After a game restart, re-registering the context restores it (bound J, restarted, row read J before the menu was opened).
+- The constructed objects survive hot reload (found again by path). UE4SS has no `GetPathName` on UObject, so they are looked up as `/Engine/Transient.<name>`.
+
+## Controls menu
+
+From the object dump and `kb_probe_row` / `kb_probe_clone`, 2026-09-18.
+
+- The keyboard bindings page is `WB_KeyboardSoldierBindings_C` (`/Game/Blueprints/UICore/Widgets/Settings/`), owned by the GameInstance (`UMS_GameInstance_C`). Each session has several live instances. Only one is on screen. The others' rows were never constructed: `IsVisible()` is false and their `LabelText` still reads "Text Block". `FindAllOf` also returns the blueprint's own template rows under `/Game/...:WidgetTree.<name>`.
+- Rows are `WB_SingleSettingBar_C` in the page's `SettingsContainer`, a `VerticalBox` (51 children). `PointShooting` is child 22.
+- A keybinding row has `BarType = 4`. Its label is `SettingBar.LabelSettings_17_….Text_3_…` (`Struct_SettingBar` → `Struct_CategoryHolderSettings`), not `Title`. Its key data is `Keybindings`, an array of `Struct_InputKeyInfo`: `KeyType_20_…`, `SharedMapNames_36_…`, `InputAction_41_…`, `PlayerMappedName_60_…`, `InputMapIndex_58_…`. The vanilla PointShooting row holds one entry: `IA_PointSight`, mapped name `IA_PointShooting`, index 0, type 0.
+- Rebinding runs in `WB_KeyBindingButton_C:ReceiveInput` through `EnhancedInputUserSettings:MapPlayerKey`. The page calls `ResetKeyProfileToDefault` for reset.
+- A key button shows its key through `WB_KeyBindingButton_C:FindInputActionKey`, which reads the subsystem's `QueryKeysMappedToAction` and `GetAllPlayerMappableActionKeyMappings`. Both see only contexts in the active input stack. A context registered with user settings but not added to the stack shows None after a restart, though its saved key is restored. Added with `AddMappingContext` at priority -1000, it shows the saved key, and a vanilla action on the same key keeps firing.
+- A working mod row: `WidgetBlueprintLibrary:Create(page, WB_SingleSettingBar_C, row:GetOwningPlayer())`, copy `BarType`, `SettingBar` and `Keybindings` from `PointShooting` (assignment copies by value, the source stays unchanged), set the label text and the entry's action and mapped name, add it to `SettingsContainer`, then call `On_WidgetConstructed()` and `Toggle_Widget(false, 0)`. `On_WidgetConstructed` applies the label and switches `TypeSwitcher` to the keybinding view (index 4). It also leaves `Container` at opacity 0, the start of the fade-in the page normally plays. `Toggle_Widget` brings it to 1. `PreConstruct(false)`, `On_Panel_Loaded` and `Refresh_Keybinding` change nothing visible.
+- The row then rebinds, applies and saves like a vanilla row, keyed by the mod's mapping name.
+- `PanelWidget` has no `InsertChildAt` UFunction (`parent.InsertChildAt` returns a non-nil stub). A row lands after `PointShooting` by removing the children below it, adding the new row, then re-adding them. `AddChild` creates a fresh `VerticalBoxSlot`, so padding, size and alignments are copied from the old slot. Layout and navigation were unaffected in-game.
+- Adding a second mod row to the same page (as after a hot reload) left two rows on one mapping name. A bound key did not survive that session.
 
 ## Lua threading
 

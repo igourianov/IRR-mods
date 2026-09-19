@@ -11,8 +11,8 @@
 --      Given here as a string; input.lua resolves it and disables the bind
 --      if the name does not exist, rather than erroring the whole mod.
 --
--- engine_key: an Unreal key name ("H", "ThumbMouseButton", ...), used instead
---      of `key`. The key is polled every tick, so "hold" gets a real release.
+-- mapping: a player-mappable key name from keymap.lua, used instead of `key`.
+--      The key is set in the game's controls menu and polled every tick, so "hold" gets a real release.
 
 return {
     -- "error" | "warn" | "info" | "debug"
@@ -30,7 +30,7 @@ return {
         {
             id      = "point_aim",
             enabled = true,
-            engine_key = "H",
+            mapping = "LikhosPointShootingDirect",   -- Settings > Controls > Point Shooting (Direct)
             mode    = "hold",
             action  = "PointAim",     -- hold to aim straight into point sight
             block_in_ui = true,

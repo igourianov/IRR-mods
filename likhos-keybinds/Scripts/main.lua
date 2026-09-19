@@ -9,6 +9,8 @@ local util     = require("util")
 local input    = require("input")
 local triggers = require("triggers")
 local actions  = require("actions")
+local keymap   = require("keymap")
+local menu     = require("menu")
 
 local config = require("config")
 
@@ -76,7 +78,11 @@ local function init()
         -- A patch may rename a handler; clear the per-session disable list
         -- on every level load so one bad raid does not kill a bind forever.
         actions.reset()
+        -- This callback runs inside the PlayerController's construction. Build and register the mod's input objects a tick later.
+        -- A hot reload needs no call: the registration lives in the engine's user settings, not in Lua.
+        ExecuteInGameThreadWithDelay(1, function() util.safe("keymap register", keymap.register) end)
     end)
+    menu.install()
 
     -- The tick loop runs Lua every tick_ms. Skip it when nothing can use it.
     if register_binds() > 0 then start_tick_loop() end
@@ -91,7 +97,7 @@ local function init()
                  input.get_player_controller() and "acquired" or "none")
         for _, b in ipairs(config.binds) do
             log.info("  %-28s %-12s %-6s %s",
-                     b.id, b.key or b.engine_key, b.mode, b.enabled and "on" or "off")
+                     b.id, b.key or keymap.describe(b.mapping), b.mode, b.enabled and "on" or "off")
         end
         return true
     end)
