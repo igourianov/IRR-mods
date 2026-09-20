@@ -1,12 +1,12 @@
 # Likho's Point and Shoot
 
-This mod reworks Point Shooting and tactical device activation. 
+This mod reworks Point Shooting and tactical device activation.
 
 ## Point Shooting
 
 It is meant for close range engagement. Its advantage over gun sights is speed, which is sadly defeated by the vanilla's awkward control scheme.
 
-This mod decouples point shooting from aiming. Adds a new keybind **Point Shooting (Direct)** that allows user to go directly into point shooting pose bypassing regular aim.  
+This mod decouples point shooting from aiming. Adds a new keybind **Point Shooting (Direct)** that allows the user to go directly into point shooting pose bypassing regular aim.
 
 Hold mode only (no toggle). Recommended to bind the new key to a mouse side button for quick access.
 
@@ -21,7 +21,7 @@ Contextual to NVG:
 
 ## Flashlight (Hold/Toggle)
 
-New keybind to quickly access avilable light without searching through the radial menu or togglling gajillion modes.
+New keybind to quickly access avilable light without opening the radial menu or cycling through activation modes.
 
 Works as both momentary switch and toggle:
 
@@ -33,7 +33,6 @@ Contextual to NVG:
 
 - **NVG off:** the first visible flashlight.
 - **NVG on:** the first IR illuminator. If the weapon has none, the first visible flashlight.
-
 
 ## Requirements
 
