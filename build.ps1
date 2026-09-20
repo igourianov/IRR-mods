@@ -1,21 +1,19 @@
 <#
 .SYNOPSIS
-    Copy mods from this workspace into the game's UE4SS Mods folder and package each as dist\<mod>.zip.
+    Copy mods from this workspace into the game's UE4SS Mods folder.
 
 .DESCRIPTION
     A build bumps the patch segment of the mod's version in mod.txt when the mod folder has uncommitted changes.
-    The zip holds the bare mod folder, so extracting it into ue4ss\Mods installs the mod.
+    Packaging and release live in publish.ps1.
 
 .EXAMPLE
     .\build.ps1                             # deploy all mods
     .\build.ps1 likhos-point-and-shoot      # deploy one mod
-    .\build.ps1 -Unlink                     # remove deployed mods from the game
 #>
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [string[]] $Mods,
-    [switch]   $Unlink
+    [string[]] $Mods
 )
 
 $ErrorActionPreference = 'Stop'
@@ -53,22 +51,8 @@ function Get-WorkspaceMods {
 if (-not $Mods -or $Mods.Count -eq 0) { $Mods = Get-WorkspaceMods }
 if (-not $Mods) { Write-Error 'No mods found (a mod folder must contain mod.txt).' }
 
-# ---------------------------------------------------------------- unlink
-if ($Unlink) {
-    foreach ($m in $Mods) {
-        $dest = Join-Path $modsDir $m
-        if (Test-Path $dest) {
-            $item = Get-Item $dest -Force
-            if ($item.LinkType) { $item.Delete() }
-            else { Remove-Item $dest -Recurse -Force }
-            Write-Host "removed  $m" -ForegroundColor Yellow
-        }
-    }
-    return
-}
-
 # ---------------------------------------------------------------- validate
-# A tab-completed argument like .\likhos-point-and-shoot\ would otherwise leak into deploy paths and zip entry names.
+# A tab-completed argument like .\likhos-point-and-shoot\ would otherwise leak into deploy paths.
 $Mods = $Mods | ForEach-Object { Split-Path $_.TrimEnd('\', '/') -Leaf }
 foreach ($m in $Mods) {
     if (-not (Test-Path (Join-Path $root $m))) { Write-Error "No such mod: $m" }
@@ -80,10 +64,6 @@ foreach ($m in $Mods) {
 $gitAvailable = (Get-Command git -ErrorAction SilentlyContinue) -and (git -C $root rev-parse --is-inside-work-tree 2>$null) -eq 'true'
 if (-not $gitAvailable) { Write-Warning 'Git not available. Every build bumps the version.' }
 $versionPattern = '(?m)^(\s*version\s*=\s*")(\d+)\.(\d+)\.(\d+)(")'
-
-Add-Type -AssemblyName System.IO.Compression.FileSystem
-$distDir = Join-Path $root 'dist'
-New-Item -ItemType Directory -Force $distDir | Out-Null
 
 foreach ($m in $Mods) {
     $src    = Join-Path $root $m
@@ -116,20 +96,6 @@ foreach ($m in $Mods) {
     Copy-Item $src $dest -Recurse -Force
     $label = if ($version) { "$m v$version" } else { $m }
     Write-Host "copied   $label  -> $dest" -ForegroundColor Green
-
-    # Entries are written one by one so their names use '/'. Backslash names extract as flat files outside Windows Explorer.
-    $zipPath = Join-Path $distDir "$m.zip"
-    if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
-    $zip = [System.IO.Compression.ZipFile]::Open($zipPath, 'Create')
-    try {
-        foreach ($file in Get-ChildItem $src -Recurse -File) {
-            $entry = "$m/" +($file.FullName.Substring($src.Length + 1) -replace '\\', '/')
-            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $entry) | Out-Null
-        }
-    } finally {
-        $zip.Dispose()
-    }
-    Write-Host "packed   $label  -> $zipPath" -ForegroundColor Green
 }
 
 Write-Host ''

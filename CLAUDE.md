@@ -39,9 +39,9 @@ hours of debugging.
 ## Commands
 
 ```powershell
-.\build.ps1                 # symlink all mods into the game
-.\build.ps1 -Copy           # clean install test
-.\build.ps1 -Unlink         # remove from game
+.\build.ps1                 # deploy all mods into the game, bump the mod version
+.\publish.ps1 -DryRun       # pack dist\<mod>.zip, show what would go to Nexus
+.\publish.ps1               # pack and upload as a new Nexus file version
 ```
 
 In-game console: `kb_status`, `kb_dump_imc`.

@@ -21,7 +21,8 @@ UE4SS mods for **Incursion Red River** (Games of Tomorrow, UE 5.6, Steam).
 ```
 likhos-<name>/     one mod: mod.txt + Scripts/ + README
 docs/solutions/    per-task solution docs, recon findings and session notes
-build.ps1          copy mods into the game and package each as dist/<mod>.zip
+build.ps1          copy mods into the game and bump the mod version
+publish.ps1        pack dist/<mod>.zip and upload it to Nexus Mods as a new file version
 dist/              distribution zips, each holding the bare mod folder to extract into ue4ss\Mods (gitignored)
 ```
 
@@ -34,3 +35,18 @@ Copy-Item build.config.example.json build.config.json
 ```
 
 Then launch the game. The UE4SS console should log the mod loading.
+
+## Publishing to Nexus
+
+`publish.ps1` packs the mod folder into `dist\<mod>.zip` and uploads it as a new version of the mod's existing Nexus file, under the version in its `mod.txt`.
+
+```powershell
+.\publish.ps1 -DryRun    # pack the zip, show the request, upload nothing
+.\publish.ps1            # pack and publish
+```
+
+One-time setup per mod:
+
+1. Create `nexus-api.key` holding a personal key from https://www.nexusmods.com/settings/api-keys (gitignored).
+2. Upload the mod's first file on the Nexus site by hand.
+3. Put the `file_id` from the Files tab URL into `publish.config.json` (`docs/solutions/nexus-publish.md` has the API query for it).
