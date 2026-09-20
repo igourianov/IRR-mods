@@ -19,9 +19,9 @@ local LABEL_TEXT     = "Text_3_4CDF99D140A67A062FBAA99D135648EC"
 local KEY_ACTION     = "InputAction_41_F0CC631D427AFF1C0FB2849BA41B6025"
 local KEY_MAPPED     = "PlayerMappedName_60_D667E47C4761808F2AAD738F1F328FEA"
 
--- Vanilla row name -> mod mapping placed directly under it.
+-- Vanilla row name -> mod mappings placed directly under it, in this order.
 local ROWS = {
-    PointShooting = "LikhosPointShootingDirect",
+    PointShooting = { "LikhosPointShootingDirect", "LikhosFlashlight" },
 }
 
 local hooked = false
@@ -31,11 +31,12 @@ local function mapped_name(row)
     return ok and name or nil
 end
 
-local function has_row(container, mapping)
+local function find_row(container, mapping)
     for i = 0, container:GetChildrenCount() - 1 do
-        if mapped_name(container:GetChildAt(i)) == mapping then return true end
+        local row = container:GetChildAt(i)
+        if mapped_name(row) == mapping then return row end
     end
-    return false
+    return nil
 end
 
 -- AddChild creates a fresh slot, so a moved row's layout is carried over by value.
@@ -70,61 +71,70 @@ local function insert_after(container, anchor, widget)
     for _, t in ipairs(tail) do add_child(container, t.widget, t.layout) end
 end
 
-local function add_row(anchor_path, mapping)
-    local anchor = StaticFindObject(anchor_path)
-    if not util.valid(anchor) then
-        log.warn("menu: %s is gone, row not added", anchor_path)
-        return
-    end
-    local container = anchor:GetParent()
-    if not util.valid(container) then
-        log.warn("menu: %s has no parent, row not added", anchor_path)
-        return
-    end
-    if has_row(container, mapping) then return end
-
+--- Clone the vanilla row `source` into a row for `mapping` and put it directly under `below`. Returns the new row, or nil.
+local function add_row(container, source, below, mapping)
     local ia = keymap.action(mapping)
     if not ia then
         log.warn("menu: mapping %s isn't registered yet, row not added", mapping)
-        return
+        return nil
     end
 
-    -- The row's outer is the page's WidgetTree. The page is the world context for the new widget.
-    local page = anchor:GetOuter():GetOuter()
+    -- The vanilla row's outer is the page's WidgetTree. The page is the world context for the new widget.
+    local page = source:GetOuter():GetOuter()
     local lib = StaticFindObject("/Script/UMG.Default__WidgetBlueprintLibrary")
-    local row = lib:Create(page, anchor:GetClass(), anchor:GetOwningPlayer())
+    local row = lib:Create(page, source:GetClass(), source:GetOwningPlayer())
     if not util.valid(row) then
         log.warn("menu: could not create a row for %s", mapping)
-        return
+        return nil
     end
 
     -- Assignment copies struct and array values, so the vanilla row is left unchanged.
-    row.BarType = anchor.BarType
-    row.SettingBar = anchor.SettingBar
+    row.BarType = source.BarType
+    row.SettingBar = source.SettingBar
     row.SettingBar[LABEL_SETTINGS][LABEL_TEXT] = FText(keymap.MAPPINGS[mapping].display)
-    row.Keybindings = anchor.Keybindings
+    row.Keybindings = source.Keybindings
     row.Keybindings[1][KEY_ACTION] = ia
     row.Keybindings[1][KEY_MAPPED] = FName(mapping)
 
-    insert_after(container, anchor, row)
+    insert_after(container, below, row)
 
     -- On_WidgetConstructed applies the label and switches to the keybinding view, but leaves the row at opacity 0, the start of a fade-in the page plays only for its own rows.
     -- Toggle_Widget shows it.
     row:On_WidgetConstructed()
     row:Toggle_Widget(false, 0.0)
     log.info("menu: added %s row to %s", mapping, page:GetFullName())
+    return row
+end
+
+local function add_rows(anchor_path, mappings)
+    local anchor = StaticFindObject(anchor_path)
+    if not util.valid(anchor) then
+        log.warn("menu: %s is gone, rows not added", anchor_path)
+        return
+    end
+    local container = anchor:GetParent()
+    if not util.valid(container) then
+        log.warn("menu: %s has no parent, rows not added", anchor_path)
+        return
+    end
+
+    -- Every row is cloned from the vanilla one, but each lands under the row before it so the mod rows keep their declared order.
+    local below = anchor
+    for _, mapping in ipairs(mappings) do
+        below = find_row(container, mapping) or add_row(container, anchor, below, mapping) or below
+    end
 end
 
 local function on_row_constructed(context)
     local anchor = context:get()
-    local mapping = ROWS[anchor:GetFName():ToString()]
-    if not mapping then return end
+    local mappings = ROWS[anchor:GetFName():ToString()]
+    if not mappings then return end
 
     -- The hook fires while the page may still be building its rows, so the list is changed on the next timer tick.
     -- The row is passed by path. It is looked up again rather than held.
     local path = anchor:GetFullName():match("^%S+ (.+)$")
     ExecuteInGameThreadWithDelay(1, function()
-        util.safe("menu add_row", add_row, path, mapping)
+        util.safe("menu add_rows", add_rows, path, mappings)
     end)
 end
 

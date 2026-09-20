@@ -17,6 +17,7 @@ local STACK_PRIORITY = -1000
 
 M.MAPPINGS = {
     LikhosPointShootingDirect = { display = "Point Shooting (Direct)" },
+    LikhosFlashlight          = { display = "Flashlight (Hold/Toggle)" },
 }
 
 local function action_name(mapping)

@@ -1,8 +1,8 @@
 [mod]
 name="Likho's Point and Shoot"
 id="likhos-point-and-shoot"
-version="1.0.49"
-description="Hold a key to aim straight into point shooting"
+version="1.0.50"
+description="Hold a key to aim straight into point shooting, and a key for the weapon light"
 
 [ue4ss]
 ; UE4SS version this mod was developed and tested against.

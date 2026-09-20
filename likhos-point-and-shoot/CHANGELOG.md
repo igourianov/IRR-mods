@@ -1,3 +1,6 @@
+# 1.0.50
+* new keybind for flashlight activation
+
 # 1.0.49
 * direct point aim no longer turns on flashlights; it turns on the first visible laser with NVG off, or the first IR laser (falling back to the first visible laser) with NVG on
 
