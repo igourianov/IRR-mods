@@ -1,3 +1,6 @@
+# 1.0.53
+* fixed occasional crash on mod hot reload
+
 # 1.0.50
 * new keybind for flashlight activation
 
