@@ -5,16 +5,13 @@
 * new keybind for flashlight activation
 
 # 1.0.49
-* direct point aim no longer turns on flashlights; it turns on the first visible laser with NVG off, or the first IR laser (falling back to the first visible laser) with NVG on
+* removed flashlights from auto activation
 
 # 1.0.48
 * fixed a crash after reloading mods from the UE4SS console
 
 # 1.0.47
-* direct point aim picks the aiming device by night vision state:
-  * NVG off: the first visible laser, or the first visible flashlight if the weapon has no visible laser
-  * NVG on: the first IR laser and the first IR light, or the first visible laser if the weapon has neither; a visible flashlight is never turned on
-* devices the hold turned on are turned off on release; a device that was already on is left on
+* direct point aim picks now picks laser module contextual to NVG
 
 # 1.0.45
 * direct point aim turns on the weapon's visible laser while held and turns it off on release; a laser that was already on is left on
