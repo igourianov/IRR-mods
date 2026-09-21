@@ -50,15 +50,12 @@ local function start_tick_loop()
     local tick_ms = config.tick_ms or 16
     -- LoopAsync runs its callback on UE4SS's async thread. Calling ExecuteInGameThread from there every tick corrupted the Lua state (random crashes inside UE4SS's Lua runtime).
     -- This timer runs on the game thread only.
+    -- UE4SS cancels the mod's delayed actions on unload, so a hot reload needs no explicit cancel. This build has no ModRef:OnUnload despite Types.lua declaring it.
     loop_handle = LoopInGameThreadWithDelay(tick_ms, function()
         util.safe("tick", function()
             input.poll(config.binds)
             triggers.tick(config.binds)
         end)
-    end)
-    -- A hot reload crashed inside UE4SS's delayed action processing seconds after the reinstall. Cancel the loop explicitly rather than rely on the unload to stop it.
-    ModRef:OnUnload(function()
-        CancelDelayedAction(loop_handle)
     end)
     log.debug("tick loop started at %dms", tick_ms)
 end

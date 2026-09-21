@@ -236,6 +236,15 @@ They started when the first always-on bind started a 16 ms `LoopAsync` whose cal
 
 This UE4SS build deprecates `LoopAsync` and `ExecuteAsync` in favour of the game-thread delayed actions (`LoopInGameThreadWithDelay`, `LoopInGameThreadAfterFrames`, `ExecuteInGameThreadWithDelay`), citing thread safety. See `ue4ss\Changelog.md` and `ue4ss\Docs\lua-api\global-functions\delayedactions.md`.
 
+### Hot reload and delayed actions
+
+Probed 2026-09-21 with Ctrl+R in the hideout.
+
+- `ModRef` is userdata with no readable metatable. `ModRef:OnUnload` is nil at runtime (`attempt to call a nil value (method 'OnUnload')`), although `Mods\shared\Types.lua` from the same install declares it. Upstream lists it under v4.0.0-rc1.
+- `CancelDelayedAction`, `ClearAllDelayedActions`, `IsValidDelayedActionHandle`, `ModRef:SetSharedVariable` and `ModRef:GetSharedVariable` exist.
+- Delayed action handles are process-wide integers (1, 4, 5, 6 across reloads).
+- A hot reload cancels the unloaded mod's `LoopInGameThreadWithDelay` loop. The old handle reads invalid from the new instance, and a per-second heartbeat from the old loop stopped at the reload while the new loop's kept going. No crash across three reloads.
+
 ## UI focus detection
 
 Property that reliably differs menu-open vs menu-closed:
