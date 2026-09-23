@@ -15,11 +15,14 @@ UE4SS mods for **Incursion Red River** (Games of Tomorrow, UE 5.6, Steam).
 | Folder | Status | Description |
 |---|---|---|
 | `likhos-point-and-shoot` | pre-alpha | Likho's Point and Shoot: hold a key to aim straight into point shooting |
+| `likhos-reclass` | pre-alpha | Likho's Reclass: moves weapons to a different weapon class (pak mod) |
 
 ## Layout
 
 ```
 likhos-<name>/     one mod: mod.txt + Scripts/ + README
+                   a pak mod has pak= in mod.txt and a pak.ps1 that stages the pak's files instead of Scripts/
+tools/             tools build.ps1 downloads on first use (gitignored)
 docs/solutions/    per-task solution docs, recon findings and session notes
 build.ps1          copy mods into the game and bump the mod version
 publish.ps1        pack dist/<mod>.zip and upload it to Nexus Mods as a new file version

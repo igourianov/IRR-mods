@@ -5,7 +5,8 @@
 .DESCRIPTION
     Zips the mod folder from this workspace, then publishes it through the Nexus v3 upload
     API under the version in its mod.txt. The zip holds the bare mod folder, so extracting
-    it into ue4ss\Mods installs the mod.
+    it into ue4ss\Mods installs the mod. A pak mod's zip holds ~mods\<pak> from the last
+    build.ps1 run instead, so extracting it into Content\Paks installs the mod.
 
     Needs publish.config.json (mod_id and file_id per mod) and a personal API key in
     nexus-api.key. The mod file must already exist on Nexus: upload the first file by
@@ -73,15 +74,16 @@ function Get-ModInfo {
 }
 
 function New-ModArchive {
-    param([string] $Source, [string] $Path)
+    param([string] $Source, [string] $Path, [string] $Folder = (Split-Path $Source -Leaf))
 
     if (Test-Path $Path) { Remove-Item $Path -Force }
+    $base = if (Test-Path $Source -PathType Leaf) { Split-Path $Source } else { $Source }
 
     # Entries are written one by one so their names use '/'. Backslash names extract as flat files outside Windows Explorer.
     $zip = [System.IO.Compression.ZipFile]::Open($Path, 'Create')
     try {
         foreach ($file in Get-ChildItem $Source -Recurse -File) {
-            $entry = "$(Split-Path $Source -Leaf)/" + ($file.FullName.Substring($Source.Length + 1) -replace '\\', '/')
+            $entry = "$Folder/" + ($file.FullName.Substring($base.Length + 1) -replace '\\', '/')
             [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $entry) | Out-Null
         }
     } finally {
@@ -184,7 +186,18 @@ if ($version -notmatch '^[a-zA-Z0-9.-]+$' -or $version.Length -gt 50) {
 $distDir = Join-Path $root 'dist'
 New-Item -ItemType Directory -Force $distDir | Out-Null
 $archivePath = Join-Path $distDir "$Mod.zip"
-New-ModArchive -Source $src -Path $archivePath
+$pakMatch = [regex]::Match([System.IO.File]::ReadAllText($modTxt), '(?m)^\s*pak\s*=\s*"([^"]+)"')
+if ($pakMatch.Success) {
+    # build.ps1 bumps mod.txt before it packs, so a pak older than any mod file predates the last change.
+    $pakPath = Join-Path $distDir $pakMatch.Groups[1].Value
+    $newest = Get-ChildItem $src -Recurse -File | Sort-Object LastWriteTime | Select-Object -Last 1
+    if (-not (Test-Path $pakPath) -or (Get-Item $pakPath).LastWriteTime -lt $newest.LastWriteTime) {
+        Write-Error "$pakPath is missing or older than $($newest.Name). Run .\build.ps1 $Mod first."
+    }
+    New-ModArchive -Source $pakPath -Path $archivePath -Folder '~mods'
+} else {
+    New-ModArchive -Source $src -Path $archivePath
+}
 Write-Host "packed $Mod v$version -> $archivePath" -ForegroundColor Green
 
 $sizeBytes = (Get-Item $archivePath).Length

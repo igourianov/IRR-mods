@@ -245,6 +245,24 @@ Probed 2026-09-21 with Ctrl+R in the hideout.
 - Delayed action handles are process-wide integers (1, 4, 5, 6 across reloads).
 - A hot reload cancels the unloaded mod's `LoopInGameThreadWithDelay` loop. The old handle reads invalid from the new instance, and a per-second heartbeat from the old loop stopped at the reload while the new loop's kept going. No crash across three reloads.
 
+## Weapon classification
+
+From the object dump, save files and pak index, 2026-09-23, game build 22417726.
+
+- Items are `IRRItemDefinition` data assets (`/Game/Blueprints/InventorySystem/Items/<Category>/<Class folder>/<Name>/ID_<Name>`). `ItemIdentifier` is one `GameplayTag`, the item's ID.
+- Weapon tags are `Inventory.Items.Weapons.<Class>.<Name>`, e.g. `Inventory.Items.Weapons.Rifle.FN FAL`. Classes: `Dmr`, `Lmg`, `Pistol`, `Rifle`, `Shotgun`, `Smg`, `SniperRifle`. The class is the tag's parent, so reclassing a weapon renames its ID tag. Asset folders don't always follow the tag: `ID_SVDS` sits under `Weapons/DMR` with tag `SniperRifle.SVDS`.
+- Tags are declared in `Test_C/Config/DefaultGameplayTags.ini`, stored uncompressed in `pakchunk0-Windows.pak`, with `+GameplayTagList` and `+GameplayTagRedirects` entries. The developers moved SVDS and SKS between classes with redirects.
+- Game paks: version V11 (`Fnv64BugFix`), no compression, no index encryption, no `.sig`, no IoStore. The engine mounts every `.pak` under `Content\Paks`, subfolders included.
+- Class tag consumers in the dump: `IRRAIWeaponSettings.WeaponClassSettingsMap` (`IRRAIWeaponClassSettings`: aim delay, recovery, spread), `IRRAIWeaponData.WeaponClass`, `IRRGunShotEvent.WeaponClass`, the vendor category filter (`W_VendorCategoryFilter_C.CategoryTag`), `InventoryEnhancedUISettings.ItemCategoryItems`. Tag-keyed maps that may be class or item level: `IRRRandomItemParameters.ItemSpawnChances`, `RepairSettings.RepairRules`, `VendorSettings.VendorSellMultiplierMap`.
+- Item tag references: `IRRGunsmithSaveGame.PresetMap` is keyed by the full item tag. AI loadouts name weapons by item tag (`DA_Inventory_AI_Sniper_VLF` lists `Rifle.FN FAL`). Stash and inventory saves reference items by definition asset path only, with no tag.
+
+Tested in game with a `_P` pak in `Paks\~mods` holding an edited `DefaultGameplayTags.ini` (`Rifle.FN FAL` removed from the list, `Dmr.FN FAL` added, a redirect from the old to the new):
+
+- The pak's ini replaces the game's. The redirect applies at runtime to cooked assets: the inventory logs `Received Snap for Item: Inventory.Items.Weapons.Dmr.FN FAL`, with no `LogGameplayTags` warnings.
+- The vendor and gunsmith list the FAL as a DMR.
+- A FAL bought with the pak installed stays in the stash after the pak is removed and loads as `Rifle.FN FAL`.
+- Not tested: AI loadouts, a FAL owned before the pak is installed.
+
 ## UI focus detection
 
 Property that reliably differs menu-open vs menu-closed:

@@ -1,9 +1,11 @@
 <#
 .SYNOPSIS
-    Copy mods from this workspace into the game's UE4SS Mods folder.
+    Copy mods from this workspace into the game's UE4SS Mods folder, or build and install pak mods.
 
 .DESCRIPTION
     A build bumps the patch segment of the mod's version in mod.txt when the mod folder has uncommitted changes.
+    A mod whose mod.txt names a pak is a pak mod. Its pak.ps1 stages the files, repak packs them into dist\<pak> and the pak is copied into Content\Paks\~mods.
+    repak is downloaded into tools\repak on first use.
     Packaging and release live in publish.ps1.
 
 .EXAMPLE
@@ -39,6 +41,31 @@ if (-not (Test-Path $modsDir)) {
 UE4SS Mods folder not found: $modsDir
 Install UE4SS first, launch the game once, and confirm UE4SS.log appears.
 "@
+}
+
+$paksDir = Join-Path $gameDir "$($cfg.game.module)\Content\Paks"
+$distDir = Join-Path $root 'dist'
+
+# ---------------------------------------------------------------- repak
+# Pinned so a pak build is reproducible. $pakVersion must match the game's own paks (repak info on a game pak).
+$repakVersion = 'v0.2.3'
+$repakSha256 = '6720d602144d75df477a99d5bedb6ea780997546afc335901d4937cafeaa73fa'
+$pakVersion = 'V11'
+
+function Get-Repak {
+    $dir = Join-Path $root 'tools\repak'
+    $exe = Join-Path $dir 'repak.exe'
+    if (Test-Path $exe) { return $exe }
+
+    $zip = Join-Path $root "tmp.$([System.IO.Path]::GetRandomFileName().Split('.')[0]).zip"
+    $ProgressPreference = 'SilentlyContinue'
+    Invoke-WebRequest "https://github.com/trumank/repak/releases/download/$repakVersion/repak_cli-x86_64-pc-windows-msvc.zip" -OutFile $zip
+    $hash = (Get-FileHash $zip -Algorithm SHA256).Hash
+    if ($hash -ne $repakSha256) { Write-Error "repak $repakVersion download has SHA256 $hash, expected $repakSha256. Left at $zip." }
+    Expand-Archive $zip $dir -Force
+    Remove-Item $zip
+    Write-Host "fetched  repak $repakVersion -> $dir"
+    return $exe
 }
 
 # ---------------------------------------------------------------- discover
@@ -86,16 +113,37 @@ foreach ($m in $Mods) {
         Write-Warning "${m}: mod.txt has no version=`"major.minor.patch`" line. Deploying without a version bump."
     }
 
-    if (Test-Path $dest) {
-        # A deploy from an older symlink build is removed as a link, so the workspace it points at survives.
-        $item = Get-Item $dest -Force
-        if ($item.LinkType) { $item.Delete() }
-        else { Remove-Item $dest -Recurse -Force }
-    }
-
-    Copy-Item $src $dest -Recurse -Force
     $label = if ($version) { "$m v$version" } else { $m }
-    Write-Host "copied   $label  -> $dest" -ForegroundColor Green
+    $pakMatch = [regex]::Match($text, '(?m)^\s*pak\s*=\s*"([^"]+)"')
+
+    if ($pakMatch.Success) {
+        $pak = $pakMatch.Groups[1].Value
+        $repak = Get-Repak
+        $stage = Join-Path ([System.IO.Path]::GetTempPath()) "$m.$([System.IO.Path]::GetRandomFileName().Split('.')[0])"
+        New-Item -ItemType Directory $stage | Out-Null
+        & (Join-Path $src 'pak.ps1') -Repak $repak -PaksDir $paksDir -StageDir $stage
+
+        New-Item -ItemType Directory -Force $distDir | Out-Null
+        $pakPath = Join-Path $distDir $pak
+        & $repak pack -q --version $pakVersion --mount-point '../../../' $stage $pakPath
+        if ($LASTEXITCODE) { Write-Error "repak failed to pack $pakPath from $stage." }
+        Remove-Item $stage -Recurse -Force
+
+        $pakDest = Join-Path $paksDir '~mods'
+        New-Item -ItemType Directory -Force $pakDest | Out-Null
+        Copy-Item $pakPath $pakDest -Force
+        Write-Host "packed   $label  -> $(Join-Path $pakDest $pak)" -ForegroundColor Green
+    } else {
+        if (Test-Path $dest) {
+            # A deploy from an older symlink build is removed as a link, so the workspace it points at survives.
+            $item = Get-Item $dest -Force
+            if ($item.LinkType) { $item.Delete() }
+            else { Remove-Item $dest -Recurse -Force }
+        }
+
+        Copy-Item $src $dest -Recurse -Force
+        Write-Host "copied   $label  -> $dest" -ForegroundColor Green
+    }
 }
 
 Write-Host ''

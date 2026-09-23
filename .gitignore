@@ -13,5 +13,8 @@ __pycache__/
 # Distribution zips, rebuilt on every build
 dist/
 
+# Tools build.ps1 downloads on first use
+tools/
+
 # ephemeral bbcode conversion
 *.bbcode
