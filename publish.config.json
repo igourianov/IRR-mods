@@ -3,6 +3,7 @@
     "game": "incursionredriver"
   },
   "mods": {
-    "likhos-point-and-shoot": { "mod_id": 268, "file_id": 7995453 }
+    "likhos-point-and-shoot": { "mod_id": 268, "file_id": 7995453 },
+    "likhos-rearmed": { "mod_id": 273, "file_id": 8016966 }
   }
 }
