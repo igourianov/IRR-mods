@@ -5,7 +5,7 @@
 .DESCRIPTION
     A build bumps the patch segment of the mod's version in mod.txt when the mod folder has uncommitted changes.
     A mod whose mod.txt names a pak is a pak mod. Its pak.ps1 stages the files, repak packs them into dist\<pak> and the pak is copied into Content\Paks\~mods.
-    repak is downloaded into tools\repak on first use.
+    The pinned tools a pak build needs, repak and UAssetGUI, are downloaded into tools\<name> on first use.
     Packaging and release live in publish.ps1.
 
 .EXAMPLE
@@ -46,25 +46,34 @@ Install UE4SS first, launch the game once, and confirm UE4SS.log appears.
 $paksDir = Join-Path $gameDir "$($cfg.game.module)\Content\Paks"
 $distDir = Join-Path $root 'dist'
 
-# ---------------------------------------------------------------- repak
+# ---------------------------------------------------------------- tools
 # Pinned so a pak build is reproducible. $pakVersion must match the game's own paks (repak info on a game pak).
-$repakVersion = 'v0.2.3'
-$repakSha256 = '6720d602144d75df477a99d5bedb6ea780997546afc335901d4937cafeaa73fa'
+$tools = @{
+    repak     = @{ Url = 'https://github.com/trumank/repak/releases/download/v0.2.3/repak_cli-x86_64-pc-windows-msvc.zip'; Sha256 = '6720d602144d75df477a99d5bedb6ea780997546afc335901d4937cafeaa73fa'; Exe = 'repak.exe' }
+    UAssetGUI = @{ Url = 'https://github.com/atenfyr/UAssetGUI/releases/download/v1.1.0/UAssetGUI.exe'; Sha256 = 'b7d75c0893f1a60e565853ae638bc21f2416cd12c2d9d854e297abb87ceb3263'; Exe = 'UAssetGUI.exe' }
+}
 $pakVersion = 'V11'
 
-function Get-Repak {
-    $dir = Join-Path $root 'tools\repak'
-    $exe = Join-Path $dir 'repak.exe'
+function Get-Tool {
+    param([string] $Name)
+    $tool = $tools[$Name]
+    $dir = Join-Path $root "tools\$Name"
+    $exe = Join-Path $dir $tool.Exe
     if (Test-Path $exe) { return $exe }
 
-    $zip = Join-Path $root "tmp.$([System.IO.Path]::GetRandomFileName().Split('.')[0]).zip"
+    $download = Join-Path $root "tmp.$([System.IO.Path]::GetRandomFileName().Split('.')[0])$([System.IO.Path]::GetExtension($tool.Url))"
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest "https://github.com/trumank/repak/releases/download/$repakVersion/repak_cli-x86_64-pc-windows-msvc.zip" -OutFile $zip
-    $hash = (Get-FileHash $zip -Algorithm SHA256).Hash
-    if ($hash -ne $repakSha256) { Write-Error "repak $repakVersion download has SHA256 $hash, expected $repakSha256. Left at $zip." }
-    Expand-Archive $zip $dir -Force
-    Remove-Item $zip
-    Write-Host "fetched  repak $repakVersion -> $dir"
+    Invoke-WebRequest $tool.Url -OutFile $download
+    $hash = (Get-FileHash $download -Algorithm SHA256).Hash
+    if ($hash -ne $tool.Sha256) { Write-Error "$($tool.Url) has SHA256 $hash, expected $($tool.Sha256). Left at $download." }
+    New-Item -ItemType Directory -Force $dir | Out-Null
+    if ($download.EndsWith('.zip')) {
+        Expand-Archive $download $dir -Force
+        Remove-Item $download
+    } else {
+        Move-Item $download $exe
+    }
+    Write-Host "fetched  $Name -> $dir"
     return $exe
 }
 
@@ -118,10 +127,10 @@ foreach ($m in $Mods) {
 
     if ($pakMatch.Success) {
         $pak = $pakMatch.Groups[1].Value
-        $repak = Get-Repak
+        $repak = Get-Tool repak
         $stage = Join-Path ([System.IO.Path]::GetTempPath()) "$m.$([System.IO.Path]::GetRandomFileName().Split('.')[0])"
         New-Item -ItemType Directory $stage | Out-Null
-        & (Join-Path $src 'pak.ps1') -Repak $repak -PaksDir $paksDir -StageDir $stage
+        & (Join-Path $src 'pak.ps1') -Repak $repak -UAssetGUI (Get-Tool UAssetGUI) -PaksDir $paksDir -StageDir $stage
 
         New-Item -ItemType Directory -Force $distDir | Out-Null
         $pakPath = Join-Path $distDir $pak
