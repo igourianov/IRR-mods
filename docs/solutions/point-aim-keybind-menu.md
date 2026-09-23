@@ -10,9 +10,9 @@ It replaces the fixed H key in `config.lua`. The bind's behaviour (hold to aim s
 
 Constraints:
 
-- Game class, function and property names come from recon recorded in `docs/solutions/findings.md` (project rule). Engine names (Enhanced Input, UMG) are not game internals and may be used directly.
+- Game class, function and property names come from recon recorded in this doc (project rule). Engine names (Enhanced Input, UMG) are not game internals and may be used directly.
 - UObject access happens on the game thread only. UObjects are never cached across a level load, and validity is checked with `util.valid` (`CODE_GUIDE.md`). The mod holds no reference to a page or row.
-- Nothing runs Lua off the game thread. The tick is a game-thread timer (`docs/solutions/point-aim-bind.md`). `LoopAsync` crashed the game (`docs/solutions/findings.md`, Lua threading).
+- Nothing runs Lua off the game thread. The tick is a game-thread timer (`docs/solutions/point-aim-bind.md`). `LoopAsync` crashed the game (`docs/solutions/point-aim-bind.md`, Recon, Lua threading).
 - The bind is unbound by default. It does nothing until the user assigns a key. So it never collides with a vanilla binding on first install.
 - The key is not consumed. If the user assigns a key that a vanilla action also uses, both fire. The mod adds no conflict check of its own beyond what the vanilla row logic does.
 - Keyboard and mouse only. A gamepad row is out of scope.
@@ -20,7 +20,7 @@ Constraints:
 - A pak or Blueprint asset override of the controls page is ruled out. It breaks on every game patch that touches the page and needs a cooked asset toolchain the project doesn't have.
 - A page holds at most one mod row. Two rows on one mapping name lost the bound key.
 
-Verified by recon (`docs/solutions/findings.md`, Enhanced Input user settings and Controls menu):
+Verified by recon (Recon below, Enhanced Input user settings and Controls menu):
 
 - The mod's `InputAction`, its `PlayerMappableKeySettings` and an `InputMappingContext` with one unbound mapping can be built at runtime in `/Engine/Transient`. Registering the context with `EnhancedInputUserSettings` adds a row for the mapping name to the active key profile. The objects survive hot reload and are found again by path.
 - A `WB_SingleSettingBar_C` created at runtime becomes a working keybinding row when its setup is copied from the `PointShooting` row, its label and `Keybindings` entry point at the mod's action and mapping name, and it runs its own `On_WidgetConstructed` and `Toggle_Widget(false, 0)` after being added. The vanilla row logic then shows, rebinds, applies and saves the key under the mod's mapping name.
@@ -42,7 +42,7 @@ Owned:
 - `likhos-point-and-shoot/Scripts/config.lua`: the `point_aim` bind entry.
 - `likhos-point-and-shoot/Scripts/main.lua`: startup wiring.
 - `likhos-point-and-shoot/README.md`: how the user sets the key.
-- `docs/solutions/findings.md`: recon results.
+- The Recon section of this doc: recon results.
 
 Context only: `actions.lua` (`PointAim`, unchanged), `context.lua` (UI gate, unchanged), `util.lua`, `log.lua`, the tick loop in `main.lua` (`docs/solutions/point-aim-bind.md`), the vanilla controls page and Enhanced Input user settings.
 
@@ -99,4 +99,31 @@ The vanilla keyboard bindings list shows "Point Shooting (Direct)" under "Point 
 - Adding the context to the input stack at the lowest priority, over registering it with user settings only: the row shows the saved key like a vanilla row, at the cost of an Enhanced Input action firing on the key with no listener, and of re-adding the context on each PlayerController acquire. The key is still not consumed, so a vanilla action on the same key fires too.
 - Cloning the vanilla row over building a new widget: it looks and behaves exactly like vanilla rows, at the cost of depending on `WB_SingleSettingBar_C`'s variables (`BarType`, `SettingBar`, `Keybindings`) and events (`On_WidgetConstructed`, `Toggle_Widget`), which a game patch can rename.
 - Placing the row under Point Shooting over appending it to the list: it sits in the right section, at the cost of detaching and re-adding every row below it on each page build.
-- Polling the mapped key over reading the action's value: `FInputActionValue` can't be read from UE4SS Lua (`docs/solutions/findings.md`), so polling is the only option. It keeps the one-tick latency of the current bind.
+- Polling the mapped key over reading the action's value: `FInputActionValue` can't be read from UE4SS Lua (`docs/solutions/point-aim-bind.md`, Recon, Enhanced Input injection), so polling is the only option. It keeps the one-tick latency of the current bind.
+
+## Recon
+
+### Enhanced Input user settings
+
+Probed 2026-09-18 with `kb_probe_keymap` (throwaway `probe.lua`).
+
+- An `InputAction`, its `PlayerMappableKeySettings` (outer: the action, `Name` set to the mapping name) and an `InputMappingContext` can be built at runtime with `StaticConstructObject` in `/Engine/Transient`. `imc:MapKey(action, { KeyName = FName("None") })` adds an unbound mapping. It inherits the action's mappable settings (`SettingBehavior = 0`).
+- `settings:RegisterInputMappingContext(imc)` returns true the first time, false once registered. `IsMappingContextRegistered` stays true. Registering adds a row for the mapping name to the active key profile (`settings:GetActiveKeyProfile()`).
+- `profile:GetMappedKeysInRow(FName(name), out)` fills the Lua table `out` with struct wrappers. Read a key as `out[i]:get().KeyName`, not `out[i].KeyName`. An unbound row reports one key, `None`.
+- A key bound through the controls menu is saved with the rest of the profile. After a game restart, re-registering the context restores it (bound J, restarted, row read J before the menu was opened).
+- The constructed objects survive hot reload (found again by path). UE4SS has no `GetPathName` on UObject, so they are looked up as `/Engine/Transient.<name>`.
+
+### Controls menu
+
+From the object dump and `kb_probe_row` / `kb_probe_clone`, 2026-09-18.
+
+- The keyboard bindings page is `WB_KeyboardSoldierBindings_C` (`/Game/Blueprints/UICore/Widgets/Settings/`), owned by the GameInstance (`UMS_GameInstance_C`). Each session has several live instances. Only one is on screen. The others' rows were never constructed: `IsVisible()` is false and their `LabelText` still reads "Text Block". `FindAllOf` also returns the blueprint's own template rows under `/Game/...:WidgetTree.<name>`.
+- Rows are `WB_SingleSettingBar_C` in the page's `SettingsContainer`, a `VerticalBox` (51 children). `PointShooting` is child 22.
+- A keybinding row has `BarType = 4`. Its label is `SettingBar.LabelSettings_17_….Text_3_…` (`Struct_SettingBar` → `Struct_CategoryHolderSettings`), not `Title`. Its key data is `Keybindings`, an array of `Struct_InputKeyInfo`: `KeyType_20_…`, `SharedMapNames_36_…`, `InputAction_41_…`, `PlayerMappedName_60_…`, `InputMapIndex_58_…`. The vanilla PointShooting row holds one entry: `IA_PointSight`, mapped name `IA_PointShooting`, index 0, type 0.
+- Rebinding runs in `WB_KeyBindingButton_C:ReceiveInput` through `EnhancedInputUserSettings:MapPlayerKey`. The page calls `ResetKeyProfileToDefault` for reset.
+- A key button shows its key through `WB_KeyBindingButton_C:FindInputActionKey`, which reads the subsystem's `QueryKeysMappedToAction` and `GetAllPlayerMappableActionKeyMappings`. Both see only contexts in the active input stack. A context registered with user settings but not added to the stack shows None after a restart, though its saved key is restored. Added with `AddMappingContext` at priority -1000, it shows the saved key, and a vanilla action on the same key keeps firing.
+- A working mod row: `WidgetBlueprintLibrary:Create(page, WB_SingleSettingBar_C, row:GetOwningPlayer())`, copy `BarType`, `SettingBar` and `Keybindings` from `PointShooting` (assignment copies by value, the source stays unchanged), set the label text and the entry's action and mapped name, add it to `SettingsContainer`, then call `On_WidgetConstructed()` and `Toggle_Widget(false, 0)`. `On_WidgetConstructed` applies the label and switches `TypeSwitcher` to the keybinding view (index 4). It also leaves `Container` at opacity 0, the start of the fade-in the page normally plays. `Toggle_Widget` brings it to 1. `PreConstruct(false)`, `On_Panel_Loaded` and `Refresh_Keybinding` change nothing visible.
+- The row then rebinds, applies and saves like a vanilla row, keyed by the mod's mapping name.
+- `PanelWidget` has no `InsertChildAt` UFunction (`parent.InsertChildAt` returns a non-nil stub). A row lands after `PointShooting` by removing the children below it, adding the new row, then re-adding them. `AddChild` creates a fresh `VerticalBoxSlot`, so padding, size and alignments are copied from the old slot. Layout and navigation were unaffected in-game.
+- Adding a second mod row to the same page (as after a hot reload) left two rows on one mapping name. A bound key did not survive that session.
+- At startup `StaticFindObject` can find `WB_SingleSettingBar_C:On_WidgetConstructed` while its class is still loading. `RegisterHook` then throws "Was unable to register a hook" with `UFunction::Func: 0x0`, `FUNC_Native: 0` (2026-09-19). Retrying from a `NotifyOnNewObject` on the row class succeeds before the main menu is up.

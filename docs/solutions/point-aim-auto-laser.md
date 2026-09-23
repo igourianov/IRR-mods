@@ -10,7 +10,7 @@ Vanilla laser control is a single on/off key, a cycle key that steps through eve
 
 Constraints:
 
-- Game class, function and property names come from the UE4SS object dump or Live View and are recorded in `docs/solutions/findings.md` (project rule).
+- Game class, function and property names come from the UE4SS object dump or Live View and are recorded in this doc (project rule).
 - UObject access happens on the game thread only, UObjects are never cached across a level load and validity is checked with `util.valid` (`CODE_GUIDE.md`).
 - Only visible lasers are touched. Flashlights and IR lasers are left in whatever state they are in. The mod never switches a device's infrared mode.
 - A laser is visible when its `LaserSettings.DefaultLaserMaterial.Laser` is the `MI_LaserRed` asset. Any other material, `MI_LaserGreen` (IR) or one added by a later patch, is not treated as visible.
@@ -21,7 +21,7 @@ Constraints:
 - With no visible laser on the weapon, the bind behaves exactly as without this feature.
 - No hooks on `TacticalComponent` or `WeaponComponent` functions. Native hooks there crashed the game when the vanilla toggle fired.
 
-Verified by recon (`docs/solutions/findings.md`, Tactical devices):
+Verified by recon (Recon below, Tactical devices):
 
 - The equipped weapon's `WeaponComponent.TacticalAttachments` lists one component per emitter. Each laser emitter is its own `LaserComponent`, so a two-laser device (CQBL-1, PEQ-15) has a visible and an IR component.
 - `SetDeviceState` on a single `LaserComponent` turns that emitter on and off on screen, alone.
@@ -32,7 +32,7 @@ Owned:
 
 - `likhos-point-and-shoot/Scripts/actions.lua`: the laser part of the `PointAim` action.
 - `likhos-point-and-shoot/Scripts/probe.lua`: throwaway recon console commands. Not part of the end state.
-- `docs/solutions/findings.md`: recon results under a tactical devices section.
+- The Recon section of this doc: recon results under Tactical devices.
 
 Context only: the rest of `PointAim` (point sight mode and aim injection, `docs/solutions/point-aim-bind.md`), `triggers.lua` and `input.lua` (press, held and release events, level load reset), `util.lua`, `log.lua`, the vanilla tactical device controls.
 
@@ -59,3 +59,30 @@ On a weapon with a visible laser, holding the bind aims into point sight with it
 - One laser, the first in attachment order, over every visible laser: a weapon with several visible lasers shows a single beam. Which one is picked follows the game's attachment order, not the player's choice.
 - Matching the visible laser by the `MI_LaserRed` asset over "anything not `MI_LaserGreen`": an IR laser with a new material is never lit, at the cost of ignoring a visible laser of any other color until the rule is extended. It also ties the feature to a third-party asset path that a patch could move.
 - An on laser is visible to other players and AI (`IRRBaseCharacter:ActiveTacticalDevices`). Accepted as the point of the feature.
+
+## Recon
+
+### Tactical devices
+
+From the object dump and `kb_probe_laser` / `kb_probe_laser_set`, 2026-09-19 in the hideout, on an AUG A3 (CQBL-1 laser, APLc flashlight) and a SCAR-L (PEQ-15, Klesch 2IKS3, CQBL-1).
+
+- `WeaponComponent:TacticalAttachments` on the equipped weapon's `BP_WeaponComponent` lists one component per emitter across all mounted devices. Lasers are `LaserComponent` (native, subclass of `TacticalComponent`). Lights are `BP_FlashlightComponent_C`.
+- Each laser emitter is its own component. Two-laser devices name them `Laser_A` and `Laser_B`. The single-laser Klesch names it `Laser`.
+- `TacticalComponent` state: `DeviceState` (`EIRRTacticalDeviceState`: `Off` = 0, `On` = 1), `GetDeviceState()`, `IsDeviceActive()`.
+- The infrared flags don't mark IR lasers. `bHasInfraredMode`, `bDeviceInfraredOn` and `IsInInfraredMode()` read false on every laser, including the on IR ones. The PEQ-15's flashlight has `bHasInfraredMode = true` (IR illuminator mode).
+- Visible vs IR laser shows in `LaserComponent.LaserSettings.DefaultLaserMaterial.Laser` (`IRRLaserSettings` → `IRRLaserMaterial`), an asset reference. `LaserSettings.InfraredLaserMaterial.Laser` is nil on all lasers seen.
+
+| Device | Component | `DefaultLaserMaterial.Laser` | Seen in game |
+|---|---|---|---|
+| Steiner CQBL-1 | `Laser_A` | `MI_LaserGreen` | IR |
+| Steiner CQBL-1 | `Laser_B` | `MI_LaserRed` | visible |
+| PEQ-15 LA-5 | `Laser_A` | `MI_LaserGreen` | IR |
+| PEQ-15 LA-5 | `Laser_B` | `MI_LaserRed` | visible |
+| Zenitco Klesch 2IKS3 | `Laser` | `MI_LaserRed` | not checked |
+
+Material paths: `/Game/ThirdParty/SKGShooterFramework/Assets/Firearm/FirearmParts/LightLaser/Materials/Red/MI_LaserRed.MI_LaserRed` and `.../Green/MI_LaserGreen.MI_LaserGreen`. The laser mesh itself carries a per-instance `MaterialInstanceDynamic` (`MID_MI_LaserRed_<n>`) made from it.
+
+- `SetDeviceState(1)` / `SetDeviceState(0)` on one laser component, called from Lua, turns that emitter on and off on screen, alone. The vanilla toggle key, cycle key and radial menu keep working normally afterwards.
+- `LocTacticalAttachmentOptions` is the vanilla cycle list: an array of `IRRTacticalAttachmentOption` (`TacticalAttachments`, `bEnabled`), one per combination of emitters (5 on the AUG, 35 on the SCAR). `GetCurrentTacticalOption().bEnabled` followed a probe `SetDeviceState` on the AUG.
+- Native hooks (`RegisterHook`) on `TacticalComponent` and `WeaponComponent` functions registered fine, and the game crashed without a dump when the vanilla toggle fired `WeaponComponent:ToggleCurrentTacticalOption` with them active. The toggle didn't crash without the hooks. Don't hook these.
+- Reading `LocalAttachmentBase.LaserIndex` / `FlashlightIndex` returned a `TrivialObject`, not a number. `GameplayTags` could not be enumerated with `ForEach`. Neither is needed.

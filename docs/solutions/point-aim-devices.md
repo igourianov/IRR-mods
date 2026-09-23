@@ -13,10 +13,10 @@ Pressing the bind turns the chosen devices on. Releasing it turns off the ones t
 
 Constraints:
 
-- Game class, function and property names come from the UE4SS object dump or Live View and are recorded in `docs/solutions/findings.md` (project rule).
+- Game class, function and property names come from the UE4SS object dump or Live View and are recorded in this doc (project rule).
 - UObject access happens on the game thread only, UObjects are never cached across a level load and validity is checked with `util.valid` (`CODE_GUIDE.md`).
 - The mod never switches a device's infrared mode (`SetInfraredMode`, `ToggleInfraredMode`). A device's class is read from what it is, never changed.
-- A laser is visible when its `LaserSettings.DefaultLaserMaterial.Laser` is the `MI_LaserRed` asset, and IR when it is `MI_LaserGreen`. A laser with any other material, e.g. one added by a later patch, is neither and is never chosen. The infrared flags are ruled out for lasers: they read false on IR lasers (`findings.md`, Tactical devices).
+- A laser is visible when its `LaserSettings.DefaultLaserMaterial.Laser` is the `MI_LaserRed` asset, and IR when it is `MI_LaserGreen`. A laser with any other material, e.g. one added by a later patch, is neither and is never chosen. The infrared flags are ruled out for lasers: they read false on IR lasers (`docs/solutions/point-aim-auto-laser.md`, Recon, Tactical devices).
 - "First" means first of that class in the weapon's `TacticalAttachments` order. Other devices of the same class are never touched.
 - Selection is by presence, not by state. A class counts as found when the weapon has a device of it, on or off. So with NVG on, an IR laser that is already on still counts, and the visible laser fallback does not happen. The same holds for the visible flashlight fallback when NVG is off.
 - NVG state is read once, at press. Toggling NVG during the hold changes nothing until the next press.
@@ -25,12 +25,12 @@ Constraints:
 - The feature is always on as part of the `PointAim` action. No config switch.
 - No hooks on `TacticalComponent` or `WeaponComponent` functions. Native hooks there crashed the game when the vanilla toggle fired.
 
-Verified by recon (`docs/solutions/findings.md`, Tactical devices):
+Verified by recon (Recon below, and `docs/solutions/point-aim-auto-laser.md`, Recon, for lasers):
 
 - `WeaponComponent.TacticalAttachments` lists one component per emitter. Lasers are `LaserComponent`, lights are `BP_FlashlightComponent_C` (native parent `FlashlightComponent`). Both derive from `TacticalComponent`, which carries `DeviceState` and `SetDeviceState`.
 - `SetDeviceState` on one laser component turns that emitter on and off alone, and the vanilla toggle, cycle key and radial menu keep working afterwards. On a light component it turns that light on and off too. Vanilla controls after it weren't checked for lights.
 - Lights: `TacticalComponent.bHasInfraredMode` tells IR from visible on lights: true on the PEQ-15's light, false on a visible flashlight (SureFire Mini Scout). Unlike on lasers, the flag is meaningful on lights.
-- NVG state: `IRRNightVision_Subsystem:IsInfraredModeEnabledOnPlayer()` returns true while the local player's NVG is on. The subsystem is a per-level object, found with `FindFirstOf("IRRNightVision_Subsystem")` at call time (`findings.md`, Night vision).
+- NVG state: `IRRNightVision_Subsystem:IsInfraredModeEnabledOnPlayer()` returns true while the local player's NVG is on. The subsystem is a per-level object, found with `FindFirstOf("IRRNightVision_Subsystem")` at call time (Recon, Night vision).
 
 Known from the game (user):
 
@@ -43,7 +43,7 @@ Owned:
 - `likhos-point-and-shoot/Scripts/devices.lua`: device classification, NVG state and selection.
 - `likhos-point-and-shoot/Scripts/actions.lua`: the device part of the `PointAim` action.
 - `likhos-point-and-shoot/Scripts/probe.lua`: throwaway recon console commands. Not part of the end state.
-- `docs/solutions/findings.md`: recon results under the Tactical devices section and a night vision section.
+- The Recon section of this doc: recon results for lights and night vision.
 
 Context only: the rest of `PointAim` (point sight mode and aim injection, `docs/solutions/point-aim-bind.md`), `triggers.lua` and `input.lua` (press, held and release events, level load reset), `util.lua`, `log.lua`, the vanilla tactical device and NVG controls.
 
@@ -80,3 +80,22 @@ With NVG off, holding the bind aims into point sight with the first visible lase
 - Per component `SetDeviceState` over the vanilla toggle path: exact per device and independent of the vanilla cycle selection, at the cost of bypassing the option bookkeeping. The vanilla controls coped with it for lasers.
 - Material match for lasers ties the feature to two third-party asset paths a patch could move. A moved path can't be told apart from a weapon without that laser class, so it fails silently.
 - An on device is visible to other players and AI, IR devices to those with NVG. Accepted as the point of the feature.
+
+## Recon
+
+### Tactical devices: lights
+
+Lights, from `kb_probe_devices` / `kb_probe_dev_set`, 2026-09-19 in the hideout, on a SCAR-L (PEQ-15 LA-5, SureFire Mini Scout):
+
+- Lights are `BP_FlashlightComponent_C` (`/Game/Blueprints/InventorySystem/Components/ItemComponents/BP_FlashlightComponent`), one per device, named `BP_FlashlightComponent`. Native parent `/Script/Test_C.FlashlightComponent` (object dump). The probe's `IsA` against it matched both lights.
+- `bHasInfraredMode` tells lights apart: `true` on the PEQ-15's light, `false` on the Mini Scout. `bDeviceInfraredOn` and `IsInInfraredMode()` read false on both. Per the user, the PEQ-15's light is the only IR light in the game and it is IR only.
+- `TacticalAttachments` order on that SCAR-L: PEQ-15 `Laser_B` (red), `Laser_A` (green), PEQ-15 light, Mini Scout light.
+- `SetDeviceState(1)` / `SetDeviceState(0)` on the Mini Scout's light turns it on and off on screen, and `DeviceState` follows.
+
+### Night vision
+
+From the object dump and `kb_probe_nvg`, 2026-09-19 in the hideout.
+
+- `IRRNightVision_Subsystem` (`/Script/IRRNightVision`) is a per-level object: `LVL_HideoutNEW:IRRNightVision_Subsystem_<n>`, one live instance, found with `FindFirstOf("IRRNightVision_Subsystem")`.
+- `IsInfraredModeEnabledOnPlayer()` (no parameters) read `false` with NVG off and `true` with NVG on.
+- Toggled by `IA_ToggleNightVision` through `SGA_NightVision_C`. The goggles view is `BP_FPCC_NightVision_C`, a first person core subobject.

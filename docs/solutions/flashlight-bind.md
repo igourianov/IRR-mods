@@ -20,7 +20,7 @@ The point aim bind keeps its current behavior: it touches lasers only and never 
 
 Constraints:
 
-- Game class, function and property names come from a UE4SS dump or Live View and are recorded in `docs/solutions/findings.md` (project rule).
+- Game class, function and property names come from a UE4SS dump or Live View and are recorded in a solution doc (project rule). The ones used here are in the Recon sections of `docs/solutions/point-aim-auto-laser.md` and `docs/solutions/point-aim-devices.md`.
 - UObject access happens on the game thread only, UObjects are never cached across a level load and validity is checked with `util.valid` (`CODE_GUIDE.md`).
 - The mod never switches a device's infrared mode (`SetInfraredMode`, `ToggleInfraredMode`). A light's class is read from what it is, never changed.
 - A light is IR when `TacticalComponent.bHasInfraredMode` is true and visible when it is false. Per the user, the PEQ-15's light is the only IR light in the game and it is IR only, so no light changes class at runtime.
@@ -29,10 +29,10 @@ Constraints:
 - The light chosen at press is the one release turns off, found again by full name. A weapon switch during the hold is handled like the point sight mode in `docs/solutions/point-aim-bind.md`: release restores nothing on the new weapon and doesn't reach back to the old one.
 - Ruled out: a separate toggle-off key, a double tap gesture and a fixed non-configurable tap window. The tap window is a config value.
 - Ruled out for the flashlight action only: the laser rule that the mod never turns off a device it didn't turn on. The key is a flashlight switch, so a press on a lit light turns it off whatever lit it. The laser side of `PointAim` keeps that rule.
-- No hooks on `TacticalComponent` or `WeaponComponent` functions. Native hooks there crashed the game when the vanilla toggle fired (`findings.md`, Tactical devices).
+- No hooks on `TacticalComponent` or `WeaponComponent` functions. Native hooks there crashed the game when the vanilla toggle fired (`docs/solutions/point-aim-auto-laser.md`, Recon, Tactical devices).
 - The controls menu row is anchored on the vanilla `PointShooting` row, the only anchor verified by recon. Both mod rows sit below it, in mapping order.
 
-Verified by recon (`docs/solutions/findings.md`, Tactical devices, Night vision):
+Verified by recon (`docs/solutions/point-aim-auto-laser.md` and `docs/solutions/point-aim-devices.md`, Recon):
 
 - `WeaponComponent.TacticalAttachments` lists one component per emitter. Lights are `BP_FlashlightComponent_C`, whose native parent `/Script/Test_C.FlashlightComponent` matches both lights seen. Both lights and lasers derive from `TacticalComponent`, which carries `DeviceState` (`Off` = 0, `On` = 1) and `SetDeviceState`.
 - `bHasInfraredMode` is true on the PEQ-15's light and false on the SureFire Mini Scout. Unlike on lasers, the flag is meaningful on lights.
@@ -42,7 +42,7 @@ Verified by recon (`docs/solutions/findings.md`, Tactical devices, Night vision)
 
 Assumptions the build checks:
 
-- Two mod mappings coexist: each gets its own row in the active key profile, each row rebinds and saves independently and both keys come back after a game restart. Recon only ever put one mod row on the page, and a duplicate row for the *same* mapping lost its key that session (`findings.md`, Controls menu).
+- Two mod mappings coexist: each gets its own row in the active key profile, each row rebinds and saves independently and both keys come back after a game restart. Recon only ever put one mod row on the page, and a duplicate row for the *same* mapping lost its key that session (`docs/solutions/point-aim-keybind-menu.md`, Recon, Controls menu).
 - The vanilla flashlight controls (toggle key, cycle key, radial menu) keep working after the mod sets a light's state, as they do after it sets a laser's state. Recon confirmed this for lasers only.
 - The 16 ms poll interval resolves the tap window closely enough that a deliberate tap and a deliberate hold are never confused.
 

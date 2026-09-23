@@ -40,7 +40,7 @@ This decides the project. Do it before writing any code.
 RESOLVED 2026-09-18: the game is **UE 5.6**, not 5.4. Stable 3.0.1 cannot scan
 it at all; the experimental build can. `MinorVersion` must be 6 — setting 4
 produces a deterministic access violation at the first tick. See
-`findings.md` for the working config.
+Results below for the working config.
 
 ## Step 2 — dumps
 
@@ -62,7 +62,8 @@ In Live View, search for:
 | `EnhancedInputUserSettings` | Sanctioned runtime rebind API (`MapPlayerKey`) exists |
 | `PlayerInput` with `ActionMappings` / `AxisMappings` | Legacy input; different approach entirely |
 
-Record the answer in `findings.md`.
+Record the answer in the current task's solution doc. The answer for
+this build is under Results below.
 
 ## Step 4 — enumerate mappings
 
@@ -106,3 +107,60 @@ search box. The bind must **not** fire. If it does, `context.lua`'s
 `ui_has_focus()` is reading the wrong property — find the right one in
 Live View while a menu is open (compare property values menu-open vs
 menu-closed).
+
+## Results
+
+### Environment
+
+| | |
+|---|---|
+| Game build ID | 22417726 |
+| Date verified | 2026-09-18 |
+| Engine version | **5.6** (NOT 5.4 - wikis say 5.4, the binary says 5.6) |
+| UE4SS version | experimental `v3.0.1-1136-g35d1795d` (zDEV) - stable 3.0.1 CANNOT scan this build |
+| UE4SS injects cleanly | **yes** - all scans resolve, HashTables self test passes (7657 classes) |
+| GraphicsAPI setting that worked | `opengl` (default; no dx12 option exists in this build) |
+
+### Working UE4SS config
+
+Hard-won. Do not change these without re-testing.
+
+```ini
+[EngineVersionOverride]
+MajorVersion = 5
+MinorVersion = 6      ; <-- 4 causes a deterministic crash at first tick
+
+[General]
+EnableHotReloadSystem = 1
+bUseUObjectArrayCache = true
+
+[Debug]
+GuiConsoleEnabled = 1
+GuiConsoleVisible = 1
+GraphicsAPI = opengl
+```
+
+`Mods/mods.txt`: `KismetDebuggerMod` and `EventViewerMod` set to 0 (not required;
+setting 0 stops them starting, though the DLLs still load into the process).
+
+#### Failure modes seen, and what they meant
+
+| Symptom | Cause |
+|---|---|
+| Stable 3.0.1: `Failed to find GUObjectArray` / `FText`, `PS scan timed out` | 3.0.1 has no UE5.6 support. Not a per-build signature issue. |
+| Experimental + `MinorVersion = 4`: AV writing to exe image at `+0x15EF0F0`, right after `UStruct::Link` | Wrong engine version -> wrong member/vtable layouts when installing hooks. Deterministic, identical address every run. |
+
+`WARNING: VTable and scan addresses differ for UGameEngine::Tick` still appears
+on a healthy run - it is not fatal.
+
+### Input stack
+
+| Object | Present? | Full name |
+|---|---|---|
+| `EnhancedInputLocalPlayerSubsystem` | ☑ | `/Engine/Transient.GameEngine_<n>:LocalPlayer_<n>.EnhancedInputLocalPlayerSubsystem_<n>` |
+| `EnhancedInputUserSettings` | ☑ | `/Engine/Transient.EnhancedInputUserSettings_<n>`, from `subsystem:GetUserSettings()`. Saved to `%LOCALAPPDATA%\Test_C\Saved\SaveGames\EnhancedInputUserSettings.sav`. |
+| `PlayerInput` (legacy mappings) | ☐ | |
+
+### Tracing
+
+The game logs `LogTemp: Warning: Activating ability SGA_<Name>_C_<n>` on each ability activation. It shows in the UE4SS log window and is useful for tracing.

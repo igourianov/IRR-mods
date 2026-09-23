@@ -1,6 +1,6 @@
 -- actions.lua : action name -> how to invoke it on the pawn / controller.
 --
--- Every game name here comes from docs/solutions/findings.md. Nothing is guessed from the real game.
+-- Every game name here comes from docs/solutions/point-aim-bind.md (Recon). Nothing is guessed from the real game.
 --
 -- Design rule: resolve lazily, per call and never cache a UObject across a level load.
 -- Caching the *name* is fine. Caching the object is what crashes.
@@ -61,7 +61,7 @@ local function device_off(wc, name)
     if dev and devices.is_on(dev) then devices.set(dev, false) end
 end
 
---- Milliseconds since `at`. os.clock is wall time on Windows (docs/solutions/findings.md, Enhanced Input injection).
+--- Milliseconds since `at`. os.clock is wall time on Windows (docs/solutions/point-aim-bind.md, Recon, Enhanced Input injection).
 local function elapsed_ms(at)
     return (os.clock() - at) * 1000
 end

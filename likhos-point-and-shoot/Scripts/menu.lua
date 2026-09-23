@@ -2,7 +2,7 @@
 --
 -- Each row is a clone of a vanilla row (WB_SingleSettingBar_C), pointed at a mapping from keymap.lua.
 -- The vanilla row logic then shows, rebinds, saves and resets the key.
--- See docs/solutions/point-aim-keybind-menu.md and docs/solutions/findings.md (Controls menu) for the recon behind every name here.
+-- See docs/solutions/point-aim-keybind-menu.md (Recon) for the recon behind every name here.
 
 local log    = require("log")
 local util   = require("util")

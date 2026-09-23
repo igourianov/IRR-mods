@@ -9,7 +9,7 @@ local util = require("util")
 local M = {}
 
 --- True when the mouse cursor is shown, which is taken to mean a menu is open.
---- Unverified: bShowMouseCursor is not confirmed to change with a menu open or a text field focused (docs/solutions/findings.md, UI focus detection).
+--- Unverified: bShowMouseCursor is not confirmed to change with a menu open or a text field focused.
 local function ui_has_focus(pc)
     if not util.valid(pc) then return false end
 

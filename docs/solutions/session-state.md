@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-18
 
-Read `CLAUDE.md` and `docs/solutions/findings.md` alongside this.
+Read `CLAUDE.md` alongside this.
 
 ## Where the project is
 
@@ -26,14 +26,14 @@ Game-state awareness is the entire justification for injecting. Pure remapping w
 | UE4SS | experimental `v3.0.1-1136-g35d1795d` (zDEV), in `Test_C\Binaries\Win64\ue4ss\` |
 | Project | `D:\Projects\IRR-mods` |
 
-Working UE4SS config and the two failure modes are recorded in `docs/solutions/findings.md`. **The critical value is `MinorVersion = 6`.** Setting 4 produces a deterministic access violation at the first tick.
+Working UE4SS config and the two failure modes are recorded in `docs/solutions/recon.md`, Results. **The critical value is `MinorVersion = 6`.** Setting 4 produces a deterministic access violation at the first tick.
 
 Deploy with `.\build.ps1` (symlinks need an elevated shell or Windows Developer Mode, `-Copy` otherwise). Healthy startup ends with `[HashTables] Self test passed`. The `VTable and scan addresses differ for UGameEngine::Tick` warning appears on healthy runs too and is not fatal.
 
 ## Hard-won lessons
 
 - Stable UE4SS 3.0.1 cannot scan this binary (no UE5.6 support). Only the experimental build works.
-- `LoopAsync` with a per-tick `ExecuteInGameThread` hop corrupted the Lua state and crashed the game seven times. The tick now runs on `LoopInGameThreadWithDelay` (`docs/solutions/findings.md`, Lua threading).
+- `LoopAsync` with a per-tick `ExecuteInGameThread` hop corrupted the Lua state and crashed the game seven times. The tick now runs on `LoopInGameThreadWithDelay` (`docs/solutions/point-aim-bind.md`, Recon, Lua threading).
 - `RegisterKeyBind` gives press events only, with no release. Binds that need a real release name a `mapping` and are polled with `IsInputKeyDown`.
 - `RegisterKeyBind` does not consume the keystroke. The game's own binding still fires. Key stealing is not implemented, and the point aim bind does not need it.
 - The aiming subobject's `bIsPointSight` does not track the sticky mode. The equipped weapon's `WeaponComponent.bIsPointSight` does.
@@ -43,7 +43,7 @@ Deploy with `.\build.ps1` (symlinks need an elevated shell or Windows Developer 
 
 Unverified:
 
-- `context.lua` reads `bShowMouseCursor` as the UI gate. Confirm it differs with the stash open and with the search box focused (the table in `docs/solutions/findings.md` is blank).
+- `context.lua` reads `bShowMouseCursor` as the UI gate. Confirm it differs with the stash open and with the search box focused (no recon recorded yet).
 - Per-tick `IA_Aim` injection holds aim at native frame rates above about 60 fps (`docs/solutions/point-aim-bind.md`, A2).
 - Hot reload does not double-register binds or the menu row. After a hot reload two rows on one mapping name lost the saved key in a probe. `menu.lua` skips a page that already holds a mod row, but this has not been tested.
 - Co-op as host and as client.
@@ -55,7 +55,6 @@ Known issues:
 
 Housekeeping:
 
-- `docs/solutions/findings.md` still has empty template sections: input stack decision, mapping contexts, action handlers, UI focus.
 - Set Steam to "only update when launched", so a game patch does not break the mod between sessions.
 
 ## Standing risks
