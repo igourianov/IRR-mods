@@ -1,6 +1,6 @@
 # Likho's Point and Shoot
 
-This mod reworks Point Shooting and tactical device activation.
+This mod reworks Point Shooting, tactical device activation and the flip magnifier.
 
 ## Point Shooting
 
@@ -33,6 +33,15 @@ Contextual to NVG:
 
 - **NVG off:** the first visible flashlight.
 - **NVG on:** the first IR illuminator. If the weapon has none, the first visible flashlight.
+
+## Magnifier zoom
+
+On a sight with a flip magnifier (EOTech HHS-1), the zoom input (mouse wheel) folds and unfolds the magnifier, the same way the vanilla Toggle Magnifier key does:
+
+- **Scroll forward:** unfolds the magnifier. Already unfolded, it stays unfolded.
+- **Scroll back:** folds it. Already folded, it stays folded.
+
+Works aimed and not aimed, like the vanilla zoom on a variable scope. Other sights zoom as before. Set `magnifier_zoom = false` in `Scripts\config.lua` to turn it off.
 
 ## Requirements
 

@@ -44,6 +44,12 @@ local function resolve_weapon_component(pawn)
     return nil
 end
 
+--- The local player's equipped weapon's WeaponComponent, or nil.
+function M.equipped_weapon_component()
+    local pawn = resolve_pawn()
+    return pawn and resolve_weapon_component(pawn)
+end
+
 --- Call a devices.lua function without ever failing the caller, so a broken device lookup still leaves the rest of the action working.
 local function try_devices(fn, ...)
     local ok, res = pcall(fn, ...)
@@ -66,12 +72,23 @@ local function elapsed_ms(at)
     return (os.clock() - at) * 1000
 end
 
+local PRESS_VALUE = { X = 1.0, Y = 0.0, Z = 0.0 }
+
+--- A one-frame press of the input action at `path`, as if its key went down for one frame.
+--- Continuous injection can't be used: its FInputActionValue parameter can't be built from UE4SS Lua.
+function M.inject_press(path)
+    local subsystem = FindFirstOf("EnhancedInputLocalPlayerSubsystem")
+    local ia = StaticFindObject(path)
+    if not (util.valid(subsystem) and util.valid(ia)) then return end
+    subsystem:InjectInputVectorForAction(ia, PRESS_VALUE, {}, {})
+end
+
 --------------------------------------------------------------------------
 -- PointAim: hold to aim straight into point sight (docs/solutions/point-aim-bind.md)
 --------------------------------------------------------------------------
 
+-- IA_Aim has a Released trigger, so aim holds only while its one-frame press repeats every tick.
 local IA_AIM = "/Game/Blueprints/InputSystem/InputActions/IA_Aim.IA_Aim"
-local AIM_VALUE = { X = 1.0, Y = 0.0, Z = 0.0 }
 
 -- Non-nil while a PointAim hold is live. Plain values only, no UObjects.
 --   flipped : the mode was regular on press and this action switched it to point
@@ -95,15 +112,6 @@ local function resolve_aim_objects()
     return ads, wc
 end
 
--- A one-frame IA_Aim press. IA_Aim has a Released trigger, so aim holds only while this repeats every tick.
--- Continuous injection can't be used: its FInputActionValue parameter can't be built from UE4SS Lua.
-local function inject_aim()
-    local subsystem = FindFirstOf("EnhancedInputLocalPlayerSubsystem")
-    local ia = StaticFindObject(IA_AIM)
-    if not (util.valid(subsystem) and util.valid(ia)) then return end
-    subsystem:InjectInputVectorForAction(ia, AIM_VALUE, {}, {})
-end
-
 --- Turn on the laser that suits the player's vision and return its full name.
 --- Nil when the weapon has none or it was already on: a laser this action didn't light is never put out.
 local function laser_on(wc)
@@ -124,11 +132,11 @@ local function point_aim_press()
     local flipped = not wc.bIsPointSight
     if flipped then ads:TriggerPointSight() end
     point_aim = { flipped = flipped, weapon = wc:GetFullName(), device = try_devices(laser_on, wc) }
-    inject_aim()
+    M.inject_press(IA_AIM)
 end
 
 local function point_aim_held()
-    if point_aim then inject_aim() end
+    if point_aim then M.inject_press(IA_AIM) end
 end
 
 local function point_aim_release()
@@ -173,8 +181,7 @@ end
 
 local function flashlight_press()
     flashlight = nil
-    local pawn = resolve_pawn()
-    local wc = pawn and resolve_weapon_component(pawn)
+    local wc = M.equipped_weapon_component()
     if not wc then
         log.debug("Flashlight: no pawn or equipped weapon right now")
         return
@@ -189,8 +196,7 @@ local function flashlight_release()
     if not (state and state.device) then return end
     if elapsed_ms(state.at) < TAP_MS then return end
 
-    local pawn = resolve_pawn()
-    local wc = pawn and resolve_weapon_component(pawn)
+    local wc = M.equipped_weapon_component()
     if not wc then return end
     if wc:GetFullName() ~= state.weapon then
         log.debug("Flashlight: weapon changed during hold, light left on")

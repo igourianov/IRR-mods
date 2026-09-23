@@ -1,3 +1,6 @@
+# 1.0.55
+* the zoom input folds and unfolds a flip magnifier (EOTech HHS-1): scroll forward unfolds, scroll back folds
+
 # 1.0.53
 * fixed occasional crash on mod hot reload
 
