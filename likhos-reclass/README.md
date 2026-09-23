@@ -19,7 +19,7 @@ It also rechambers weapons in a different caliber.
 |---|---|---|
 | Sig Sauer MCX Rattler | 5.56x45 | 300 BLK |
 
-The Rattler still takes the same AR-15 mags. When bought as a complete weapon, it comes with a 300 BLK Colt A2 30 round mag.
+The Rattler still takes the same AR-15 mags, but only when they're loaded with 300 BLK. When bought as a complete weapon, it comes with a full 300 BLK Colt A2 30 round mag.
 
 ## Installation
 

@@ -1,0 +1,8 @@
+{
+    "/Game/Blueprints/InventorySystem/Objects/ItemContainers/Plattforms/AR-15/U_Mag_AR-15_x300_Blackout": {
+        "from": "/Game/Blueprints/InventorySystem/Objects/ItemContainers/Plattforms/AR-15/U_Mag_AR-15",
+        "names": {
+            "Inventory.Items.Ammunition.Rounds.556x45": "Inventory.Items.Ammunition.Rounds.x300 Blackout"
+        }
+    }
+}

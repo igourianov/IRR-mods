@@ -1,7 +1,7 @@
 [mod]
 name="Likho's Reclass"
 id="likhos-reclass"
-version="1.0.4"
+version="1.0.5"
 description="Moves weapons to a different weapon class or caliber"
 ; Built pak. zz_ sorts it after the game's paks and _P gives its files priority over theirs.
 pak="zz_likhos_reclass_P.pak"

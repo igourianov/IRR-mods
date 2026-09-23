@@ -1,6 +1,7 @@
 {
     "/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/Sig_Sauer_MCX_Rattler/ID_Sig_Sauer_MCX_Rattler": {
-        "/Game/Blueprints/InventorySystem/Objects/InventorySupportedItems/General/Ammunition/UISI_556": "/Game/Blueprints/InventorySystem/Objects/InventorySupportedItems/General/Ammunition/UISI_x300_Blackout"
+        "/Game/Blueprints/InventorySystem/Objects/InventorySupportedItems/General/Ammunition/UISI_556": "/Game/Blueprints/InventorySystem/Objects/InventorySupportedItems/General/Ammunition/UISI_x300_Blackout",
+        "/Game/Blueprints/InventorySystem/Objects/ItemContainers/Plattforms/AR-15/U_Mag_AR-15": "/Game/Blueprints/InventorySystem/Objects/ItemContainers/Plattforms/AR-15/U_Mag_AR-15_x300_Blackout"
     },
     "/Game/Blueprints/InventorySystem/Presets/Items/Weapons/DA_Sig_Sauer_MCX_Rattler": {
         "/Game/Blueprints/InventorySystem/Presets/Items/Attachments/Mags/DA_AR-15_Colt_A2_Stanag_556x45_30Rnd": "/Game/Blueprints/InventorySystem/Presets/Items/Attachments/Mags/DA_AR-15_Colt_A2_Stanag_x300_Blackout_30Rnd"

@@ -6,7 +6,8 @@
     Extracts the game's own DefaultGameplayTags.ini and moves every weapon listed in reclass.json to its new class.
     A weapon's class is the parent of its item tag (Inventory.Items.Weapons.<Class>.<Name>), so a move renames the tag.
     The old tag leaves the tag list and a redirect maps it to the new one. The engine applies redirects when it loads cooked assets and saves, so every item definition, loadout and preset that names the old tag follows.
-    Then extracts every cooked asset listed in retarget.json and points its references to one game asset at another, e.g. a weapon's chamber from the 5.56 ammo set to the 300 BLK one.
+    Then stages a renamed copy of every cooked asset listed in clone.json, e.g. a mag well that takes 300 BLK mags instead of 5.56 ones.
+    Last, it extracts every cooked asset listed in retarget.json and points its references to one asset at another, e.g. a weapon's chamber from the 5.56 ammo set to the 300 BLK one.
     Called by build.ps1, which packs the staged tree.
 #>
 [CmdletBinding()]
@@ -39,11 +40,11 @@ function Find-GamePak {
 }
 
 function Expand-GameFile {
-    param([string] $Path)
+    param([string] $Path, [string] $To = $StageDir)
     $pak = Find-GamePak $Path
-    & $Repak unpack -q -f -i $Path -o $StageDir $pak
+    & $Repak unpack -q -f -i $Path -o $To $pak
     if ($LASTEXITCODE) { Write-Error "repak failed to extract $Path from $(Split-Path $pak -Leaf)." }
-    Join-Path $StageDir $Path
+    Join-Path $To $Path
 }
 
 function Get-AssetPath {
@@ -97,8 +98,8 @@ foreach ($entry in $reclass.PSObject.Properties) {
 
 [System.IO.File]::WriteAllText($file, ($lines -join $eol), [System.Text.UTF8Encoding]::new($bom))
 
-# ---------------------------------------------------------------- retarget
-# Cooked assets are edited as UAssetGUI JSON. Without a usmap their exports stay raw bytes, so only the name map and the import table are touched.
+# ---------------------------------------------------------------- assets
+# Cooked assets are edited as UAssetGUI JSON. Without a usmap their exports stay raw bytes, so only the name map and the import and export tables are touched.
 $work = Join-Path ([System.IO.Path]::GetTempPath()) "likhos-reclass.$([System.IO.Path]::GetRandomFileName().Split('.')[0])"
 New-Item -ItemType Directory $work | Out-Null
 $json = Join-Path $work 'asset.json'
@@ -114,17 +115,17 @@ function Save-Asset {
     param($Data, [string] $Path)
     [System.IO.File]::WriteAllText($json, ($Data | ConvertTo-Json -Depth 100), [System.Text.UTF8Encoding]::new($false))
     Remove-Item $Path, ($Path -replace '\.uasset$', '.uexp') -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Force (Split-Path $Path) | Out-Null
     Invoke-UAssetGUI 'fromjson', $json, $Path
     # UAssetGUI exits 0 without writing anything when the JSON names an FName that isn't in the name map.
     if (-not (Test-Path $Path)) { Write-Error "UAssetGUI wrote no $Path. A name the edit uses may be missing from the name map." }
 }
 
-$retarget = Get-Content (Join-Path $PSScriptRoot 'retarget.json') -Raw | ConvertFrom-Json
-foreach ($entry in $retarget.PSObject.Properties) {
-    $asset = $entry.Name
-    $path = Get-AssetPath $asset
-    $uasset = Expand-GameFile "$path.uasset"
-    Expand-GameFile "$path.uexp" | Out-Null
+function Read-Asset {
+    param([string] $Package)
+    $path = Get-AssetPath $Package
+    $uasset = Expand-GameFile "$path.uasset" $work
+    Expand-GameFile "$path.uexp" $work | Out-Null
 
     Invoke-UAssetGUI 'tojson', $uasset, $json, $engineVersion
     $data = Get-Content $json -Raw | ConvertFrom-Json
@@ -133,25 +134,66 @@ foreach ($entry in $retarget.PSObject.Properties) {
     $check = Join-Path $work 'check.uasset'
     Save-Asset $data $check
     foreach ($ext in 'uasset', 'uexp') {
-        if ((Get-FileHash (Join-Path $StageDir "$path.$ext")).Hash -ne (Get-FileHash ($check -replace '\.uasset$', ".$ext")).Hash) {
-            Write-Error "UAssetGUI doesn't round-trip $asset.$ext unchanged."
+        if ((Get-FileHash (Join-Path $work "$path.$ext")).Hash -ne (Get-FileHash ($check -replace '\.uasset$', ".$ext")).Hash) {
+            Write-Error "UAssetGUI doesn't round-trip $Package.$ext unchanged."
         }
     }
+    $data
+}
 
+function Get-AssetNames {
+    param([string] $Old, [string] $New)
+    # A package holds an object named after it, a Blueprint package also its class and class default object.
+    $oldName = ($Old -split '/')[-1]
+    $newName = ($New -split '/')[-1]
+    @{ $Old = $New; $oldName = $newName; "${oldName}_C" = "${newName}_C"; "Default__${oldName}_C" = "Default__${newName}_C" }
+}
+
+# ---------------------------------------------------------------- clone
+$cloned = [System.Collections.Generic.HashSet[string]]::new()
+$clone = Get-Content (Join-Path $PSScriptRoot 'clone.json') -Raw | ConvertFrom-Json
+foreach ($entry in $clone.PSObject.Properties) {
+    $new = $entry.Name
+    $source = $entry.Value.from
+    $path = Get-AssetPath $new
+    if (@($paks.Values | Where-Object { $_.Contains("$path.uasset") }).Count) { Write-Error "$new already exists in the game's paks." }
+
+    $data = Read-Asset $source
+    $names = Get-AssetNames $source $new
+    foreach ($name in $entry.Value.names.PSObject.Properties) {
+        if ($data.NameMap -notcontains $name.Name) { Write-Error "$source has no name $($name.Name)." }
+        $names[$name.Name] = $name.Value
+    }
+
+    # The raw export data refers to names by their index in the name map, so renaming an entry renames every use.
+    $data.NameMap = @($data.NameMap | ForEach-Object { $name = $names[$_]; if ($name) { $name } else { $_ } })
+    foreach ($object in @($data.Exports) + @($data.Imports)) {
+        $name = $names[$object.ObjectName]
+        if ($name) { $object.ObjectName = $name }
+    }
+    $data.FolderName = $new
+
+    Save-Asset $data (Join-Path $StageDir "$path.uasset")
+    $cloned.Add($new) | Out-Null
+    Write-Host "  $(($new -split '/')[-1]): copy of $(($source -split '/')[-1])"
+}
+
+# ---------------------------------------------------------------- retarget
+$retarget = Get-Content (Join-Path $PSScriptRoot 'retarget.json') -Raw | ConvertFrom-Json
+foreach ($entry in $retarget.PSObject.Properties) {
+    $asset = $entry.Name
+    $data = Read-Asset $asset
     $imports = $data.Imports
     foreach ($ref in $entry.Value.PSObject.Properties) {
         $old = $ref.Name
         $new = $ref.Value
-        Find-GamePak "$(Get-AssetPath $new).uasset" | Out-Null
+        if (-not $cloned.Contains($new)) { Find-GamePak "$(Get-AssetPath $new).uasset" | Out-Null }
 
         $at = @(for ($i = 0; $i -lt $imports.Count; $i++) { if ($imports[$i].ClassName -eq 'Package' -and $imports[$i].ObjectName -eq $old) { $i } })
         if ($at.Count -ne 1) { Write-Error "$asset doesn't import $old." }
         $outer = -1 - $at[0]
 
-        # A Blueprint is imported as its class and class default object, any other asset as its object.
-        $oldName = ($old -split '/')[-1]
-        $newName = ($new -split '/')[-1]
-        $names = @{ $oldName = $newName; "${oldName}_C" = "${newName}_C"; "Default__${oldName}_C" = "Default__${newName}_C" }
+        $names = Get-AssetNames $old $new
         $used = [System.Collections.Generic.List[string]]@($new)
 
         $imports[$at[0]].ObjectName = $new
@@ -171,10 +213,10 @@ foreach ($entry in $retarget.PSObject.Properties) {
         }
 
         foreach ($name in $used) { if ($data.NameMap -notcontains $name) { $data.NameMap += $name } }
-        Write-Host "  $(($asset -split '/')[-1]): $oldName -> $newName"
+        Write-Host "  $(($asset -split '/')[-1]): $(($old -split '/')[-1]) -> $(($new -split '/')[-1])"
     }
 
-    Save-Asset $data $uasset
+    Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset")
 }
 
 Remove-Item $work -Recurse -Force
