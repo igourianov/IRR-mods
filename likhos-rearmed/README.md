@@ -1,29 +1,20 @@
 # Likho's Rearmed
 
-This mod moves weapons to a different weapon class and applies minor weapon fixes.
+This mod adjusts various weapon stats
 
-| Weapon | Vanilla class | New class |
-|---|---|---|
-| FN FAL | Assault rifle | DMR |
-| AKS-74U | Assault rifle | SMG |
-| Honey Badger | Assault rifle | SMG |
-| Sig Sauer MCX Rattler | Assault rifle | SMG |
-| SKS | DMR | Assault rifle |
-| SVDS | Sniper rifle | DMR |
+## Classification
 
-The class decides where the weapon is listed at the vendor and in the gunsmith.
+* FAL: Rifle -> DMR
+* SVD: Sniper -> DMR
+* AKS-74U, Rattler, Honey Badger: Rifle -> SMG
 
-It also rechambers weapons in a different caliber.
+## Caliber
 
-| Weapon | Vanilla caliber | New caliber |
-|---|---|---|
-| Sig Sauer MCX Rattler | 5.56x45 | 300 BLK |
-
-The Rattler still takes the same AR-15 mags, but only when they're loaded with 300 BLK. When bought as a complete weapon, it comes with a full 300 BLK Colt A2 30 round mag.
+Rechambered Rattler from 5.56 to 300BLK
 
 ## Installation
 
-Extract the zip into `PROJECT QUARANTINE\Test_C\Content\Paks`. It places `likhos_rearmed_P.pak` in `Paks\~mods`. When updating from Likho's Reclass, delete `Paks\~mods\likhos_reclass_P.pak` (1.0.6) or `Paks\~mods\zz_likhos_reclass_P.pak` (1.0.5 or older) first.
+Extract the zip into `PROJECT QUARANTINE\Test_C\Content\Paks`. It places `likhos_rearmed_P.pak` in `Paks\~mods`.
 
 The mod doesn't need UE4SS.
 
