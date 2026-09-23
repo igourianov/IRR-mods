@@ -1,3 +1,6 @@
+# 1.0.57
+* hooked up magnifier flip to the zoom (mouse scroll) action
+
 # 1.0.53
 * fixed occasional crash on mod hot reload
 

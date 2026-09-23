@@ -23,16 +23,11 @@ Contextual to NVG:
 
 New keybind to quickly access avilable light without opening the radial menu or cycling through activation modes.
 
-Works as both momentary switch and toggle:
+Works as both momentary switch and toggle. Contextual to NVG same way the laser is.
 
-- **Tap** (under 250 ms): the light comes on and stays on. Tap again to put it out.
-- **Hold:** the light is on while the key is down and goes out when you let go.
-- Pressing the key while the light is already on always puts it out, including a light you turned on with the vanilla key.
+## Magnifier binding
 
-Contextual to NVG:
-
-- **NVG off:** the first visible flashlight.
-- **NVG on:** the first IR illuminator. If the weapon has none, the first visible flashlight.
+The EOTech+Magnifier combo now works using the mouse scroll, same way LPVO does. Old binding still works but unnecessary.
 
 ## Requirements
 
