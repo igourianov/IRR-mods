@@ -1,10 +1,10 @@
 [mod]
 name="Likho's Reclass"
 id="likhos-reclass"
-version="1.0.5"
+version="1.0.6"
 description="Moves weapons to a different weapon class or caliber"
-; Built pak. zz_ sorts it after the game's paks and _P gives its files priority over theirs.
-pak="zz_likhos_reclass_P.pak"
+; Built pak. _P gives its files priority over the game's paks.
+pak="likhos_reclass_P.pak"
 
 [game]
 ; Game build ID the pak was last built from. The pak carries that build's whole DefaultGameplayTags.ini and the whole assets it edits, so rebuild and republish after every game patch.

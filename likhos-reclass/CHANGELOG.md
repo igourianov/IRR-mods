@@ -1,3 +1,6 @@
+# 1.0.6
+* pak renamed to likhos_reclass_P.pak, delete the old zz_likhos_reclass_P.pak from Paks\~mods
+
 # 1.0.5
 * Sig Sauer MCX Rattler takes AR-15 mags loaded with 300 BLK, so it's sold with a full mag again
 
