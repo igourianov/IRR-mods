@@ -1,6 +1,6 @@
-# Likho's Reclass
+# Likho's Rearmed
 
-This mod moves weapons to a different weapon class or caliber.
+This mod moves weapons to a different weapon class and applies minor weapon fixes.
 
 | Weapon | Vanilla class | New class |
 |---|---|---|
@@ -23,13 +23,13 @@ The Rattler still takes the same AR-15 mags, but only when they're loaded with 3
 
 ## Installation
 
-Extract the zip into `PROJECT QUARANTINE\Test_C\Content\Paks`. It places `likhos_reclass_P.pak` in `Paks\~mods`. When updating from 1.0.5 or older, delete `Paks\~mods\zz_likhos_reclass_P.pak` first.
+Extract the zip into `PROJECT QUARANTINE\Test_C\Content\Paks`. It places `likhos_rearmed_P.pak` in `Paks\~mods`. When updating from Likho's Reclass, delete `Paks\~mods\likhos_reclass_P.pak` (1.0.6) or `Paks\~mods\zz_likhos_reclass_P.pak` (1.0.5 or older) first.
 
 The mod doesn't need UE4SS.
 
 ## Uninstall
 
-Delete `Paks\~mods\likhos_reclass_P.pak`. Weapons already in your stash stay there and go back to their vanilla class and caliber.
+Delete `Paks\~mods\likhos_rearmed_P.pak`. Weapons already in your stash stay there and go back to their vanilla class and caliber.
 
 ## Compatibility
 

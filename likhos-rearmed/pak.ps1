@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Stage the files of the Likho's Reclass pak.
+    Stage the files of the Likho's Rearmed pak.
 
 .DESCRIPTION
     Extracts the game's own DefaultGameplayTags.ini and moves every weapon listed in reclass.json to its new class.
@@ -100,7 +100,7 @@ foreach ($entry in $reclass.PSObject.Properties) {
 
 # ---------------------------------------------------------------- assets
 # Cooked assets are edited as UAssetGUI JSON. Without a usmap their exports stay raw bytes, so only the name map and the import and export tables are touched.
-$work = Join-Path ([System.IO.Path]::GetTempPath()) "likhos-reclass.$([System.IO.Path]::GetRandomFileName().Split('.')[0])"
+$work = Join-Path ([System.IO.Path]::GetTempPath()) "likhos-rearmed.$([System.IO.Path]::GetRandomFileName().Split('.')[0])"
 New-Item -ItemType Directory $work | Out-Null
 $json = Join-Path $work 'asset.json'
 

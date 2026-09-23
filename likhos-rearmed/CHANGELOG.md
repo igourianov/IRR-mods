@@ -1,3 +1,6 @@
+# 1.0.7
+* renamed from Likho's Reclass to Likho's Rearmed, pak renamed to likhos_rearmed_P.pak, delete the old likhos_reclass_P.pak from Paks\~mods
+
 # 1.0.6
 * pak renamed to likhos_reclass_P.pak, delete the old zz_likhos_reclass_P.pak from Paks\~mods
 
