@@ -1,7 +1,7 @@
 [mod]
 name="Likho's Rearmed"
 id="likhos-rearmed"
-version="1.0.7"
+version="1.0.8"
 description="Moves weapons to a different weapon class and applies minor weapon fixes"
 ; Built pak. _P gives its files priority over the game's paks.
 pak="likhos_rearmed_P.pak"

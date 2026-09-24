@@ -6,6 +6,7 @@
     A build bumps the patch segment of the mod's version in mod.txt when the mod folder has uncommitted changes.
     A mod whose mod.txt names a pak is a pak mod. Its pak.ps1 stages the files, repak packs them into dist\<pak> and the pak is copied into Content\Paks\~mods.
     The pinned tools a pak build needs, repak and UAssetGUI, are downloaded into tools\<name> on first use.
+    A pak build also needs the game's usmap, which UE4SS generates in game into its own folder.
     Packaging and release live in publish.ps1.
 
 .EXAMPLE
@@ -130,7 +131,16 @@ foreach ($m in $Mods) {
         $repak = Get-Tool repak
         $stage = Join-Path ([System.IO.Path]::GetTempPath()) "$m.$([System.IO.Path]::GetRandomFileName().Split('.')[0])"
         New-Item -ItemType Directory $stage | Out-Null
-        & (Join-Path $src 'pak.ps1') -Repak $repak -UAssetGUI (Get-Tool UAssetGUI) -PaksDir $paksDir -StageDir $stage
+
+        # UAssetGUI reads a usmap only from its own mappings folder, by name. UE4SS names its usmap after a hash, so the newest one is the current game build's.
+        $ue4ssDir = Split-Path $modsDir
+        $usmap = Get-ChildItem $ue4ssDir -Filter *.usmap -File | Sort-Object LastWriteTime | Select-Object -Last 1
+        if (-not $usmap) { Write-Error "No usmap in $ue4ssDir. Generate one in game with UE4SS's mappings dump key after every game patch." }
+        $mappingsDir = Join-Path $env:LOCALAPPDATA 'UAssetGUI\Mappings'
+        New-Item -ItemType Directory -Force $mappingsDir | Out-Null
+        Copy-Item $usmap.FullName (Join-Path $mappingsDir "$($cfg.game.module).usmap") -Force
+
+        & (Join-Path $src 'pak.ps1') -Repak $repak -UAssetGUI (Get-Tool UAssetGUI) -Mappings $cfg.game.module -PaksDir $paksDir -StageDir $stage
 
         New-Item -ItemType Directory -Force $distDir | Out-Null
         $pakPath = Join-Path $distDir $pak

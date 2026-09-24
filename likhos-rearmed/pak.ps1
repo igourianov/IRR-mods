@@ -7,13 +7,16 @@
     A weapon's class is the parent of its item tag (Inventory.Items.Weapons.<Class>.<Name>), so a move renames the tag.
     The old tag leaves the tag list and a redirect maps it to the new one. The engine applies redirects when it loads cooked assets and saves, so every item definition, loadout and preset that names the old tag follows.
     Then stages a renamed copy of every cooked asset listed in clone.json, e.g. a mag well that takes 300 BLK mags instead of 5.56 ones.
-    Last, it extracts every cooked asset listed in retarget.json and points its references to one asset at another, e.g. a weapon's chamber from the 5.56 ammo set to the 300 BLK one.
+    Then it extracts every cooked asset listed in retarget.json and points its references to one asset at another, e.g. a weapon's chamber from the 5.56 ammo set to the 300 BLK one.
+    Last, it extracts every item definition listed in stats.json and sets its stat values, e.g. the 7.62x39 HP round's damage.
     Called by build.ps1, which packs the staged tree.
 #>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)] [string] $Repak,
     [Parameter(Mandatory)] [string] $UAssetGUI,
+    # Name of the game's usmap in UAssetGUI's mappings folder.
+    [Parameter(Mandatory)] [string] $Mappings,
     [Parameter(Mandatory)] [string] $PaksDir,
     [Parameter(Mandatory)] [string] $StageDir
 )
@@ -100,6 +103,7 @@ foreach ($entry in $reclass.PSObject.Properties) {
 
 # ---------------------------------------------------------------- assets
 # Cooked assets are edited as UAssetGUI JSON. Without a usmap their exports stay raw bytes, so only the name map and the import and export tables are touched.
+# With -Parse the usmap turns exports into properties, whose names are no longer name map indexes, so renaming a name map entry would leave them behind. Only the stats stage parses.
 $work = Join-Path ([System.IO.Path]::GetTempPath()) "likhos-rearmed.$([System.IO.Path]::GetRandomFileName().Split('.')[0])"
 New-Item -ItemType Directory $work | Out-Null
 $json = Join-Path $work 'asset.json'
@@ -112,27 +116,27 @@ function Invoke-UAssetGUI {
 }
 
 function Save-Asset {
-    param($Data, [string] $Path)
+    param($Data, [string] $Path, [switch] $Parse)
     [System.IO.File]::WriteAllText($json, ($Data | ConvertTo-Json -Depth 100), [System.Text.UTF8Encoding]::new($false))
     Remove-Item $Path, ($Path -replace '\.uasset$', '.uexp') -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Force (Split-Path $Path) | Out-Null
-    Invoke-UAssetGUI 'fromjson', $json, $Path
+    Invoke-UAssetGUI (@('fromjson', $json, $Path) + @(if ($Parse) { $Mappings }))
     # UAssetGUI exits 0 without writing anything when the JSON names an FName that isn't in the name map.
     if (-not (Test-Path $Path)) { Write-Error "UAssetGUI wrote no $Path. A name the edit uses may be missing from the name map." }
 }
 
 function Read-Asset {
-    param([string] $Package)
+    param([string] $Package, [switch] $Parse)
     $path = Get-AssetPath $Package
     $uasset = Expand-GameFile "$path.uasset" $work
     Expand-GameFile "$path.uexp" $work | Out-Null
 
-    Invoke-UAssetGUI 'tojson', $uasset, $json, $engineVersion
+    Invoke-UAssetGUI (@('tojson', $uasset, $json, $engineVersion) + @(if ($Parse) { $Mappings }))
     $data = Get-Content $json -Raw | ConvertFrom-Json
 
     # An unedited round trip through UAssetGUI and ConvertTo-Json must reproduce the game's bytes, or the edited asset can't be trusted.
     $check = Join-Path $work 'check.uasset'
-    Save-Asset $data $check
+    Save-Asset $data $check -Parse:$Parse
     foreach ($ext in 'uasset', 'uexp') {
         if ((Get-FileHash (Join-Path $work "$path.$ext")).Hash -ne (Get-FileHash ($check -replace '\.uasset$', ".$ext")).Hash) {
             Write-Error "UAssetGUI doesn't round-trip $Package.$ext unchanged."
@@ -217,6 +221,54 @@ foreach ($entry in $retarget.PSObject.Properties) {
     }
 
     Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset")
+}
+
+# ---------------------------------------------------------------- stats
+# An item definition's ItemStats entry holds the value and references a stat object exported by the same asset. Only the stat object's class tells entries apart, since their order differs between items.
+function Find-Stat {
+    param([string] $Name)
+    $class = "U_${Name}_C"
+    $found = @($items | Where-Object {
+        $config = ($_.Value | Where-Object Name -eq 'StatItemConfig').Value
+        $config -gt 0 -and $data.Imports[-1 - $exports[$config - 1].ClassIndex].ObjectName -eq $class
+    })
+    if ($found.Count -ne 1) { Write-Error "$asset has $($found.Count) $class stat entries, expected one." }
+    $found[0]
+}
+
+$stats = Get-Content (Join-Path $PSScriptRoot 'stats.json') -Raw | ConvertFrom-Json
+foreach ($entry in $stats.PSObject.Properties) {
+    $asset = $entry.Name
+    # Both stages start from the game's copy, so the second write would drop the first one's edits.
+    if ($retarget.PSObject.Properties[$asset]) { Write-Error "$asset is listed in both retarget.json and stats.json." }
+
+    $data = Read-Asset $asset -Parse
+    $exports = $data.Exports
+    $definition = @($exports | Where-Object ObjectName -eq ($asset -split '/')[-1])
+    if ($definition.Count -ne 1) { Write-Error "$asset has no item definition export." }
+    $items = @(($definition[0].Data | Where-Object Name -eq 'ItemStats').Value)
+
+
+    foreach ($stat in $entry.Value.PSObject.Properties) {
+        # Bleeding chance isn't an ItemStats value. It lives on the wound effect that the ChanceToWound stat object points at.
+        if ($stat.Name -eq 'BleedingChance') {
+            $config = ((Find-Stat 'ChanceToWound').Value | Where-Object Name -eq 'StatItemConfig').Value
+            $effect = ($exports[$config - 1].Data | Where-Object Name -eq 'StatEffect').Value
+            if ($effect -le 0) { Write-Error "$asset's ChanceToWound stat has no wound effect in the asset." }
+            $property = @($exports[$effect - 1].Data | Where-Object Name -eq 'BleedingChance')
+        } else {
+            $property = @((Find-Stat $stat.Name).Value | Where-Object Name -eq 'Value')
+        }
+        if ($property.Count -ne 1 -or $property[0].'$type' -notlike 'UAssetAPI.PropertyTypes.Objects.FloatPropertyData,*') { Write-Error "$asset's $($stat.Name) has no float value." }
+
+        $old = $property[0].Value
+        $property[0].Value = [double] $stat.Value
+        # An unversioned property flagged zero is left out of the export, so a value that stops or starts being zero flips the flag.
+        $property[0].IsZero = $stat.Value -eq 0
+        Write-Host "  $(($asset -split '/')[-1]): $($stat.Name) $old -> $($stat.Value)"
+    }
+
+    Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset") -Parse
 }
 
 Remove-Item $work -Recurse -Force
