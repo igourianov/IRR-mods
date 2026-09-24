@@ -6,6 +6,7 @@ This mod adjusts various weapon stats
 
 * FAL: Rifle -> DMR
 * SVD: Sniper -> DMR
+* SKS: DMR -> Rifle
 * AKS-74U, Rattler, Honey Badger: Rifle -> SMG
 
 ## Caliber
