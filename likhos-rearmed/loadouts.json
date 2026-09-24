@@ -1,0 +1,52 @@
+{
+    "/Game/Blueprints/InventorySystem/Presets/Container/AI/IGC/DA_Inventory_AI_Patrol_IGC_A": {
+        "Smg.AKS-74U": 3.6,
+        "Smg.PP-19 Vitayz": 3.2,
+        "Shotgun.Saiga-12K": 2.5,
+        "Rifle.AK-74M": 2.4,
+        "Rifle.AK-12": 1.8,
+        "Rifle.AK-105": 1.25,
+        "Rifle.AKS-74": 1.25
+    },
+    "/Game/Blueprints/InventorySystem/Presets/Container/AI/IGC/DA_Inventory_AI_Sniper_IGC": {
+        "Dmr.SVDS": 2
+    },
+    "/Game/Blueprints/InventorySystem/Presets/Container/AI/UICS/DA_Inventory_AI_Patrol_UICS_A": {
+        "Rifle.Colt M4A1": 5.0,
+        "Shotgun.Benelli M2": 1.0,
+        "Smg.MP5": 1.1,
+        "Smg.MP5SD": 0.8,
+        "Smg.MP5k": 0.55,
+        "Smg.MPX": 0.55
+    },
+    "/Game/Blueprints/InventorySystem/Presets/Container/AI/UICS/DA_Inventory_AI_Guard_UICS": {
+        "Smg.MP5SD": 0.5,
+        "Rifle.AUG A3": 0.3,
+        "Rifle.FN SCAR-L": 0.2,
+        "Smg.Sig Sauer MCX Rattler": 0.2,
+        "Rifle.Sig Sauer MCX Virtus": 0.2,
+        "Smg.KRISS Vector 45ACP": 0.2,
+        "Smg.FN P90": 0.2,
+        "Shotgun.RIA VR80": 0.2,
+        "Smg.Honey Badger": 0.2
+    },
+    "/Game/Blueprints/InventorySystem/Presets/Container/AI/UICS/DA_Inventory_AI_Sniper_UICS": {
+        "Dmr.Galil Ace": 1,
+        "Dmr.FN SCAR-H": 1
+    },
+    "/Game/Blueprints/InventorySystem/Presets/Container/AI/VLF/DA_Inventory_AI_Patrol_VLF_A": {
+        "Rifle.STV-380": 4,
+        "Rifle.Norinco QBZ-97": 3.5,
+        "Rifle.Norinco CQ": 3.5,
+        "Rifle.SKS": 3,
+        "Rifle.AK-103": 1,
+        "Rifle.AK-104": 1
+    },
+    "/Game/Blueprints/InventorySystem/Presets/Container/AI/VLF/DA_Inventory_AI_Patrol_VLF_B": {
+        "Pistol.QSZ-92": 2
+    },
+    "/Game/Blueprints/InventorySystem/Presets/Container/AI/VLF/DA_Inventory_AI_Sniper_VLF": {
+        "Dmr.FN FAL": 2,
+        "Dmr.SVDS": 1
+    }
+}

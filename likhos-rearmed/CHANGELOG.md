@@ -1,3 +1,6 @@
+# 1.0.10
+* reworked NPC faction weapons pools
+
 # 1.0.8
 * buffed 7.62 HP ammo bleed chance
 

@@ -8,7 +8,8 @@
     The old tag leaves the tag list and a redirect maps it to the new one. The engine applies redirects when it loads cooked assets and saves, so every item definition, loadout and preset that names the old tag follows.
     Then stages a renamed copy of every cooked asset listed in clone.json, e.g. a mag well that takes 300 BLK mags instead of 5.56 ones.
     Then it extracts every cooked asset listed in retarget.json and points its references to one asset at another, e.g. a weapon's chamber from the 5.56 ammo set to the 300 BLK one.
-    Last, it extracts every item definition listed in stats.json and sets its stat values, e.g. the 7.62x39 HP round's damage.
+    Then it extracts every item definition listed in stats.json and sets its stat values, e.g. the 7.62x39 HP round's damage.
+    Last, it extracts every NPC loadout preset listed in loadouts.json and sets the weapon pool it picks from.
     Called by build.ps1, which packs the staged tree.
 #>
 [CmdletBinding()]
@@ -269,6 +270,43 @@ foreach ($entry in $stats.PSObject.Properties) {
     }
 
     Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset") -Parse
+}
+
+# ---------------------------------------------------------------- loadouts
+# An NPC preset rolls its weapon from the one container whose ItemSpawnChances map weapon tags to weights. The listed pool replaces that map whole.
+# Tags are the staged ini's, reclass applied, so the presets don't depend on tag redirects reaching them.
+$loadouts = Get-Content (Join-Path $PSScriptRoot 'loadouts.json') -Raw | ConvertFrom-Json
+foreach ($entry in $loadouts.PSObject.Properties) {
+    $asset = $entry.Name
+    if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loadouts.json and another stage." }
+
+    $data = Read-Asset $asset -Parse
+    $containers = @((@($data.Exports | Where-Object ObjectName -eq ($asset -split '/')[-1])[0].Data | Where-Object Name -eq 'DefaultItemsContainers').Value)
+    $pools = @(foreach ($container in $containers) {
+        $parameters = @($container.Value | Where-Object Name -eq 'RandomItemParameters')
+        $chances = @($parameters.Value | Where-Object Name -eq 'ItemSpawnChances')
+        if (-not $chances.Count -or -not $chances[0].Value.Count) { continue }
+        $keys = @($chances[0].Value | ForEach-Object { ($_[0].Value | Where-Object Name -eq 'TagName').Value })
+        if (-not @($keys | Where-Object { -not "$_".StartsWith("$weaponsTag.") }).Count) { $chances[0] }
+    })
+    if ($pools.Count -ne 1) { Write-Error "$asset has $($pools.Count) weapon containers, expected one." }
+    $pool = $pools[0]
+
+    $template = $pool.Value[0] | ConvertTo-Json -Depth 100
+    $pool.Value = @(foreach ($weapon in $entry.Value.PSObject.Properties) {
+        $tag = "$weaponsTag.$($weapon.Name)"
+        if ((Find-Tag $tag).Count -ne 1) { Write-Error "$tag in loadouts.json is not in the staged tag list." }
+        if ($data.NameMap -notcontains $tag) { $data.NameMap += $tag }
+        $pair = $template | ConvertFrom-Json
+        ($pair[0].Value | Where-Object Name -eq 'TagName').Value = $tag
+        $pair[1].Value = [double] $weapon.Value
+        $pair[1].IsZero = $weapon.Value -eq 0
+        # A bare pair would be unrolled into the outer array.
+        , $pair
+    })
+
+    Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset") -Parse
+    Write-Host "  $(($asset -split '/')[-1]): $($pool.Value.Count) weapons"
 }
 
 Remove-Item $work -Recurse -Force

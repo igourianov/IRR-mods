@@ -14,14 +14,19 @@ This mod adjusts various weapon stats
 * Rechambered Rattler from 5.56 to 300BLK
 * Incrased bleed chance on 7.62 HP ammo from 10 to 40%
 
-## Ammo
+## NPC loadouts
 
-7.62x39 HP:
+Each faction's NPCs carry weapons that fit the faction.
 
-* Damage: 48 -> 52
-* Penetration: 16 -> 10
-* Piercing level: 2 -> 1
-* Bleeding chance: 10% -> 40%
+* IGC patrols carry mostly 5.45 AKs, with some PP-19 Vityaz and Saiga shotguns.
+* IGC snipers use only SVD.
+* UICS patrols carry mostly M4s, with some MP5s and Benelli shotguns.
+* UICS guards use asortment of exostic NATO weapons.
+* UICS snipers use Galil or SCAR-H.
+* UICS pistol patrols are unchanged
+* VLF use 7.62x39 rifles or Chinese 5.56 rifles.
+* VLF pistol patrols carry only the QSZ-92.
+* VLF snipers mostly use FAL and sometimes the SVD.
 
 ## Installation
 
@@ -35,4 +40,20 @@ Delete `Paks\~mods\likhos_rearmed_P.pak`. Weapons and ammo already in your stash
 
 ## Compatibility
 
-The mod replaces the game's `DefaultGameplayTags.ini`, the Rattler's item definition (`ID_Sig_Sauer_MCX_Rattler`) and preset (`DA_Sig_Sauer_MCX_Rattler`) and the 7.62x39 HP round's item definition (`ID_762x39_HP`). It conflicts with any other mod that replaces those files, and it needs an update after every game patch that changes them.
+The mod replaces these game files:
+
+- `DefaultGameplayTags.ini`
+- The Rattler's item definition (`ID_Sig_Sauer_MCX_Rattler`)
+- The Rattler's preset (`DA_Sig_Sauer_MCX_Rattler`)
+- The 7.62x39 HP round's item definition (`ID_762x39_HP`)
+- Eight NPC loadout presets:
+  - `DA_Inventory_AI_Patrol_IGC_A`
+  - `DA_Inventory_AI_Sniper_IGC`
+  - `DA_Inventory_AI_Patrol_UICS_A`
+  - `DA_Inventory_AI_Guard_UICS`
+  - `DA_Inventory_AI_Sniper_UICS`
+  - `DA_Inventory_AI_Patrol_VLF_A`
+  - `DA_Inventory_AI_Patrol_VLF_B`
+  - `DA_Inventory_AI_Sniper_VLF`
+
+It conflicts with any other mod that replaces those files, and it needs an update after every game patch that changes them.
