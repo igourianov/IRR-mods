@@ -1,3 +1,6 @@
+# 1.0.11
+* rebalanced muzzle devices
+
 # 1.0.10
 * reworked NPC faction weapons pools
 

@@ -1,5 +1,192 @@
 {
     "/Game/Blueprints/InventorySystem/Items/Ammunition/Rounds/762x39/762x39_HP/ID_762x39_HP": {
         "BleedingChance": 40
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AAC_762-SDN-6_Suppressor/ID_AAC_762-SDN-6_Suppressor": {
+        "Recoil": -3
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AK-74_Steel_PATRIOT_Silencer/ID_AK-74_Steel_PATRIOT_Silencer": {
+        "Recoil": -4.5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AR-15_Griffin_Armament_M4SD_II_Silencer/ID_AR-15_Griffin_Armament_M4SD_II_Silencer": {
+        "Recoil": -4.5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AUG_Ase_Utra_S_Series_SL7i_Suppressor/ID_AUG_Ase_Utra_S_Series_SL7i_Suppressor": {
+        "Recoil": -3
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/DT338_Suppressor/ID_DT338_Suppressor": {
+        "Recoil": -5.5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Honey_Badger_Standard_Suppressor/ID_Honey_Badger_Standard_Suppressor": {
+        "Recoil": -4.5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Honey_Badger_Trash_PANDA_Suppressor/ID_Honey_Badger_Trash_PANDA_Suppressor": {
+        "Recoil": -5.5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/KVP_XL_45ACP_Suppressor/ID_KVP_XL_45ACP_Suppressor": {
+        "Recoil": -2.5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/M700_PGW_Timberwolf_Suppressor/ID_M700_PGW_Timberwolf_Suppressor": {
+        "Recoil": -4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/MP5_PDW_Suppressor/ID_MP5_PDW_Suppressor": {
+        "Recoil": -3.5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/MPX_Ronin_12_Inch_9x19_Suppressor/ID_MPX_Ronin_12_Inch_9x19_Suppressor": {
+        "Recoil": -6
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/MPX_Ronin_8_Inch_9x19_Suppressor/ID_MPX_Ronin_8_Inch_9x19_Suppressor": {
+        "Recoil": -5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/PBS-4_545x39_Suppressor/ID_PBS-4_545x39_Suppressor": {
+        "Recoil": -3.5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/QBZ-97_556x45_Suppressor/ID_QBZ-97_556x45_Suppressor": {
+        "Recoil": -4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/RS_Putnik_Multi-Caliber_Suppressor/ID_RS_Putnik_Multi-Caliber_Suppressor": {
+        "Recoil": -4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Sig_Sauer_SRD762_Suppressor/ID_Sig_Sauer_SRD762_Suppressor": {
+        "Recoil": -4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SilencerCo_Hybrid_46_Suppressor/ID_SilencerCo_Hybrid_46_Suppressor": {
+        "Recoil": -4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SilencerCo_Omega_45k_Suppressor/ID_SilencerCo_Omega_45k_Suppressor": {
+        "Recoil": -3
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SilencerCo_Osprey_45K_Suppressor/ID_SilencerCo_Osprey_45K_Suppressor": {
+        "Recoil": -4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SilencerCo_Salvo12_Suppressor/ID_SilencerCo_Salvo12_Suppressor": {
+        "Recoil": -4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SKS_OSS_HX-QD_762_Suppressor/ID_SKS_OSS_HX-QD_762_Suppressor": {
+        "Recoil": -4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Surefire_Ryder_9M_TI_Suppressor/ID_Surefire_Ryder_9M_TI_Suppressor": {
+        "Recoil": -3
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Surefire_SOCOM338-TI_Suppressor/ID_Surefire_SOCOM338-TI_Suppressor": {
+        "Recoil": -5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Surefire_SOCOM556-MONSTER_Suppressor/ID_Surefire_SOCOM556-MONSTER_Suppressor": {
+        "Recoil": -5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SVD_Rotor43_762x54_Suppressor/ID_SVD_Rotor43_762x54_Suppressor": {
+        "Recoil": -4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/TGP-A_545x39_Suppressor/ID_TGP-A_545x39_Suppressor": {
+        "Recoil": -4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AK-12_545x39_Muzzle/ID_AK-12_545x39_Muzzle": {
+        "Recoil": -17.5,
+        "Ergonomics": -5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AK-74M_Muzzle_Brake/ID_AK-74M_Muzzle_Brake": {
+        "Recoil": -16.5,
+        "Ergonomics": -5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AKS-74U_Muzzle/ID_AKS-74U_Muzzle": {
+        "Recoil": -12.5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/DT338_Muzzle_Brake/ID_DT338_Muzzle_Brake": {
+        "Recoil": -17,
+        "Ergonomics": -3
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/FAL_Standard_Muzzle/ID_FAL_Standard_Muzzle": {
+        "Recoil": -14,
+        "Ergonomics": -7.5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Galil_ACE_II_762x51_Muzzle/ID_Galil_ACE_II_762x51_Muzzle": {
+        "Recoil": -18.5,
+        "Ergonomics": -7
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Honey_Badger_Cherry_Bomb_Muzzle_Brake/ID_Honey_Badger_Cherry_Bomb_Muzzle_Brake": {
+        "Recoil": -12
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Jmac_Customs_RRD-4C_545x39_Muzzle_Brake/ID_Jmac_Customs_RRD-4C_545x39_Muzzle_Brake": {
+        "Recoil": -19.5,
+        "Ergonomics": -4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/M700_PGW_Timberwolf_Muzzle_Brake/ID_M700_PGW_Timberwolf_Muzzle_Brake": {
+        "Recoil": -17
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/M9A3_Compensator/ID_M9A3_Compensator": {
+        "Recoil": -18,
+        "Ergonomics": -2
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/P320_Compact_Compensator/ID_P320_Compact_Compensator": {
+        "Recoil": -17.5,
+        "Ergonomics": -2
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/P90_Flash_Hider/ID_P90_Flash_Hider": {
+        "Recoil": -17
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/PP-19_Muzzle/ID_PP-19_Muzzle": {
+        "Recoil": -17.5,
+        "Ergonomics": -3
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Saiga_12K_GK-02_12ga_Muzzle_Device/ID_Saiga_12K_GK-02_12ga_Muzzle_Device": {
+        "Recoil": -21,
+        "Ergonomics": -10
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Saiga_12K_Tromix_Monster_Claw_12ga_Muzzle_Device/ID_Saiga_12K_Tromix_Monster_Claw_12ga_Muzzle_Device": {
+        "Recoil": -25,
+        "Ergonomics": -12
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Surefire_SOCOM338-TI_Muzzle_Brake/ID_Surefire_SOCOM338-TI_Muzzle_Brake": {
+        "Recoil": -17.5,
+        "Ergonomics": -6
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Zenitco_DTK-1_545x39_Muzzle_Brake/ID_Zenitco_DTK-1_545x39_Muzzle_Brake": {
+        "Recoil": -20,
+        "Ergonomics": -4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AR-10_M110_762x51_Muzzle_Brake/ID_AR-10_M110_762x51_Muzzle_Brake": {
+        "Recoil": -2,
+        "Ergonomics": 1
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AR-15_Griffin_Armament_Gate-LOK_Hammer_Flash_Hider/ID_AR-15_Griffin_Armament_Gate-LOK_Hammer_Flash_Hider": {
+        "Recoil": -4,
+        "Ergonomics": 5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AUG_A3_Flash_Hider/ID_AUG_A3_Flash_Hider": {
+        "Recoil": -2,
+        "Ergonomics": 1
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Colt_USGI_A2_Flash_Hider/ID_Colt_USGI_A2_Flash_Hider": {
+        "Recoil": -2,
+        "Ergonomics": 4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Honey_Badger_Whistletip_Muzzle_Brake/ID_Honey_Badger_Whistletip_Muzzle_Brake": {
+        "Recoil": -3,
+        "Ergonomics": 1.5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/MPX_9x19_Flash_Hider/ID_MPX_9x19_Flash_Hider": {
+        "Recoil": -2,
+        "Ergonomics": 4
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SCAR-H_AAC_SD_51T_Flash_Hider/ID_SCAR_H_AAC_SD_51T_Flash_Hider": {
+        "Recoil": -2,
+        "Ergonomics": -2
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SCAR-L_AAC_SD_51T_Flash_Hider/ID_SCAR-L_AAC_SD_51T_Flash_Hider": {
+        "Recoil": -2,
+        "Ergonomics": 1
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Surefire_SD3P-556_3_Flash_Hider/ID_Surefire_SD3P-556_3_Flash_Hider": {
+        "Recoil": -1,
+        "Ergonomics": 1
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/M9A3_Thread_Protector/ID_M9A3_Thread_Protector": {
+        "Recoil": 0
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Saiga_12K_12ga_Muzzle_Device/ID_Saiga_12K_12ga_Muzzle_Device": {
+        "Recoil": 0
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SVD_Rotor43_Thread_Adapter/ID_SVD_Rotor43_Thread_Adapter": {
+        "Recoil": 0
     }
 }
