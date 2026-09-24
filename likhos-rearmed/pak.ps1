@@ -16,8 +16,8 @@
 param(
     [Parameter(Mandatory)] [string] $Repak,
     [Parameter(Mandatory)] [string] $UAssetGUI,
-    # Name of the game's usmap in UAssetGUI's mappings folder.
-    [Parameter(Mandatory)] [string] $Mappings,
+    # Names of copies of the game's usmap in UAssetGUI's mappings folder, one per parallel UAssetGUI instance.
+    [Parameter(Mandatory)] [string[]] $Mappings,
     [Parameter(Mandatory)] [string] $PaksDir,
     [Parameter(Mandatory)] [string] $StageDir
 )
@@ -43,12 +43,14 @@ function Find-GamePak {
     $found[0]
 }
 
-function Expand-GameFile {
-    param([string] $Path, [string] $To = $StageDir)
-    $pak = Find-GamePak $Path
-    & $Repak unpack -q -f -i $Path -o $To $pak
-    if ($LASTEXITCODE) { Write-Error "repak failed to extract $Path from $(Split-Path $pak -Leaf)." }
-    Join-Path $To $Path
+function Expand-GameFiles {
+    param([string[]] $Paths, [string] $To = $StageDir)
+    # Without an include, repak extracts everything.
+    if (-not $Paths) { return }
+    $Paths = @($Paths | Select-Object -Unique)
+    $gamePaks = @($Paths | ForEach-Object { Find-GamePak $_ } | Select-Object -Unique)
+    & $Repak unpack -q -f @($Paths | ForEach-Object { '-i'; $_ }) -o $To @gamePaks
+    if ($LASTEXITCODE) { Write-Error "repak failed to extract $($Paths -join ', ') from $(($gamePaks | Split-Path -Leaf) -join ', ')." }
 }
 
 function Get-AssetPath {
@@ -58,7 +60,8 @@ function Get-AssetPath {
 }
 
 # ---------------------------------------------------------------- reclass
-$file = Expand-GameFile $iniPath
+Expand-GameFiles $iniPath
+$file = Join-Path $StageDir $iniPath
 $bytes = [System.IO.File]::ReadAllBytes($file)
 $bom = $bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF
 $text = [System.IO.File]::ReadAllText($file)
@@ -107,43 +110,70 @@ foreach ($entry in $reclass.PSObject.Properties) {
 # With -Parse the usmap turns exports into properties, whose names are no longer name map indexes, so renaming a name map entry would leave them behind. Only the stats stage parses.
 $work = Join-Path ([System.IO.Path]::GetTempPath()) "likhos-rearmed.$([System.IO.Path]::GetRandomFileName().Split('.')[0])"
 New-Item -ItemType Directory $work | Out-Null
-$json = Join-Path $work 'asset.json'
 
 function Invoke-UAssetGUI {
-    param([string[]] $Arguments)
-    # A GUI executable: the call operator wouldn't wait for it.
-    $process = Start-Process $UAssetGUI -ArgumentList ($Arguments | ForEach-Object { "`"$_`"" }) -Wait -NoNewWindow -PassThru
-    if ($process.ExitCode) { Write-Error "UAssetGUI $($Arguments[0]) failed with exit code $($process.ExitCode)." }
+    param([hashtable[]] $Calls)
+    # Every launch starts .NET and loads the usmap, so the calls run in parallel, one per usmap copy.
+    # Parallel instances reading one usmap file often skip it silently and leave exports unparsed.
+    # Call i reuses the copy of call i - N, so it waits for that one first.
+    $processes = [System.Collections.Generic.List[System.Diagnostics.Process]]::new()
+    for ($i = 0; $i -lt $Calls.Count; $i++) {
+        if ($i -ge $Mappings.Count) { $processes[$i - $Mappings.Count].WaitForExit() }
+        $arguments = $Calls[$i].Arguments + @(if ($Calls[$i].Parse) { $Mappings[$i % $Mappings.Count] })
+        # A GUI executable: the call operator wouldn't wait for it.
+        $process = Start-Process $UAssetGUI -ArgumentList ($arguments | ForEach-Object { "`"$_`"" }) -NoNewWindow -PassThru
+        # Without a handle taken while it runs, ExitCode reads null after exit.
+        $null = $process.Handle
+        $processes.Add($process)
+    }
+    foreach ($process in $processes) { $process.WaitForExit() }
+    for ($i = 0; $i -lt $Calls.Count; $i++) {
+        if ($processes[$i].ExitCode) { Write-Error "UAssetGUI $($Calls[$i].Arguments[0..1] -join ' ') failed with exit code $($processes[$i].ExitCode)." }
+    }
 }
 
+# UAssetGUI writes are queued and run together by Save-QueuedAssets.
+$writes = [System.Collections.Generic.List[hashtable]]::new()
+
 function Save-Asset {
-    param($Data, [string] $Path, [switch] $Parse)
+    param($Data, [string] $Path, [switch] $Parse, [string] $Original)
+    $json = Join-Path $work "$([System.IO.Path]::GetRandomFileName()).json"
     [System.IO.File]::WriteAllText($json, ($Data | ConvertTo-Json -Depth 100), [System.Text.UTF8Encoding]::new($false))
     Remove-Item $Path, ($Path -replace '\.uasset$', '.uexp') -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Force (Split-Path $Path) | Out-Null
-    Invoke-UAssetGUI (@('fromjson', $json, $Path) + @(if ($Parse) { $Mappings }))
-    # UAssetGUI exits 0 without writing anything when the JSON names an FName that isn't in the name map.
-    if (-not (Test-Path $Path)) { Write-Error "UAssetGUI wrote no $Path. A name the edit uses may be missing from the name map." }
+    $writes.Add(@{ Arguments = @('fromjson', $json, $Path); Parse = [bool] $Parse; Path = $Path; Original = $Original })
 }
 
-function Read-Asset {
-    param([string] $Package, [switch] $Parse)
-    $path = Get-AssetPath $Package
-    $uasset = Expand-GameFile "$path.uasset" $work
-    Expand-GameFile "$path.uexp" $work | Out-Null
-
-    Invoke-UAssetGUI (@('tojson', $uasset, $json, $engineVersion) + @(if ($Parse) { $Mappings }))
-    $data = Get-Content $json -Raw | ConvertFrom-Json
-
-    # An unedited round trip through UAssetGUI and ConvertTo-Json must reproduce the game's bytes, or the edited asset can't be trusted.
-    $check = Join-Path $work 'check.uasset'
-    Save-Asset $data $check -Parse:$Parse
-    foreach ($ext in 'uasset', 'uexp') {
-        if ((Get-FileHash (Join-Path $work "$path.$ext")).Hash -ne (Get-FileHash ($check -replace '\.uasset$', ".$ext")).Hash) {
-            Write-Error "UAssetGUI doesn't round-trip $Package.$ext unchanged."
+function Save-QueuedAssets {
+    Invoke-UAssetGUI $writes
+    foreach ($write in $writes) {
+        # UAssetGUI exits 0 without writing anything when the JSON names an FName that isn't in the name map.
+        if (-not (Test-Path $write.Path)) { Write-Error "UAssetGUI wrote no $($write.Path). A name the edit uses may be missing from the name map." }
+        if (-not $write.Original) { continue }
+        foreach ($ext in 'uasset', 'uexp') {
+            if ((Get-FileHash ($write.Original -replace '\.uasset$', ".$ext")).Hash -ne (Get-FileHash ($write.Path -replace '\.uasset$', ".$ext")).Hash) {
+                Write-Error "UAssetGUI doesn't round-trip $($write.Original -replace '\.uasset$', ".$ext") unchanged."
+            }
         }
     }
-    $data
+}
+
+function Read-Assets {
+    param([string[]] $Packages, [switch] $Parse)
+    $reads = @(foreach ($package in $Packages) {
+        $path = Get-AssetPath $package
+        @{ Path = $path; Uasset = Join-Path $work "$path.uasset"; Json = Join-Path $work "$([System.IO.Path]::GetRandomFileName()).json" }
+    })
+    Expand-GameFiles @($reads | ForEach-Object { "$($_.Path).uasset"; "$($_.Path).uexp" }) $work
+    Invoke-UAssetGUI @($reads | ForEach-Object { @{ Arguments = @('tojson', $_.Uasset, $_.Json, $engineVersion); Parse = [bool] $Parse } })
+
+    foreach ($read in $reads) {
+        $data = Get-Content $read.Json -Raw | ConvertFrom-Json
+        if ($Parse -and -not @($data.Exports | Where-Object '$type' -notlike 'UAssetAPI.ExportTypes.RawExport,*').Count) { Write-Error "UAssetGUI left every export of $($read.Path) unparsed. The usmap didn't load." }
+        # An unedited round trip through UAssetGUI and ConvertTo-Json must reproduce the game's bytes, or the edited asset can't be trusted.
+        Save-Asset $data ($read.Json -replace '\.json$', '.uasset') -Parse:$Parse -Original $read.Uasset
+        $data
+    }
 }
 
 function Get-AssetNames {
@@ -157,13 +187,16 @@ function Get-AssetNames {
 # ---------------------------------------------------------------- clone
 $cloned = [System.Collections.Generic.HashSet[string]]::new()
 $clone = Get-Content (Join-Path $PSScriptRoot 'clone.json') -Raw | ConvertFrom-Json
-foreach ($entry in $clone.PSObject.Properties) {
+$entries = @($clone.PSObject.Properties)
+$assets = @(Read-Assets $entries.Value.from)
+for ($n = 0; $n -lt $entries.Count; $n++) {
+    $entry = $entries[$n]
+    $data = $assets[$n]
     $new = $entry.Name
     $source = $entry.Value.from
     $path = Get-AssetPath $new
     if (@($paks.Values | Where-Object { $_.Contains("$path.uasset") }).Count) { Write-Error "$new already exists in the game's paks." }
 
-    $data = Read-Asset $source
     $names = Get-AssetNames $source $new
     foreach ($name in $entry.Value.names.PSObject.Properties) {
         if ($data.NameMap -notcontains $name.Name) { Write-Error "$source has no name $($name.Name)." }
@@ -185,9 +218,12 @@ foreach ($entry in $clone.PSObject.Properties) {
 
 # ---------------------------------------------------------------- retarget
 $retarget = Get-Content (Join-Path $PSScriptRoot 'retarget.json') -Raw | ConvertFrom-Json
-foreach ($entry in $retarget.PSObject.Properties) {
+$entries = @($retarget.PSObject.Properties)
+$assets = @(Read-Assets $entries.Name)
+for ($n = 0; $n -lt $entries.Count; $n++) {
+    $entry = $entries[$n]
     $asset = $entry.Name
-    $data = Read-Asset $asset
+    $data = $assets[$n]
     $imports = $data.Imports
     foreach ($ref in $entry.Value.PSObject.Properties) {
         $old = $ref.Name
@@ -238,12 +274,15 @@ function Find-Stat {
 }
 
 $stats = Get-Content (Join-Path $PSScriptRoot 'stats.json') -Raw | ConvertFrom-Json
-foreach ($entry in $stats.PSObject.Properties) {
+$entries = @($stats.PSObject.Properties)
+$assets = @(Read-Assets $entries.Name -Parse)
+for ($n = 0; $n -lt $entries.Count; $n++) {
+    $entry = $entries[$n]
     $asset = $entry.Name
     # Both stages start from the game's copy, so the second write would drop the first one's edits.
     if ($retarget.PSObject.Properties[$asset]) { Write-Error "$asset is listed in both retarget.json and stats.json." }
 
-    $data = Read-Asset $asset -Parse
+    $data = $assets[$n]
     $exports = $data.Exports
     $definition = @($exports | Where-Object ObjectName -eq ($asset -split '/')[-1])
     if ($definition.Count -ne 1) { Write-Error "$asset has no item definition export." }
@@ -276,11 +315,14 @@ foreach ($entry in $stats.PSObject.Properties) {
 # An NPC preset rolls its weapon from the one container whose ItemSpawnChances map weapon tags to weights. The listed pool replaces that map whole.
 # Tags are the staged ini's, reclass applied, so the presets don't depend on tag redirects reaching them.
 $loadouts = Get-Content (Join-Path $PSScriptRoot 'loadouts.json') -Raw | ConvertFrom-Json
-foreach ($entry in $loadouts.PSObject.Properties) {
+$entries = @($loadouts.PSObject.Properties)
+$assets = @(Read-Assets $entries.Name -Parse)
+for ($n = 0; $n -lt $entries.Count; $n++) {
+    $entry = $entries[$n]
     $asset = $entry.Name
     if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loadouts.json and another stage." }
 
-    $data = Read-Asset $asset -Parse
+    $data = $assets[$n]
     $containers = @((@($data.Exports | Where-Object ObjectName -eq ($asset -split '/')[-1])[0].Data | Where-Object Name -eq 'DefaultItemsContainers').Value)
     $pools = @(foreach ($container in $containers) {
         $parameters = @($container.Value | Where-Object Name -eq 'RandomItemParameters')
@@ -309,4 +351,5 @@ foreach ($entry in $loadouts.PSObject.Properties) {
     Write-Host "  $(($asset -split '/')[-1]): $($pool.Value.Count) weapons"
 }
 
+Save-QueuedAssets
 Remove-Item $work -Recurse -Force

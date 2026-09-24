@@ -136,11 +136,16 @@ foreach ($m in $Mods) {
         $ue4ssDir = Split-Path $modsDir
         $usmap = Get-ChildItem $ue4ssDir -Filter *.usmap -File | Sort-Object LastWriteTime | Select-Object -Last 1
         if (-not $usmap) { Write-Error "No usmap in $ue4ssDir. Generate one in game with UE4SS's mappings dump key after every game patch." }
+        # pak.ps1 runs UAssetGUI in parallel, and parallel instances sharing one usmap file often skip it silently, so each one gets its own copy.
         $mappingsDir = Join-Path $env:LOCALAPPDATA 'UAssetGUI\Mappings'
         New-Item -ItemType Directory -Force $mappingsDir | Out-Null
-        Copy-Item $usmap.FullName (Join-Path $mappingsDir "$($cfg.game.module).usmap") -Force
+        $mappings = @(foreach ($i in 1..[Environment]::ProcessorCount) {
+            $name = "$($cfg.game.module)-$i"
+            Copy-Item $usmap.FullName (Join-Path $mappingsDir "$name.usmap") -Force
+            $name
+        })
 
-        & (Join-Path $src 'pak.ps1') -Repak $repak -UAssetGUI (Get-Tool UAssetGUI) -Mappings $cfg.game.module -PaksDir $paksDir -StageDir $stage
+        & (Join-Path $src 'pak.ps1') -Repak $repak -UAssetGUI (Get-Tool UAssetGUI) -Mappings $mappings -PaksDir $paksDir -StageDir $stage
 
         New-Item -ItemType Directory -Force $distDir | Out-Null
         $pakPath = Join-Path $distDir $pak
