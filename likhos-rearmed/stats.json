@@ -1,8 +1,5 @@
 {
     "/Game/Blueprints/InventorySystem/Items/Ammunition/Rounds/762x39/762x39_HP/ID_762x39_HP": {
-        "Damage": 52,
-        "Penetration": 10,
-        "PiercingLevel": 1,
         "BleedingChance": 40
     }
 }

@@ -9,9 +9,10 @@ This mod adjusts various weapon stats
 * SKS: DMR -> Rifle
 * AKS-74U, Rattler, Honey Badger: Rifle -> SMG
 
-## Caliber
+## Caliber/Ammo
 
-Rechambered Rattler from 5.56 to 300BLK
+* Rechambered Rattler from 5.56 to 300BLK
+* Incrased bleed chance on 7.62 HP ammo from 10 to 40%
 
 ## Ammo
 

@@ -1,3 +1,6 @@
+# 1.0.8
+* buffed 7.62 HP ammo bleed chance
+
 # 1.0.7
 * renamed from Likho's Reclass to Likho's Rearmed
 
