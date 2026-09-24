@@ -1,18 +1,18 @@
 # Likho's Rearmed
 
-This mod adjusts various weapon stats
+This mod rebalances various weapon stats, and adjusts faction weapon pool.
 
 ## Classification
 
-* FAL: Rifle -> DMR
-* SVD: Sniper -> DMR
-* SKS: DMR -> Rifle
-* AKS-74U, Rattler, Honey Badger: Rifle -> SMG
+* FAL: Rifle -> DMR.
+* SVD: Sniper -> DMR.
+* SKS: DMR -> Rifle.
+* AKS-74U, Rattler, Honey Badger: Rifle -> SMG.
 
 ## Caliber/Ammo
 
-* Rechambered Rattler from 5.56 to 300BLK
-* Incrased bleed chance on 7.62 HP ammo from 10 to 40%
+* Rechambered Rattler from 5.56 to 300BLK.
+* Increased bleed chance on 7.62 HP ammo from 10 to 40%.
 
 ## NPC loadouts
 
@@ -21,10 +21,9 @@ Each faction's NPCs carry weapons that fit the faction.
 * IGC patrols carry mostly 5.45 AKs, with some PP-19 Vityaz and Saiga shotguns.
 * IGC snipers use only SVD.
 * UICS patrols carry mostly M4s, with some MP5s and Benelli shotguns.
-* UICS guards use asortment of exostic NATO weapons.
+* UICS guards use an assortment of exotic NATO weapons.
 * UICS snipers use Galil or SCAR-H.
-* UICS pistol patrols are unchanged
-* VLF use 7.62x39 rifles or Chinese 5.56 rifles.
+* VLF patrols use 7.62x39 rifles or Chinese 5.56 rifles.
 * VLF pistol patrols carry only the QSZ-92.
 * VLF snipers mostly use FAL and sometimes the SVD.
 
