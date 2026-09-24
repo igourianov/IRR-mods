@@ -1,7 +1,7 @@
 [mod]
 name="Likho's Point and Shoot"
 id="likhos-point-and-shoot"
-version="1.0.57"
+version="1.0.59"
 description="Hold a key to aim straight into point shooting, a key for the weapon light and zoom to flip the magnifier"
 
 [ue4ss]
