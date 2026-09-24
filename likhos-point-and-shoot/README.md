@@ -1,6 +1,6 @@
 # Likho's Point and Shoot
 
-This mod reworks Point Shooting and tactical device activation.
+This mod reworks Point Shooting, tactical device activation and the flip magnifier.
 
 ## Point Shooting
 
@@ -27,7 +27,7 @@ Works as both momentary switch and toggle. Contextual to NVG same way the laser 
 
 ## Magnifier binding
 
-The EOTech+Magnifier combo now works using the mouse scroll, same way LPVO does. Old binding still works but unnecessary.
+The EOTech+Magnifier combo now works using the mouse scroll, same way LPVO does. Old binding still works but unnecessary. Set `magnifier_zoom = false` in `Scripts\config.lua` to turn it off.
 
 ## Requirements
 

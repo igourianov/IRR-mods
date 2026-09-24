@@ -71,11 +71,11 @@ Owns every game name to do with sights and the magnifier. Holds no UObject betwe
   - the sight's `SightModes` has a `Folded` entry, its `SightModeKey` is not the target mode and no flip the mod requested is pending.
 - It then injects one `IA_ToggleMagnifier` press through the Enhanced Input subsystem and records a pending flip: plain values only, the sight's full name, the target mode and the time. The vanilla ability does the flip.
 - A pending flip clears once the sight reads the target mode, the sight is no longer current or a short timeout passes. While it is pending, further notches inject nothing, so the rest of a flick's notches, which arrive before the game has handled the injected press, can't send a second toggle that undoes the first. The pending flip also clears on level load.
-- Every hook body runs under `util.safe`. A failed state read logs once per session and leaves zoom vanilla.
+- Every hook body is guarded so an error never leaves the hook. A failure logs once per session, not per notch, and leaves zoom vanilla.
 
 ### `actions.lua`
 
-The one-frame press injection is one function parameterized by input action path, used by `PointAim` for `IA_Aim` and by `magnifier.lua` for `IA_ToggleMagnifier`. `PointAim`'s behavior is unchanged.
+The one-frame press injection is one function parameterized by input action path, used by `PointAim` for `IA_Aim` and by `magnifier.lua` for `IA_ToggleMagnifier`. The lookup of the local player's equipped weapon component is likewise shared, used by `Flashlight` and by `magnifier.lua` for its current sight check. `PointAim`'s and `Flashlight`'s behavior is unchanged.
 
 ### `main.lua` and `config.lua`
 

@@ -21,6 +21,10 @@ return {
     -- Released inside this window, the light it turned on stays on until the next press. Held past it, the light goes off on release.
     tap_ms = 250,
 
+    -- The zoom input folds and unfolds the magnifier on a hybrid sight: scroll forward unfolds, scroll back folds.
+    -- Set false for vanilla zoom.
+    magnifier_zoom = true,
+
     binds = {
         {
             id      = "point_aim",
