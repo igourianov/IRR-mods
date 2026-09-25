@@ -16,16 +16,12 @@ This mod rebalances various weapon stats, and adjusts faction weapon pool.
 
 ## Muzzle devices
 
-Each type of muzzle device has its own role.
+Each type of muzzle device now has its own role.
 
-* Suppressors reduce recoil about 60% less than before and keep their heavy ergonomics penalty. Their real benefit is sound suppression.
-* Muzzle brakes / compensators reduce recoil by 12 to 25%, at a small ergonomics cost.
-* Flash hiders improve ergonomics and slightly reduce recoil.
-* Thread protectors and adapters no longer reduce recoil.
-
-*Known issues:* 
-* Some devices are misnamed in the vanilla game. E.g. `P90 flash hider` is actually a muzzle brake / compensator. This mod only changes stats, not names.
-* Vanilla does simple sum when multiple muzzle devices equipped. E.g. a suppressor over a muzzle brake. This is not a realistic behavior, but it is hardcoded and I can't easily fix this.
+* Suppressors recoil reduction nerfed by about 60% across the board. Their real benefit is sound suppression.
+* Buffed muzzle brakes / compensators recoil reduction to 12 to 25%, at a small ergonomics cost. Now they're a tangible alternative to using a suppressor.
+* Flash hiders improve ergonomics and slightly reduce recoil. Default middle ground between the two above.
+* Thread protectors and adapters no longer reduce recoil. These serve only a cosmetic purpose.
 
 ## NPC loadouts
 
@@ -67,4 +63,5 @@ It conflicts with any other mod that replaces those files, and it needs an updat
 
 ## Known issues
 
-* A suppressor mounted on a muzzle brake keeps the brake's recoil reduction on top of its own. In reality the suppressor would cancel the brake. This affects the DT338 and Surefire SOCOM338-TI suppressors on their brakes and the Honey Badger Trash PANDA on the Cherry Bomb.
+* Some devices are misnamed in the vanilla game. E.g. `P90 flash hider` is actually a muzzle brake / compensator. This mod only changes stats, not names.
+* Vanilla does a simple sum of ergos and recoil stats when multiple muzzle devices equipped (e.g. a suppressor over a muzzle brake). This is not a realistic behavior, but it is hardcoded and I can't easily fix this.
