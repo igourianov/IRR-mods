@@ -1,3 +1,6 @@
+# 1.0.12
+* reworked IGC and UICS patrols weapon pools
+
 # 1.0.11
 * rebalanced muzzle devices
 

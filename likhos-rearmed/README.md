@@ -29,16 +29,11 @@ Each type of muzzle device has its own role.
 
 ## NPC loadouts
 
-Each faction's NPCs carry weapons that fit the faction.
+Each faction's NPCs now carry weapons that fit the faction.
 
-* IGC patrols carry mostly 5.45 AKs, with some PP-19 Vityaz and Saiga shotguns.
-* IGC snipers use only SVD.
-* UICS patrols carry mostly M4s, with some MP5s and Benelli shotguns.
-* UICS guards use an assortment of exotic NATO weapons.
-* UICS snipers use Galil or SCAR-H.
-* VLF patrols use 7.62x39 rifles or Chinese 5.56 rifles.
-* VLF pistol patrols carry only the QSZ-92.
-* VLF snipers mostly use FAL and sometimes the SVD.
+* IGC: mostly 5.45x39 platform with some Vityaz, Saiga and SVD
+* UICS: mostly M4 and MP5 with low chance of exotic NATO weapons
+* VLF: 7.62x39 rifles and Chinese 5.56 rifles
 
 ## Installation
 
@@ -59,11 +54,10 @@ The mod replaces these game files:
 - The Rattler's preset (`DA_Sig_Sauer_MCX_Rattler`)
 - The 7.62x39 HP round's item definition (`ID_762x39_HP`)
 - The item definitions of every muzzle device except the AUG RAT Worx adapter (`ID_*` under `Items/Attachments/Muzzle`)
-- Eight NPC loadout presets:
+- Seven NPC loadout presets:
   - `DA_Inventory_AI_Patrol_IGC_A`
   - `DA_Inventory_AI_Sniper_IGC`
   - `DA_Inventory_AI_Patrol_UICS_A`
-  - `DA_Inventory_AI_Guard_UICS`
   - `DA_Inventory_AI_Sniper_UICS`
   - `DA_Inventory_AI_Patrol_VLF_A`
   - `DA_Inventory_AI_Patrol_VLF_B`
