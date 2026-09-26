@@ -4,7 +4,7 @@ This mod reworks Point Shooting, tactical device activation and the flip magnifi
 
 ## QoL
 
-* Bandages and Painkills now drop automatically after exhausting their use count.
+* Bandages and Painkillers now drop automatically after exhausting their use count.
 * Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter.
 
 ## Point Shooting
