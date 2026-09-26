@@ -1,6 +1,6 @@
 # Likho's Point and Shoot
 
-This mod reworks Point Shooting, tactical device activation and the flip magnifier.
+This mod reworks Point Shooting, tactical device activation and the flip magnifier, and drops spent bandages and painkillers.
 
 ## Point Shooting
 
@@ -28,6 +28,10 @@ Works as both momentary switch and toggle. Contextual to NVG same way the laser 
 ## Magnifier binding
 
 The EOTech+Magnifier combo now works using the mouse scroll, same way LPVO does. Old binding still works but unnecessary. Set `magnifier_zoom = false` in `Scripts\config.lua` to turn it off.
+
+## Spent medical items drop
+
+A bandage or painkiller pack with no uses left drops on the floor at the end of its use animation, the same way a used health injector does. A painkiller pack with uses left stays in the inventory. Set `medic_drop = false` in `Scripts\config.lua` to turn it off.
 
 ## Requirements
 

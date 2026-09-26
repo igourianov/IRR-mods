@@ -1,3 +1,6 @@
+# 1.0.60
+* spent bandages and painkillers drop on the floor at the end of their use animation, like used health injectors
+
 # 1.0.57
 * hooked up magnifier flip to the zoom (mouse scroll) action
 

@@ -11,6 +11,7 @@ local actions  = require("actions")
 local keymap   = require("keymap")
 local menu     = require("menu")
 local magnifier = require("magnifier")
+local medic    = require("medic")
 
 local config = require("config")
 
@@ -77,12 +78,14 @@ local function init()
     input.watch_player_controller(function()
         actions.reset()
         magnifier.reset()
+        medic.reset()
         -- This callback runs inside the PlayerController's construction. Build and register the mod's input objects a tick later.
         -- A hot reload needs no call: the registration lives in the engine's user settings, not in Lua.
         ExecuteInGameThreadWithDelay(1, function() util.safe("keymap register", keymap.register) end)
     end)
     menu.install()
     if config.magnifier_zoom then magnifier.install() end
+    if config.medic_drop then medic.install() end
 
     -- The tick loop runs Lua every tick_ms. Skip it when nothing can use it.
     if register_binds() > 0 then start_tick_loop() end
