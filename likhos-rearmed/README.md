@@ -25,7 +25,7 @@ Each type of muzzle device now has its own role instead of suppressors being the
 
 ## Stocks rebalance
 
-The fixed buffer tube + Viper combination being the overpowered choice on every gun. Fixed a couple of odd outliers.
+Fixed the buffer tube + Viper combination being the overpowered choice on every gun. Fixed a couple of odd outliers.
 
 * Removed recoil bonuses from buffer tubes and nerfed their ergonomics, since their stats stacked with the stock on top.
 * Removed bonuses from the SKS SAGE chassis. Like the M700 chassis, it has no built-in grip or stock, which are added separately, so the stats stacked.
