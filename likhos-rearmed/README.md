@@ -37,9 +37,9 @@ Fixed the buffer tube + Viper combination being the overpowered choice on every 
 
 Each faction's NPCs now carry weapons that fit the faction.
 
-* IGC: mostly 5.45x39 platform with some Vityaz, Saiga and SVD
-* UICS: mostly M4 and MP5 with low chance of exotic NATO weapons
-* VLF: 7.62x39 rifles and Chinese 5.56 rifles
+* IGC: mostly 5.45x39 platform with some Vityaz and Saiga. Snipers: SVD.
+* UICS: mostly M4 and MP5 + low chance of exotic NATO weapons. Snipers: SCAR-H and Galil.
+* VLF: 7.62x39 rifles and Chinese 5.56 rifles. Snipers: FAL.
 
 ## Installation
 

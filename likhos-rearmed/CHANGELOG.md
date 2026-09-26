@@ -1,3 +1,6 @@
+# 1.0.15
+* removed SVD from VLF snipers
+
 # 1.0.14
 * buffed muzzle brakes recoil comp to compensate for stock nerfs 
 

@@ -44,7 +44,6 @@
         "Pistol.QSZ-92": 2
     },
     "/Game/Blueprints/InventorySystem/Presets/Container/AI/VLF/DA_Inventory_AI_Sniper_VLF": {
-        "Dmr.FN FAL": 2,
-        "Dmr.SVDS": 1
+        "Dmr.FN FAL": 1
     }
 }
