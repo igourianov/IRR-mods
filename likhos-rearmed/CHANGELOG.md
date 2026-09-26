@@ -1,3 +1,6 @@
+# 1.0.13
+* weapon stocks and buffer tubes rebalance
+
 # 1.0.12
 * reworked IGC and UICS patrols weapon pools
 

@@ -188,5 +188,45 @@
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SVD_Rotor43_Thread_Adapter/ID_SVD_Rotor43_Thread_Adapter": {
         "Recoil": 0
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Stock/AR-15_PWS_Enhanced_Buffertube/ID_AR-15_PWS_Enhanced_Buffertube": {
+        "Recoil": 0,
+        "Ergonomics": 0
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Stock/AK_SAG_Buffertube/ID_AK_SAG_Buffertube": {
+        "Recoil": 0,
+        "Ergonomics": -2
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Stock/AR-15_Colt_A2_Buffertube/ID_AR-15_Colt_A2_Buffertube": {
+        "Recoil": 0,
+        "Ergonomics": -5
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Stock/FAL_Folding_Buffertube/ID_FAL_Folding_Buffertube": {
+        "Recoil": 0,
+        "Ergonomics": -3
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Stock/AR-15_Strike_SI_AR_Advanced_Buffertube/ID_AR-15_Strike_SI_AR_Advanced_Buffertube": {
+        "Recoil": 0,
+        "Ergonomics": -2
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Stock/AR-15_ACE_Ultra_Lite_Stock/ID_AR-15_ACE_Ultra_Lite_Stock": {
+        "Recoil": -8,
+        "Ergonomics": 24
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Stock/AR-15_Magpul_UBR_Buttstock/ID_AR-15_Magpul_UBR_Buttstock": {
+        "Recoil": -12,
+        "Ergonomics": 22
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Stock/AR-15_Strike_Industries_Viper_Mod_1_Buttstock/ID_AR-15_Strike_Industries_Viper_Mod_1_Buttstock": {
+        "Recoil": -15,
+        "Ergonomics": 8
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Stock/AK_SAG_ACR_Stock/ID_AK_SAG_ACR_Stock": {
+        "Recoil": -17,
+        "Ergonomics": 8
+    },
+    "/Game/Blueprints/InventorySystem/Items/Attachments/Stock/SKS_SAGE_International_SKSALCV_Chassis/ID_SKS_SAGE_International_SKSALCV_Chassis": {
+        "Recoil": 0,
+        "Ergonomics": 0
     }
 }

@@ -1,6 +1,6 @@
 # Likho's Rearmed
 
-This mod rebalances various weapon stats, and adjusts faction weapon pool.
+This mod rebalances various weapon stats and adjusts faction weapon pools.
 
 ## Classification
 
@@ -11,17 +11,27 @@ This mod rebalances various weapon stats, and adjusts faction weapon pool.
 
 ## Caliber/Ammo
 
-* Rechambered Rattler from 5.56 to 300BLK.
+* Rechambered Rattler from 5.56 to 300 BLK.
 * Increased bleed chance on 7.62 HP ammo from 10 to 40%.
 
-## Muzzle devices
+## Muzzle device rebalance
 
-Each type of muzzle device now has its own role.
+Each type of muzzle device now has its own role instead of suppressors being the do-all choice.
 
-* Suppressors recoil reduction nerfed by about 60% across the board. Their real benefit is sound suppression.
-* Buffed muzzle brakes / compensators recoil reduction to 12 to 25%, at a small ergonomics cost. Now they're a tangible alternative to using a suppressor.
+* Suppressor recoil reduction nerfed by about 60% across the board. Their real benefit is sound suppression.
+* Muzzle brake and compensator recoil reduction buffed to 12 to 25%, at a small ergonomics cost. Now they're a tangible alternative to using a suppressor.
 * Flash hiders improve ergonomics and slightly reduce recoil. Default middle ground between the two above.
 * Thread protectors and adapters no longer reduce recoil. These serve only a cosmetic purpose.
+
+## Stocks rebalance
+
+The fixed buffer tube + Viper combination being the overpowered choice on every gun. Fixed a couple of odd outliers.
+
+* Removed recoil bonuses from buffer tubes and nerfed their ergonomics, since their stats stacked with the stock on top.
+* Removed bonuses from the SKS SAGE chassis. Like the M700 chassis, it has no built-in grip or stock, which are added separately, so the stats stacked.
+* Shifted ACE and UBR stocks into ergos instead of recoil.
+* Buffed recoil bonus on AK SAG ACR stock.
+* Nerfed recoil bonus on Viper stock.
 
 ## NPC loadouts
 
@@ -50,6 +60,11 @@ The mod replaces these game files:
 - The Rattler's preset (`DA_Sig_Sauer_MCX_Rattler`)
 - The 7.62x39 HP round's item definition (`ID_762x39_HP`)
 - The item definitions of every muzzle device except the AUG RAT Worx adapter (`ID_*` under `Items/Attachments/Muzzle`)
+- The item definitions of these stocks (`ID_*` under `Items/Attachments/Stock`):
+  - Buffer tubes: AR-15 PWS Enhanced, AK SAG, AR-15 Colt A2, FAL Folding and AR-15 Strike SI AR Advanced
+  - AR-15 ACE Ultra Lite, AR-15 Magpul UBR and AR-15 Strike Industries Viper Mod 1
+  - AK SAG ACR
+  - SKS SAGE International SKSALCV chassis
 - Seven NPC loadout presets:
   - `DA_Inventory_AI_Patrol_IGC_A`
   - `DA_Inventory_AI_Sniper_IGC`
