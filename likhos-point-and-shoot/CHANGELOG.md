@@ -1,3 +1,6 @@
+# 1.0.63
+* medical item uses show as whole numbers on inventory tiles
+
 # 1.0.60
 * spent bandages and painkillers drop on the floor at the end of their use animation, like used health injectors
 

@@ -1,6 +1,6 @@
 # Likho's Point and Shoot
 
-This mod reworks Point Shooting, tactical device activation and the flip magnifier, and drops spent bandages and painkillers.
+This mod reworks Point Shooting, tactical device activation and the flip magnifier, drops spent bandages and painkillers and shows medical item uses as whole numbers.
 
 ## Point Shooting
 
@@ -32,6 +32,10 @@ The EOTech+Magnifier combo now works using the mouse scroll, same way LPVO does.
 ## Spent medical items drop
 
 A bandage or painkiller pack with no uses left drops on the floor at the end of its use animation, the same way a used health injector does. A painkiller pack with uses left stays in the inventory. Set `medic_drop = false` in `Scripts\config.lua` to turn it off.
+
+## Whole number medical uses
+
+A medical item's inventory tile shows its remaining and maximum uses as whole numbers, e.g. 3/4 instead of 3.0/4.0 on a painkiller pack. Set `medic_whole_uses = false` in `Scripts\config.lua` to turn it off.
 
 ## Requirements
 

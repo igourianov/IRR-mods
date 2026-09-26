@@ -29,6 +29,10 @@ return {
     -- Set false to keep them in the inventory at 0 uses.
     medic_drop = true,
 
+    -- A medical item's inventory tile shows its uses as whole numbers.
+    -- Set false for the vanilla decimals.
+    medic_whole_uses = true,
+
     binds = {
         {
             id      = "point_aim",

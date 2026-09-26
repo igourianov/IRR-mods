@@ -1,8 +1,8 @@
 [mod]
 name="Likho's Point and Shoot"
 id="likhos-point-and-shoot"
-version="1.0.62"
-description="Hold a key to aim straight into point shooting, a key for the weapon light, zoom to flip the magnifier and spent bandages and painkillers drop like injectors"
+version="1.0.63"
+description="Hold a key to aim straight into point shooting, a key for the weapon light, zoom to flip the magnifier, spent bandages and painkillers drop like injectors and medical item uses show as whole numbers"
 
 [ue4ss]
 ; UE4SS version this mod was developed and tested against.
