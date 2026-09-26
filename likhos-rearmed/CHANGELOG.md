@@ -1,3 +1,6 @@
+# 1.0.14
+* buffed muzle brakes recoil comp to compensate for stock nerfs 
+
 # 1.0.13
 * weapon stocks and buffer tubes rebalance
 

@@ -81,67 +81,67 @@
         "Recoil": -4
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AK-12_545x39_Muzzle/ID_AK-12_545x39_Muzzle": {
-        "Recoil": -17.5,
+        "Recoil": -22.5,
         "Ergonomics": -5
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AK-74M_Muzzle_Brake/ID_AK-74M_Muzzle_Brake": {
-        "Recoil": -16.5,
+        "Recoil": -21.5,
         "Ergonomics": -5
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AKS-74U_Muzzle/ID_AKS-74U_Muzzle": {
-        "Recoil": -12.5
+        "Recoil": -17.5
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/DT338_Muzzle_Brake/ID_DT338_Muzzle_Brake": {
-        "Recoil": -17,
+        "Recoil": -22,
         "Ergonomics": -3
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/FAL_Standard_Muzzle/ID_FAL_Standard_Muzzle": {
-        "Recoil": -14,
+        "Recoil": -19,
         "Ergonomics": -7.5
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Galil_ACE_II_762x51_Muzzle/ID_Galil_ACE_II_762x51_Muzzle": {
-        "Recoil": -18.5,
+        "Recoil": -23.5,
         "Ergonomics": -7
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Honey_Badger_Cherry_Bomb_Muzzle_Brake/ID_Honey_Badger_Cherry_Bomb_Muzzle_Brake": {
-        "Recoil": -12
+        "Recoil": -17
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Jmac_Customs_RRD-4C_545x39_Muzzle_Brake/ID_Jmac_Customs_RRD-4C_545x39_Muzzle_Brake": {
-        "Recoil": -19.5,
+        "Recoil": -24.5,
         "Ergonomics": -4
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/M700_PGW_Timberwolf_Muzzle_Brake/ID_M700_PGW_Timberwolf_Muzzle_Brake": {
-        "Recoil": -17
+        "Recoil": -22
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/M9A3_Compensator/ID_M9A3_Compensator": {
-        "Recoil": -18,
+        "Recoil": -23,
         "Ergonomics": -2
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/P320_Compact_Compensator/ID_P320_Compact_Compensator": {
-        "Recoil": -17.5,
+        "Recoil": -22.5,
         "Ergonomics": -2
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/P90_Flash_Hider/ID_P90_Flash_Hider": {
-        "Recoil": -17
+        "Recoil": -22
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/PP-19_Muzzle/ID_PP-19_Muzzle": {
-        "Recoil": -17.5,
+        "Recoil": -22.5,
         "Ergonomics": -3
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Saiga_12K_GK-02_12ga_Muzzle_Device/ID_Saiga_12K_GK-02_12ga_Muzzle_Device": {
-        "Recoil": -21,
+        "Recoil": -26,
         "Ergonomics": -10
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Saiga_12K_Tromix_Monster_Claw_12ga_Muzzle_Device/ID_Saiga_12K_Tromix_Monster_Claw_12ga_Muzzle_Device": {
-        "Recoil": -25,
+        "Recoil": -30,
         "Ergonomics": -12
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Surefire_SOCOM338-TI_Muzzle_Brake/ID_Surefire_SOCOM338-TI_Muzzle_Brake": {
-        "Recoil": -17.5,
+        "Recoil": -22.5,
         "Ergonomics": -6
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Zenitco_DTK-1_545x39_Muzzle_Brake/ID_Zenitco_DTK-1_545x39_Muzzle_Brake": {
-        "Recoil": -20,
+        "Recoil": -25,
         "Ergonomics": -4
     },
     "/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AR-10_M110_762x51_Muzzle_Brake/ID_AR-10_M110_762x51_Muzzle_Brake": {

@@ -18,8 +18,8 @@ This mod rebalances various weapon stats and adjusts faction weapon pools.
 
 Each type of muzzle device now has its own role instead of suppressors being the do-all choice.
 
-* Suppressor recoil reduction nerfed by about 60% across the board. Their real benefit is sound suppression.
-* Muzzle brake and compensator recoil reduction buffed to 12 to 25%, at a small ergonomics cost. Now they're a tangible alternative to using a suppressor.
+* Nerfed suppressor recoil reduction by about 60% across the board. Their real benefit is sound suppression.
+* Buffed brake / compensator recoil reduction at a small ergonomics cost. Now they're a clear alternative to using a suppressor.
 * Flash hiders improve ergonomics and slightly reduce recoil. Default middle ground between the two above.
 * Thread protectors and adapters no longer reduce recoil. These serve only a cosmetic purpose.
 
