@@ -7,8 +7,11 @@
 local log    = require("log")
 local util   = require("util")
 local keymap = require("keymap")
+local hook   = require("hook")
 
 local M = {}
+
+local hooks = hook.new("menu", "mod rows may be missing from the controls page")
 
 local ROW_CLASS = "/Game/Blueprints/UICore/Widgets/Settings/WB_SingleSettingBar.WB_SingleSettingBar_C"
 local HOOK_FN   = ROW_CLASS .. ":On_WidgetConstructed"
@@ -23,8 +26,6 @@ local KEY_MAPPED     = "PlayerMappedName_60_D667E47C4761808F2AAD738F1F328FEA"
 local ROWS = {
     PointShooting = { "LikhosPointShootingDirect", "LikhosFlashlight" },
 }
-
-local hooked = false
 
 local function mapped_name(row)
     local ok, name = pcall(function() return row.Keybindings[1][KEY_MAPPED]:ToString() end)
@@ -132,35 +133,13 @@ local function on_row_constructed(context)
 
     -- The hook fires while the page may still be building its rows, so the list is changed on the next timer tick.
     -- The row is passed by path. It is looked up again rather than held.
-    local path = anchor:GetFullName():match("^%S+ (.+)$")
-    ExecuteInGameThreadWithDelay(1, function()
-        util.safe("menu add_rows", add_rows, path, mappings)
-    end)
+    local path = util.path(anchor)
+    ExecuteInGameThreadWithDelay(1, hooks.guard(function() add_rows(path, mappings) end))
 end
 
---- Returns false when RegisterHook refuses the function.
-local function hook()
-    -- At startup the function can be found while its class is still loading. Its Func pointer is still null then and RegisterHook throws.
-    local ok, err = pcall(RegisterHook, HOOK_FN, function(context)
-        util.safe("menu hook", on_row_constructed, context)
-    end)
-    if not ok then
-        log.debug("menu: %s not hookable yet: %s", HOOK_FN, tostring(err))
-        return false
-    end
-    hooked = true
-    log.info("menu: hooked %s", HOOK_FN)
-    return true
-end
-
---- Hook the vanilla row class once it is loaded. RegisterHook needs the function in memory and linked.
+--- Hook the vanilla row class once it is loaded.
 function M.install()
-    if hooked then return end
-    if util.valid(StaticFindObject(HOOK_FN)) and hook() then return end
-    NotifyOnNewObject(ROW_CLASS, function()
-        if not hooked then hook() end
-        return true
-    end)
+    hooks.install(HOOK_FN, ROW_CLASS, on_row_constructed)
 end
 
 return M

@@ -7,8 +7,11 @@
 local log     = require("log")
 local util    = require("util")
 local actions = require("actions")
+local hook    = require("hook")
 
 local M = {}
+
+local hooks = hook.new("magnifier zoom", "zoom stays vanilla")
 
 local HOOK_FN = "/Script/Test_C.SightComponent:TrySwitchMagnificationLevel"
 local IA_TOGGLE_MAGNIFIER = "/Game/Blueprints/InputSystem/InputActions/IA_ToggleMagnifier.IA_ToggleMagnifier"
@@ -18,9 +21,6 @@ local UNFOLDED, FOLDED = "Default", "Folded"
 
 -- The mode changes within a tick of the injected press. Past this the flip is taken as refused and a new notch may try again.
 local PENDING_TIMEOUT_MS = 500
-
--- Failures log once per session, so a renamed game name doesn't flood the log on every notch.
-local error_logged = false
 
 -- Set by the pre callback for the post callback of the same call. Plain values only.
 --   sight     : full name of the sight
@@ -85,24 +85,9 @@ local function on_post(context)
     log.debug("magnifier: flipping %s to %s", name, target)
 end
 
-local function guarded(fn)
-    return function(...)
-        local ok, err = pcall(fn, ...)
-        if not ok and not error_logged then
-            error_logged = true
-            log.error("magnifier zoom failed, zoom stays vanilla: %s", tostring(err))
-        end
-    end
-end
-
---- Hook the sight's magnification call. The class is native, so it is loaded before any mod runs.
+--- Hook the sight's magnification call. The class is native.
 function M.install()
-    local ok, err = pcall(RegisterHook, HOOK_FN, guarded(on_pre), guarded(on_post))
-    if not ok then
-        log.error("magnifier: could not hook %s, magnifier zoom is off: %s", HOOK_FN, tostring(err))
-        return
-    end
-    log.info("magnifier: hooked %s", HOOK_FN)
+    hooks.install(HOOK_FN, nil, on_pre, on_post)
 end
 
 --- Drop per-call and pending flip state. Called on level load.

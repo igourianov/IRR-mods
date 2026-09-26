@@ -17,4 +17,9 @@ function M.valid(obj)
     return obj ~= nil and obj.IsValid ~= nil and obj:IsValid()
 end
 
+--- Object path for StaticFindObject: the full name without its class prefix.
+function M.path(obj)
+    return obj:GetFullName():match("^%S+ (.+)$")
+end
+
 return M

@@ -6,8 +6,11 @@
 
 local log  = require("log")
 local util = require("util")
+local hook = require("hook")
 
 local M = {}
+
+local hooks = hook.new("medic drop", "medical items stay vanilla")
 
 local ABILITY_CLASS = "/Game/Blueprints/SimpleGameplayAbilitySystem/Abilities/SGA_UseMedic.SGA_UseMedic_C"
 local HOOK_FN       = ABILITY_CLASS .. ":ExecuteNotify"
@@ -23,23 +26,8 @@ local USES_TAG = "Inventory.Stats.Durability"
 -- The injector's Drop notify fires this long before its montage ends, in montage seconds.
 local DROP_BEFORE_END = 0.17
 
-local hooked = false
-
--- Failures log once per session, so a renamed game name doesn't flood the log on every use.
-local error_logged = false
-
 -- Bumped on level load, so a drop scheduled before it does nothing.
 local generation = 0
-
-local function guarded(context, fn)
-    return function(...)
-        local ok, err = pcall(fn, ...)
-        if not ok and not error_logged then
-            error_logged = true
-            log.error("medic drop: %s failed, medical items stay vanilla: %s", context, tostring(err))
-        end
-    end
-end
 
 local function uses_left(ability)
     local stats = ability.Item.CurrentStats
@@ -87,7 +75,7 @@ local function on_pre(context, name)
     if name:get():ToString() ~= "Use" then return end
     local ability = context:get()
     if not ITEMS[ability:GetClass():GetFName():ToString()] then return end
-    using = ability:GetFullName():match("^%S+ (.+)$")
+    using = util.path(ability)
 end
 
 -- Runs after the Use branch has spent the use.
@@ -115,30 +103,12 @@ local function on_post(context)
     log.debug("medic drop: %s spent at %.2f of %.2f s, rate %.2f, drop in %d ms", path, position, length, rate, delay_ms)
 
     local gen = generation
-    ExecuteInGameThreadWithDelay(delay_ms, guarded("drop", function() drop(path, gen) end))
+    ExecuteInGameThreadWithDelay(delay_ms, hooks.guard(function() drop(path, gen) end))
 end
 
---- Returns false when RegisterHook refuses the function.
-local function hook()
-    -- At startup the function can be found while its class is still loading. Its Func pointer is still null then and RegisterHook throws.
-    local ok, err = pcall(RegisterHook, HOOK_FN, guarded("hook", on_pre), guarded("hook", on_post))
-    if not ok then
-        log.debug("medic drop: %s not hookable yet: %s", HOOK_FN, tostring(err))
-        return false
-    end
-    hooked = true
-    log.info("medic drop: hooked %s", HOOK_FN)
-    return true
-end
-
---- Hook the medic ability once its Blueprint class is loaded. RegisterHook needs the function in memory and linked.
+--- Hook the medic ability once its Blueprint class is loaded.
 function M.install()
-    if hooked then return end
-    if util.valid(StaticFindObject(HOOK_FN)) and hook() then return end
-    NotifyOnNewObject(ABILITY_CLASS, function()
-        if not hooked then hook() end
-        return true
-    end)
+    hooks.install(HOOK_FN, ABILITY_CLASS, on_pre, on_post)
 end
 
 --- Cancel a scheduled drop. Called on level load.
