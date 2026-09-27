@@ -4,7 +4,6 @@
 -- The native ItemWidget writes the uses, a float stat, into the tile with decimals. This rewrites that text once the game has drawn it.
 -- Holds no UObject between calls.
 
-local log  = require("log")
 local util = require("util")
 local hook = require("hook")
 
@@ -38,7 +37,6 @@ local function round_numbers(block)
     end)
     if whole == text then return end
     block:SetText(FText(whole))
-    log.debug("whole uses: %s '%s' -> '%s'", block:GetFName():ToString(), text, whole)
 end
 
 local function round_tile(path)
