@@ -15,6 +15,7 @@ UE4SS mods for **Incursion Red River** (Games of Tomorrow, UE 5.6, Steam).
 | Folder | Status | Description |
 |---|---|---|
 | `likhos-point-and-shoot` | pre-alpha | Likho's Point and Shoot: hold a key to aim straight into point shooting |
+| `likhos-backpack` | pre-alpha | Likho's Backpack: inventory handling improvements |
 | `likhos-rearmed` | pre-alpha | Likho's Rearmed: moves weapons to a different weapon class and applies minor weapon fixes (pak mod) |
 
 ## Layout
