@@ -1,2 +1,5 @@
-# 1.0.0
-* dropping a 1x1 item onto another 1x1 item swaps the two
+# 1.0.18
+* moved med item drop on use and whole number item tags from the point-and-shoot mod
+
+# 1.0.17
+* implemented item swap in place

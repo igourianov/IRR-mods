@@ -10,6 +10,14 @@ Drops that stack, put the item inside the target or place it on free space work 
 
 Set `inventory_swap = false` in `Scripts\config.lua` to turn it off.
 
+## Spent medical items
+
+Bandages and Painkillers now drop automatically after exhausting their use count. Set `medic_drop = false` in `Scripts\config.lua` to turn it off.
+
+## Whole use counts
+
+Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter. Set `whole_uses = false` in `Scripts\config.lua` to turn it off.
+
 ## Requirements
 
 - Incursion Red River, Steam version. Tested on build 22417726.

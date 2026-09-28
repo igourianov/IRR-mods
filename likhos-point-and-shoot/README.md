@@ -1,11 +1,6 @@
 # Likho's Point and Shoot
 
-This mod reworks Point Shooting, tactical device activation and the flip magnifier, drops spent bandages and painkillers and shows use counts as whole numbers.
-
-## QoL
-
-* Bandages and Painkillers now drop automatically after exhausting their use count.
-* Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter.
+This mod reworks Point Shooting, tactical device activation and the flip magnifier.
 
 ## Point Shooting
 

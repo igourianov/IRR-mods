@@ -1,3 +1,6 @@
+# 1.0.73
+* moved med item drop on use and whole number item tags out into backpack mod
+
 # 1.0.63
 * use counts of medical items, keys and other items with uses show as whole numbers on inventory tiles
 

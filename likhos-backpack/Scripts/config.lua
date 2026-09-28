@@ -10,4 +10,12 @@ return {
     -- Dropping a 1x1 item onto another 1x1 item it can't stack with or go into swaps the two.
     -- Set false for the vanilla behavior, where the dragged item returns to its slot.
     inventory_swap = true,
+
+    -- A bandage or painkiller pack with no uses left drops on the floor, like a used health injector.
+    -- Set false to keep them in the inventory at 0 uses.
+    medic_drop = true,
+
+    -- Items that count uses, like medical items and keys, show them as whole numbers on inventory tiles.
+    -- Set false for the vanilla decimals.
+    whole_uses = true,
 }

@@ -85,6 +85,8 @@ Owned, the new mod folder `likhos-backpack/`:
 
 Also owned: the `likhos-backpack` row in the root `README.md` mods table.
 
+The mod also hosts `medic.lua` and `whole_uses.lua`, moved in from `likhos-point-and-shoot`. They, their config switches, `main.lua` installing them and their README and CHANGELOG parts belong to their own solution docs, not this one.
+
 Context only, left as they are: `lib/` (the shared `log`, `util` and `hook` modules `build.ps1` and `publish.ps1` copy into each mod's `Scripts/`), `likhos-point-and-shoot/` (the module pattern), `build.ps1` (finds any folder with a `mod.txt`, so it deploys the new mod with no change), `publish.ps1` and `publish.config.json`. The publish entry needs a Nexus page and a hand-uploaded first file, which is the user's step.
 
 ## Solution

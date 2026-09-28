@@ -25,14 +25,6 @@ return {
     -- Set false for vanilla zoom.
     magnifier_zoom = true,
 
-    -- A bandage or painkiller pack with no uses left drops on the floor, like a used health injector.
-    -- Set false to keep them in the inventory at 0 uses.
-    medic_drop = true,
-
-    -- Items that count uses, like medical items and keys, show them as whole numbers on inventory tiles.
-    -- Set false for the vanilla decimals.
-    whole_uses = true,
-
     binds = {
         {
             id      = "point_aim",

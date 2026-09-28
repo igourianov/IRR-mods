@@ -11,8 +11,6 @@ local actions  = require("actions")
 local keymap   = require("keymap")
 local menu     = require("menu")
 local magnifier = require("magnifier")
-local medic    = require("medic")
-local whole_uses = require("whole_uses")
 
 local config = require("config")
 
@@ -85,8 +83,6 @@ local function init()
     end)
     menu.install()
     if config.magnifier_zoom then magnifier.install() end
-    if config.medic_drop then medic.install() end
-    if config.whole_uses then whole_uses.install() end
 
     -- The tick loop runs Lua every tick_ms. Skip it when nothing can use it.
     if register_binds() > 0 then start_tick_loop() end

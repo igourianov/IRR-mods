@@ -6,6 +6,8 @@
 local log  = require("log")
 local util = require("util")
 local inventory_swap = require("inventory_swap")
+local medic = require("medic")
+local whole_uses = require("whole_uses")
 
 local config = require("config")
 
@@ -19,6 +21,8 @@ local function init()
     end
 
     if config.inventory_swap then inventory_swap.install() end
+    if config.medic_drop then medic.install() end
+    if config.whole_uses then whole_uses.install() end
 
     log.info("ready")
 end
