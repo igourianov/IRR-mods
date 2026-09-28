@@ -18,4 +18,8 @@ return {
     -- Items that count uses, like medical items and keys, show them as whole numbers on inventory tiles.
     -- Set false for the vanilla decimals.
     whole_uses = true,
+
+    -- Shift+Click on an item in the hideout sells it, like Sell from its context menu.
+    -- Set false for the vanilla behavior, where it does nothing.
+    quick_sell = true,
 }

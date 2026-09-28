@@ -18,6 +18,12 @@ Bandages and Painkillers now drop automatically after exhausting their use count
 
 Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter. Set `whole_uses = false` in `Scripts\config.lua` to turn it off.
 
+## Quick sell
+
+Shift+Click an item in the hideout to sell it, the same as Sell from its context menu. Items that can't be sold are not affected. Shift+Click in raid still drops the item.
+
+Set `quick_sell = false` in `Scripts\config.lua` to turn it off.
+
 ## Requirements
 
 - Incursion Red River, Steam version. Tested on build 22417726.
