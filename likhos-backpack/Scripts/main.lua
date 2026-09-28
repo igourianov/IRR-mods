@@ -10,7 +10,7 @@ local inventory_swap = require("inventory_swap")
 local config = require("config")
 
 local function init()
-    log.set_level(config.log_level)
+    log.setup("Backpack", config.log_level)
     log.info("loading")
 
     if not config.enabled then

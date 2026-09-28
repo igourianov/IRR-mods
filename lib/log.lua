@@ -1,20 +1,22 @@
 -- log.lua : leveled logging. UE4SS print() goes to the GUI console.
 local M = {}
 
-local PREFIX = "[PointAndShoot] "
 local LEVELS = { error = 1, warn = 2, info = 3, debug = 4 }
 
 M.level = LEVELS.info
+M.prefix = ""
 
-function M.set_level(name)
-    M.level = LEVELS[name] or LEVELS.info
+--- `mod` names the mod on every log line. Shared by all mods, so the name comes from the caller.
+function M.setup(mod, level)
+    M.prefix = "[" .. mod .. "] "
+    M.level = LEVELS[level] or LEVELS.info
 end
 
 local function emit(lvl, name, fmt, ...)
     if lvl > M.level then return end
     local ok, msg = pcall(string.format, fmt, ...)
     if not ok then msg = tostring(fmt) end
-    print(PREFIX .. name .. ": " .. msg .. "\n")
+    print(M.prefix .. name .. ": " .. msg .. "\n")
 end
 
 function M.error(fmt, ...) emit(LEVELS.error, "ERROR", fmt, ...) end

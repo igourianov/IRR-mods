@@ -4,6 +4,7 @@
 
 .DESCRIPTION
     A build bumps the patch segment of the mod's version in mod.txt when the mod folder has uncommitted changes.
+    A Lua mod gets the shared modules in lib\ copied into its Scripts folder, and a change to lib\ counts as a change to every Lua mod.
     A mod whose mod.txt names a pak is a pak mod. Its pak.ps1 stages the files, repak packs them into dist\<pak> and the pak is copied into Content\Paks\~mods.
     The pinned tools a pak build needs, repak and UAssetGUI, are downloaded into tools\<name> on first use.
     A pak build also needs the game's usmap, which UE4SS generates in game into its own folder.
@@ -101,6 +102,7 @@ foreach ($m in $Mods) {
 $gitAvailable = (Get-Command git -ErrorAction SilentlyContinue) -and (git -C $root rev-parse --is-inside-work-tree 2>$null) -eq 'true'
 if (-not $gitAvailable) { Write-Warning 'Git not available. Every build bumps the version.' }
 $versionPattern = '(?m)^(\s*version\s*=\s*")(\d+)\.(\d+)\.(\d+)(")'
+$libFiles = Get-ChildItem (Join-Path $root 'lib') -Filter *.lua -File
 
 foreach ($m in $Mods) {
     $src    = Join-Path $root $m
@@ -108,13 +110,15 @@ foreach ($m in $Mods) {
     $modTxt = Join-Path $src 'mod.txt'
 
     $text = [System.IO.File]::ReadAllText($modTxt)
+    $pakMatch = [regex]::Match($text, '(?m)^\s*pak\s*=\s*"([^"]+)"')
+    $sources = if ($pakMatch.Success) { @($m) } else { @($m, 'lib') }
     $match = [regex]::Match($text, $versionPattern)
     $version = $null
     if ($match.Success) {
         $g = $match.Groups
         $majorMinor = "$($g[2].Value).$($g[3].Value)"
         $version = "$majorMinor.$($g[4].Value)"
-        if (-not $gitAvailable -or (git -C $root status --porcelain -- $m)) {
+        if (-not $gitAvailable -or (git -C $root status --porcelain -- $sources)) {
             $version = "$majorMinor.$([int]$g[4].Value + 1)"
             $text = $text.Remove($match.Index, $match.Length).Insert($match.Index, "$($g[1].Value)$version$($g[5].Value)")
             [System.IO.File]::WriteAllText($modTxt, $text, [System.Text.UTF8Encoding]::new($false))
@@ -124,7 +128,6 @@ foreach ($m in $Mods) {
     }
 
     $label = if ($version) { "$m v$version" } else { $m }
-    $pakMatch = [regex]::Match($text, '(?m)^\s*pak\s*=\s*"([^"]+)"')
 
     if ($pakMatch.Success) {
         $pak = $pakMatch.Groups[1].Value
@@ -158,6 +161,9 @@ foreach ($m in $Mods) {
         Copy-Item $pakPath $pakDest -Force
         Write-Host "packed   $label  -> $(Join-Path $pakDest $pak)" -ForegroundColor Green
     } else {
+        $clash = $libFiles | Where-Object { Test-Path (Join-Path $src "Scripts\$($_.Name)") }
+        if ($clash) { Write-Error "${m}: Scripts has its own $($clash.Name -join ', '), which the copy from lib would overwrite." }
+
         if (Test-Path $dest) {
             # A deploy from an older symlink build is removed as a link, so the workspace it points at survives.
             $item = Get-Item $dest -Force
@@ -166,6 +172,7 @@ foreach ($m in $Mods) {
         }
 
         Copy-Item $src $dest -Recurse -Force
+        Copy-Item $libFiles.FullName (Join-Path $dest 'Scripts') -Force
         Write-Host "copied   $label  -> $dest" -ForegroundColor Green
     }
 }

@@ -23,6 +23,10 @@ The load-bearing ones:
 
 - `likhos-<name>/` — one mod: `mod.txt`, `Scripts/`, `README.md`.
   All Lua lives flat in `Scripts/`; plain `require("log")`.
+- `lib/` — Lua modules shared by every Lua mod (`log`, `util`, `hook`).
+  `build.ps1` and `publish.ps1` copy them into each mod's `Scripts/`, so a
+  mod never has its own file with a `lib` name. Each mod names itself for
+  log lines with `log.setup("<Name>", config.log_level)`.
 - A pak mod (`likhos-rearmed`) has `pak=` in `mod.txt` and a `pak.ps1` that
   stages the pak's files. `build.ps1` packs it with repak into `dist\` and
   installs it into `Content\Paks\~mods`.

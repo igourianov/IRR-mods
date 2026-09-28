@@ -62,6 +62,7 @@ Debug logs of drops, 2026-09-28:
 - `ItemDimensions` `X` and `Y` are the item's (min, max) extents in slots, (-0.5, 0.5) on both for a 1x1 item.
 - `RequestMoveItem` called from Lua on the item owner's component moves an item into a free slot, validated, and the move shows in `MainContainers` within a tick. Onto a slot another item occupies it does nothing, even with `bValidate` false.
 - A grid's free slots are its `ContainerSlots` entries (in the main container's `ContainerElements`, indexed by container index) with `bEnabled` true and a zero `HostingUID`.
+- UE4SS runs each mod in its own Lua state: with both mods enabled, each one's `log` module kept its own name in log lines.
 - UE4SS calls: a struct read from a property passes into a UFunction by value fine (`ContainerItem` into `CanSplitItem`). A struct returned by a UFunction call (`GetMainContainerByUID`) crashes the game when passed into another UFunction. An out parameter needs a Lua table, and UE4SS rejects anything else with a Lua error before calling.
 
 ### Assumptions (unverified, the build checks them)
@@ -69,11 +70,9 @@ Debug logs of drops, 2026-09-28:
 3. Slot occupancy lives only in `ContainerSlot.HostingUID`, a Lua write to it takes effect, and nothing reacts to two items sharing a slot for the few ticks between the moves. Checked by moving each item again by vanilla drag after a swap, including onto the other's old slot, and by the swap surviving reopening the inventory and a game restart.
 5. Vendor and shopping cart drops don't land on a `SpatialContainerWidget`.
 6. `RequestMoveItem` is the game's replicated move request, so two calls in order behave the same for a co-op client as for the host. Only tested solo.
-7. UE4SS runs each mod in its own Lua state, so `likhos-backpack`'s `log`, `util` and `hook` modules don't collide with `likhos-point-and-shoot`'s modules of the same names when both mods are enabled.
 ### Ruled out
 
 - Shipping the swap inside `likhos-point-and-shoot`. The player chose a separate mod.
-- A shared Lua library across mods. The layout rule keeps each mod's Lua flat in its own `Scripts/` with plain `require`, and a player installs one mod without the other.
 
 ## Scope
 
@@ -81,13 +80,12 @@ Owned, the new mod folder `likhos-backpack/`:
 
 - `mod.txt`, `enabled.txt`
 - `Scripts/main.lua`, `Scripts/config.lua`
-- `Scripts/log.lua`, `Scripts/util.lua`, `Scripts/hook.lua`
 - `Scripts/inventory_swap.lua`
 - `README.md`, `CHANGELOG.md`
 
 Also owned: the `likhos-backpack` row in the root `README.md` mods table.
 
-Context only, left as they are: `likhos-point-and-shoot/` (source of the copied infrastructure and the module pattern), `build.ps1` (finds any folder with a `mod.txt`, so it deploys the new mod with no change), `publish.ps1` and `publish.config.json`. The publish entry needs a Nexus page and a hand-uploaded first file, which is the user's step.
+Context only, left as they are: `lib/` (the shared `log`, `util` and `hook` modules `build.ps1` and `publish.ps1` copy into each mod's `Scripts/`), `likhos-point-and-shoot/` (the module pattern), `build.ps1` (finds any folder with a `mod.txt`, so it deploys the new mod with no change), `publish.ps1` and `publish.config.json`. The publish entry needs a Nexus page and a hand-uploaded first file, which is the user's step.
 
 ## Solution
 
@@ -96,9 +94,9 @@ Context only, left as they are: `likhos-point-and-shoot/` (source of the copied 
 `likhos-backpack/` is laid out like `likhos-point-and-shoot/`:
 
 - `mod.txt` has the same `[mod]` / `[ue4ss]` sections, starting at version `1.0.0`, which `build.ps1` bumps. `enabled.txt` is empty, as in the other mod.
-- `log.lua`, `util.lua` and `hook.lua` are copies of `likhos-point-and-shoot`'s, with the log prefix `[Backpack]`.
+- `log`, `util` and `hook` come from the shared `lib/`. The mod names itself `Backpack` for log lines through `log.setup`.
 - `config.lua` is user-editable and hot-reloadable, with `log_level`, the master `enabled` switch and `inventory_swap`, commented in the style of `likhos-point-and-shoot`'s config.
-- `main.lua` is the idempotent entry point: sets the log level, loads inert when `enabled` is false, installs `inventory_swap` when its switch is on, and logs `loading` / `ready`. It has no binds, tick loop or console commands.
+- `main.lua` is the idempotent entry point: sets up logging, loads inert when `enabled` is false, installs `inventory_swap` when its switch is on, and logs `loading` / `ready`. It has no binds, tick loop or console commands.
 
 ### inventory_swap.lua
 
@@ -144,7 +142,6 @@ In the inventory, stash or a loot screen, dragging a 1x1 item onto another 1x1 i
 
 - Two validated moves around a direct write to slot occupancy, instead of one atomic swap. The game has no general swap call (`CanSwapWeapons` / `FinishSwapWeapons` and `OnPickupSwap` serve weapon slots and pickups), and it refuses a move onto an occupied slot. Chosen over parking the dragged item in a free slot, which fails when every reachable inventory is full, and over a spawned hidden inventory, which needs unexplored actor and grid setup and holds the item in an unsaved actor mid-swap. The costs: the swap writes game data directly and depends on assumption 3. A co-op client's write stays local, so a swap there is expected to fail and undo.
 - Every move is validated, so the game applies its own move rules to each step. The `IsContainerSupportingItem` precheck only avoids starting a swap whose moves the game would refuse.
-- A separate mod over another module in `likhos-point-and-shoot`. The cost is copies of `log.lua`, `util.lua` and `hook.lua`: a fix to one copy has to be carried to the other by hand.
 - 1x1 only. Larger items would need footprint and rotation handling across two moves and aren't asked for.
 
 ## Open questions

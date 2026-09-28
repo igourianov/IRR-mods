@@ -5,7 +5,8 @@
 .DESCRIPTION
     Zips the mod folder from this workspace, then publishes it through the Nexus v3 upload
     API under the version in its mod.txt. The zip holds the bare mod folder, so extracting
-    it into ue4ss\Mods installs the mod. A pak mod's zip holds ~mods\<pak> from the last
+    it into ue4ss\Mods installs the mod. A Lua mod's zip also holds the shared modules from
+    lib\ in its Scripts folder, as build.ps1 deploys it. A pak mod's zip holds ~mods\<pak> from the last
     build.ps1 run instead, so extracting it into Content\Paks installs the mod.
 
     The line items of every CHANGELOG.md section newer than the version live on Nexus, up to
@@ -64,7 +65,7 @@ Create it next to publish.ps1 holding your personal key from https://www.nexusmo
 }
 
 function New-ModArchive {
-    param([string] $Source, [string] $Path, [string] $Folder = (Split-Path $Source -Leaf))
+    param([string] $Source, [string] $Path, [string] $Folder = (Split-Path $Source -Leaf), [System.IO.FileInfo[]] $Lib = @())
 
     if (Test-Path $Path) { Remove-Item $Path -Force }
     $base = if (Test-Path $Source -PathType Leaf) { Split-Path $Source } else { $Source }
@@ -75,6 +76,9 @@ function New-ModArchive {
         foreach ($file in Get-ChildItem $Source -Recurse -File) {
             $entry = "$Folder/" + ($file.FullName.Substring($base.Length + 1) -replace '\\', '/')
             [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $entry) | Out-Null
+        }
+        foreach ($file in $Lib) {
+            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, "$Folder/Scripts/$($file.Name)") | Out-Null
         }
     } finally {
         $zip.Dispose()
@@ -222,7 +226,7 @@ if ($pakMatch.Success) {
     }
     New-ModArchive -Source $pakPath -Path $archivePath -Folder '~mods'
 } else {
-    New-ModArchive -Source $src -Path $archivePath
+    New-ModArchive -Source $src -Path $archivePath -Lib (Get-ChildItem (Join-Path $root 'lib') -Filter *.lua -File)
 }
 Write-Host "packed $Mod v$version -> $archivePath" -ForegroundColor Green
 

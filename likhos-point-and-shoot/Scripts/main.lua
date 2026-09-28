@@ -66,7 +66,7 @@ end
 --------------------------------------------------------------------------
 
 local function init()
-    log.set_level(config.log_level)
+    log.setup("PointAndShoot", config.log_level)
     log.info("loading")
 
     if not config.enabled then
