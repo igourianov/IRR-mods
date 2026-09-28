@@ -63,19 +63,6 @@ Create it next to publish.ps1 holding your personal key from https://www.nexusmo
     return $key
 }
 
-function Get-ModInfo {
-    param([string] $Path)
-
-    $text = [System.IO.File]::ReadAllText($Path)
-    $info = @{}
-    foreach ($key in @('id', 'version')) {
-        $m = [regex]::Match($text, "(?m)^\s*$key\s*=\s*`"([^`"]+)`"")
-        if (-not $m.Success) { Write-Error "$Path has no $key entry." }
-        $info[$key] = $m.Groups[1].Value
-    }
-    return $info
-}
-
 function New-ModArchive {
     param([string] $Source, [string] $Path, [string] $Folder = (Split-Path $Source -Leaf))
 
@@ -213,11 +200,11 @@ $src = Join-Path $root $Mod
 $modTxt = Join-Path $src 'mod.txt'
 if (-not (Test-Path $modTxt)) { Write-Error "No such mod: $src (a mod folder must contain mod.txt)." }
 
-$modInfo = Get-ModInfo -Path $modTxt
-$modId = $modInfo.id
-$version = $modInfo.version
+$modText = [System.IO.File]::ReadAllText($modTxt)
+$versionMatch = [regex]::Match($modText, '(?m)^\s*version\s*=\s*"([^"]+)"')
+if (-not $versionMatch.Success) { Write-Error "$modTxt has no version entry." }
+$version = $versionMatch.Groups[1].Value
 
-if ($modId -ne $Mod) { Write-Error "$modTxt holds mod id '$modId', not '$Mod'." }
 if ($version -notmatch '^[a-zA-Z0-9.-]+$' -or $version.Length -gt 50) {
     Write-Error "Version '$version' is rejected by Nexus. Allowed: letters, digits and .- up to 50 chars."
 }
@@ -225,7 +212,7 @@ if ($version -notmatch '^[a-zA-Z0-9.-]+$' -or $version.Length -gt 50) {
 $distDir = Join-Path $root 'dist'
 New-Item -ItemType Directory -Force $distDir | Out-Null
 $archivePath = Join-Path $distDir "$Mod.zip"
-$pakMatch = [regex]::Match([System.IO.File]::ReadAllText($modTxt), '(?m)^\s*pak\s*=\s*"([^"]+)"')
+$pakMatch = [regex]::Match($modText,'(?m)^\s*pak\s*=\s*"([^"]+)"')
 if ($pakMatch.Success) {
     # build.ps1 bumps mod.txt before it packs, so a pak older than any mod file predates the last change.
     $pakPath = Join-Path $distDir $pakMatch.Groups[1].Value
@@ -245,7 +232,7 @@ if ($sizeBytes -gt $maxSizeBytes) {
 }
 
 # ---------------------------------------------------------------- publish
-$uploadName = "$modId.zip"
+$uploadName = "$Mod.zip"
 $fileCategory = if ($Category) { $Category } elseif ($settings.category) { $settings.category } else { 'main' }
 $bumpModVersion = if ($NoBumpModVersion) { $false } elseif ($null -ne $settings.update_mod_version) { [bool]$settings.update_mod_version } else { $true }
 
@@ -271,7 +258,7 @@ if ($changelogRequest.changelog) {
     $changelogPath = "/mods/$((Invoke-NexusApi -Method Get -Path "/games/$($cfg.nexus.game)/mods/$($settings.mod_id)").id)/changelogs"
 }
 
-Write-Host "publishing $modId v$version -> mod file $fileId ($fileCategory, $([math]::Round($sizeBytes / 1MB, 2)) MiB)"
+Write-Host "publishing $Mod v$version -> mod file $fileId ($fileCategory, $([math]::Round($sizeBytes / 1MB, 2)) MiB)"
 
 if ($DryRun) {
     Write-Host "dry run. POST /mod-files/$fileId/versions would send:" -ForegroundColor Yellow
