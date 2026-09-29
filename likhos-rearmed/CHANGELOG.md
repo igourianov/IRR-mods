@@ -1,3 +1,6 @@
+# 1.0.19
+* dropped Rattler and Honey Badger from UICS spawning pool. NPCs with those guns end up without ammo because the game hardcodes 5.56 magazines spawn.
+
 # 1.0.15
 * removed SVD from VLF snipers
 
