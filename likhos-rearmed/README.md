@@ -41,6 +41,14 @@ Each faction's NPCs now carry weapons that fit the faction.
 * UICS: mostly M4 and MP5 + low chance of exotic NATO weapons. Snipers: SCAR-H and Galil.
 * VLF: 7.62x39 rifles and Chinese 5.56 rifles. Snipers: FAL.
 
+## Ammo boxes
+
+In-raid ammo boxes hold more ammo and lean towards better rounds.
+
+* 2-5 stacks per box instead of 1-3.
+* 30-60 rounds per stack instead of 10-40.
+* Tier 1 rounds (5.56 FMJ, 9x19 PSO, 5.45 PS, 12ga buckshot, 7.62x39 HP) are about three times rarer, effectivelly making higher tiers more common.
+
 ## Installation
 
 Extract the zip into `PROJECT QUARANTINE\Test_C\Content\Paks`. It places `likhos_rearmed_P.pak` in `Paks\~mods`.
@@ -73,6 +81,7 @@ The mod replaces these game files:
   - `DA_Inventory_AI_Patrol_VLF_A`
   - `DA_Inventory_AI_Patrol_VLF_B`
   - `DA_Inventory_AI_Sniper_VLF`
+- The ammo box loot preset (`DA_LootContainer_AmmoBox`)
 
 It conflicts with any other mod that replaces those files, and it needs an update after every game patch that changes them.
 

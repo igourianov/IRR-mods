@@ -1,3 +1,6 @@
+# 1.0.21
+* in-raid ammo boxes hold 2-5 stacks of 30-60 rounds and roll tier 1 rounds less often
+
 # 1.0.19
 * dropped Rattler and Honey Badger from UICS spawning pool. NPCs with those guns end up without ammo because the game hardcodes 5.56 magazines spawn.
 

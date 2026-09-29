@@ -1,0 +1,13 @@
+{
+    "/Game/Blueprints/InventorySystem/Presets/Container/Final/DA_LootContainer_AmmoBox": {
+        "MinItemsToAdd": 2,
+        "MaxItemsToAdd": 5,
+        "bCanAddSameItem": false,
+        "ItemCountOverrides": {
+            "Inventory.Items.Ammunition": [30, 90]
+        },
+        "RarityChanceDrop": {
+            "Inventory.Rarity Types.Tier 1": 0.3
+        }
+    }
+}

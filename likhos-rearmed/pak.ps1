@@ -9,7 +9,8 @@
     Then stages a renamed copy of every cooked asset listed in clone.json, e.g. a mag well that takes 300 BLK mags instead of 5.56 ones.
     Then it extracts every cooked asset listed in retarget.json and points its references to one asset at another, e.g. a weapon's chamber from the 5.56 ammo set to the 300 BLK one.
     Then it extracts every item definition listed in stats.json and sets its stat values, e.g. the 7.62x39 HP round's damage.
-    Last, it extracts every NPC loadout preset listed in loadouts.json and sets the weapon pool it picks from.
+    Then it extracts every NPC loadout preset listed in loadouts.json and sets the weapon pool it picks from.
+    Last, it extracts every loot container preset listed in loot.json and sets its random item parameters, e.g. how many ammo stacks an ammo box holds.
     Called by build.ps1, which packs the staged tree.
 #>
 [CmdletBinding()]
@@ -349,6 +350,68 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 
     Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset") -Parse
     Write-Host "  $(($asset -split '/')[-1]): $($pool.Value.Count) weapons"
+}
+
+# ---------------------------------------------------------------- loot
+# A loot container rolls its contents from its preset's RandomItemParameters. A listed int or bool field is set, a listed map field has the value of each listed key set.
+# Only keys the preset already has are set, since a new key would need its tag added to the name map.
+$loot = Get-Content (Join-Path $PSScriptRoot 'loot.json') -Raw | ConvertFrom-Json
+$entries = @($loot.PSObject.Properties)
+$assets = @(Read-Assets $entries.Name -Parse)
+for ($n = 0; $n -lt $entries.Count; $n++) {
+    $entry = $entries[$n]
+    $asset = $entry.Name
+    $name = ($asset -split '/')[-1]
+    if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $loadouts.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loot.json and another stage." }
+
+    $data = $assets[$n]
+    $containers = @((@($data.Exports | Where-Object ObjectName -eq $name)[0].Data | Where-Object Name -eq 'DefaultItemsContainers').Value)
+    if ($containers.Count -ne 1) { Write-Error "$asset has $($containers.Count) item containers, expected one." }
+    $parameters = @(($containers[0].Value | Where-Object Name -eq 'RandomItemParameters').Value)
+
+    foreach ($field in $entry.Value.PSObject.Properties) {
+        $property = @($parameters | Where-Object Name -eq $field.Name)
+        if ($property.Count -ne 1) { Write-Error "$asset has no $($field.Name) random item parameter." }
+        $property = $property[0]
+
+        switch -Wildcard ($property.'$type') {
+            { $_ -like 'UAssetAPI.PropertyTypes.Objects.IntPropertyData,*' -or $_ -like 'UAssetAPI.PropertyTypes.Objects.BoolPropertyData,*' } {
+                $old = $property.Value
+                $property.Value = if ($field.Value -is [bool]) { $field.Value } else { [int] $field.Value }
+                $property.IsZero = -not $field.Value
+                Write-Host "  ${name}: $($field.Name) $old -> $($field.Value)"
+            }
+            'UAssetAPI.PropertyTypes.Objects.MapPropertyData,*' {
+                foreach ($key in $field.Value.PSObject.Properties) {
+                    $value = $null
+                    foreach ($pair in $property.Value) {
+                        if (($pair[0].Value | Where-Object Name -eq 'TagName').Value -eq $key.Name) { $value = $pair[1] }
+                    }
+                    if (-not $value) { Write-Error "$asset's $($field.Name) has no $($key.Name) key." }
+
+                    if ($value.'$type' -like 'UAssetAPI.PropertyTypes.Objects.FloatPropertyData,*') {
+                        $old = $value.Value
+                        $value.Value = [double] $key.Value
+                        $value.IsZero = $key.Value -eq 0
+                    } elseif ($value.StructType -eq 'Vector2D') {
+                        $range = @($key.Value)
+                        if ($range.Count -ne 2) { Write-Error "$($field.Name).$($key.Name) in loot.json is not a [min, max] pair." }
+                        $vector = $value.Value[0]
+                        $old = "[$($vector.Value.X), $($vector.Value.Y)]"
+                        $vector.Value.X = [double] $range[0]
+                        $vector.Value.Y = [double] $range[1]
+                        $vector.IsZero = $range[0] -eq 0 -and $range[1] -eq 0
+                    } else {
+                        Write-Error "$asset's $($field.Name) values are neither floats nor Vector2D."
+                    }
+                    Write-Host "  ${name}: $($field.Name)[$($key.Name)] $old -> $($key.Value | ConvertTo-Json -Compress)"
+                }
+            }
+            default { Write-Error "$asset's $($field.Name) is not an int, bool or map." }
+        }
+    }
+
+    Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset") -Parse
 }
 
 Save-QueuedAssets
