@@ -7,7 +7,7 @@ return {
     -- Master switch. Set false to load the mod inert (useful when bisecting a crash after a game patch).
     enabled = true,
 
-    -- Dropping a 1x1 item onto another 1x1 item it can't stack with or go into swaps the two.
+    -- Dropping an item onto another item of the same size, rotated or not, that it can't stack with or go into swaps the two.
     -- Set false for the vanilla behavior, where the dragged item returns to its slot.
     inventory_swap = true,
 

@@ -1,3 +1,6 @@
+# 1.0.24
+* item swap works for items of the same size, rotated or not, not just 1x1
+
 # 1.0.20
 * quick sell feature (Shift+Click)
 

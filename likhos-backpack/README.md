@@ -4,25 +4,21 @@ This mod improves inventory handling.
 
 ## Item swap
 
-Dropping a 1x1 item onto another 1x1 item swaps the two, where vanilla returns the dragged item to its slot. Works within a grid, between grids and between your inventory and a stash, loot container or body.
-
-Drops that stack, put the item inside the target or place it on free space work as in vanilla. Larger items, equipment slots, quick slots and weapon attachments are not affected.
-
-Set `inventory_swap = false` in `Scripts\config.lua` to turn it off.
+Items in the inventory grids can now be swapped via drag and drop without moving the target item to a third spot first.
+Equipment and attachment slots not supported
+Source and target item must be the same size (rotation supported)
 
 ## Spent medical items
 
-Bandages and Painkillers now drop automatically after exhausting their use count. Set `medic_drop = false` in `Scripts\config.lua` to turn it off.
+Bandages and Painkillers now drop automatically after exhausting their use count.
 
 ## Whole use counts
 
-Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter. Set `whole_uses = false` in `Scripts\config.lua` to turn it off.
+Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter.
 
 ## Quick sell
 
-Shift+Click an item in the hideout to sell it, the same as Sell from its context menu. Items that can't be sold are not affected. Shift+Click in raid still drops the item.
-
-Set `quick_sell = false` in `Scripts\config.lua` to turn it off.
+`Shift+Click` an item while in the hideout to sell it, the same as Sell from its context menu. Items that can't be sold are not affected.
 
 ## Requirements
 
