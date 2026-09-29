@@ -78,5 +78,6 @@ It conflicts with any other mod that replaces those files, and it needs an updat
 
 ## Known issues
 
+* Vendor/Gunsmith screen shows Rattler as 0/30 ammo. Run `ResetVendor` console command to fix.
 * Some devices are misnamed in the vanilla game. E.g. `P90 flash hider` is actually a muzzle brake / compensator. This mod only changes stats, not names.
 * Vanilla does a simple sum of ergos and recoil stats when multiple muzzle devices equipped (e.g. a suppressor over a muzzle brake). This is not a realistic behavior, but it is hardcoded and I can't easily fix this.
