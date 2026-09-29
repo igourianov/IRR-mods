@@ -1,6 +1,6 @@
 # Likho's Backpack
 
-This mod improves inventory handling.
+This mod provides several QoL improvements to inventory management.
 
 ## Item swap
 
