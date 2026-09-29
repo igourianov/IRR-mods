@@ -1,7 +1,7 @@
--- quick_sell.lua : Shift+Click on an item in the hideout sells it, as Sell from its context menu does (docs/solutions/hideout-quick-sell.md).
+-- quick_sell.lua : Shift+Click on an item in the hideout sells it, as Sell from its context menu does, or delivers a mission item, as Deliver does (docs/solutions/hideout-quick-sell.md, docs/solutions/quick-deliver.md).
 --
--- Every game name here comes from docs/solutions/hideout-quick-sell.md.
--- The sell goes through vanilla's Sell context, which is not offered in raid, so Shift+Click there stays vanilla's drop.
+-- Every game name here comes from those solution docs.
+-- Shift+Click goes through vanilla's Deliver and Sell contexts, which are not offered in raid, so Shift+Click there stays vanilla's drop.
 -- Holds no UObject between calls.
 
 local log  = require("log")
@@ -14,7 +14,8 @@ local hooks = hook.new("quick sell", "Shift+Click stays vanilla")
 
 local TILE_CLASS = "/Game/Blueprints/InventorySystem/Widgets/W_InventoryItem.W_InventoryItem_C"
 local HOOK_FN    = TILE_CLASS .. ":OnMouseButtonDown"
-local SELL_CLASS = "U_Sell_C"
+-- Tried in order, the first one vanilla offers for the item runs. Mission items offer Deliver and no Sell.
+local CONTEXT_CLASSES = { "U_Deliver_C", "U_Sell_C" }
 local INPUT_LIB  = "/Script/Engine.Default__KismetInputLibrary"
 
 -- TEMP recon: what vanilla's context menu passes as Owner when Sell is picked there. Remove once confirmed.
@@ -28,7 +29,7 @@ local function same_guid(a, b)
     return a.A == b.A and a.B == b.B and a.C == b.C and a.D == b.D
 end
 
-local function sell(path, uid)
+local function deliver_or_sell(path, uid)
     local tile = StaticFindObject(path)
     if not util.valid(tile) or not same_guid(tile.ContainerItem.ItemUID, uid) then
         log.debug("quick sell: the clicked tile is gone or shows another item")
@@ -36,14 +37,16 @@ local function sell(path, uid)
     end
     local item = tile.ContainerItem
     local owner = tile:GetOwningPlayer()
-    local context = FindFirstOf(SELL_CLASS)
-    if not util.valid(context) then error("no " .. SELL_CLASS .. " instance") end
-    if not context:ShouldAddToContextList(owner, tile, item) or not context:IsValidContext(owner, tile, item) then
-        log.debug("quick sell: sell not offered for %s", item_str(item))
-        return
+    for _, class in ipairs(CONTEXT_CLASSES) do
+        local context = FindFirstOf(class)
+        if not util.valid(context) then error("no " .. class .. " instance") end
+        if context:ShouldAddToContextList(owner, tile, item) and context:IsValidContext(owner, tile, item) then
+            context:Execute(owner, tile, item)
+            log.debug("quick sell: %s executed on %s", class, item_str(item))
+            return
+        end
     end
-    context:Execute(owner, tile, item)
-    log.debug("quick sell: sold %s", item_str(item))
+    log.debug("quick sell: neither deliver nor sell offered for %s", item_str(item))
 end
 
 --- Whether Shift is held, from Slate's current modifier state.
@@ -53,7 +56,7 @@ local function shift_down(input)
     return input:ModifierKeysState_IsShiftDown({ ModifierKeysStateMask = mask })
 end
 
--- The mouse event is only readable while the handler runs. The sell waits a tick, since it removes the clicked tile.
+-- The mouse event is only readable while the handler runs. The sell or delivery waits a tick, since it removes the clicked tile.
 local function on_mouse_down(context, _, mouse_event)
     local input = StaticFindObject(INPUT_LIB)
     if input:PointerEvent_GetEffectingButton(mouse_event:get()).KeyName:ToString() ~= "LeftMouseButton" then return end
@@ -63,7 +66,7 @@ local function on_mouse_down(context, _, mouse_event)
     local path = util.path(tile)
     local id = tile.ContainerItem.ItemUID
     local uid = { A = id.A, B = id.B, C = id.C, D = id.D }
-    ExecuteInGameThreadWithDelay(1, hooks.guard(function() sell(path, uid) end))
+    ExecuteInGameThreadWithDelay(1, hooks.guard(function() deliver_or_sell(path, uid) end))
 end
 
 -- TEMP recon, see SELL_EXECUTE_FN.

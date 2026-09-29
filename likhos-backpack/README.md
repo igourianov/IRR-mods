@@ -16,9 +16,13 @@ Bandages and Painkillers now drop automatically after exhausting their use count
 
 Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter.
 
-## Quick sell
+## Quick sell/deliver
 
-`Shift+Click` an item while in the hideout to sell it, the same as Sell from its context menu. Items that can't be sold are not affected.
+`Shift+Click` an item while in the hideout to sell it, the same as Sell from its context menu. A mission item is delivered for its mission instead, the same as Deliver from its context menu. Items that can't be sold or delivered are not affected.
+
+## Known issues
+
+* Delivering a mission item from the character inventory counts it for the mission but does not remove the item, so it can be delivered again. This is a vanilla bug and applies to Deliver from the context menu too. Deliver mission items from the stash.
 
 ## Requirements
 

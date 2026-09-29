@@ -1,3 +1,6 @@
+# 1.0.25
+* quick sell delivers mission items for their mission instead (Shift+Click)
+
 # 1.0.24
 * item swap works for items of the same size, rotated or not, not just 1x1
 

@@ -19,7 +19,7 @@ return {
     -- Set false for the vanilla decimals.
     whole_uses = true,
 
-    -- Shift+Click on an item in the hideout sells it, like Sell from its context menu.
+    -- Shift+Click on an item in the hideout sells it, like Sell from its context menu. A mission item is delivered instead, like Deliver.
     -- Set false for the vanilla behavior, where it does nothing.
     quick_sell = true,
 }
