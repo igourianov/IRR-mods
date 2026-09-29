@@ -145,7 +145,8 @@ function Get-Changelog {
 
     $since = New-Object Version
     $until = New-Object Version
-    if ($Live -and -not [Version]::TryParse($Live, [ref]$since)) { Write-Error "Published version '$Live' is not a version. Cannot select changelog sections." }
+    # A placeholder first upload (e.g. '1') is not a version, so every changelog section counts as new.
+    if ($Live -and -not [Version]::TryParse($Live, [ref]$since)) { $Live = '' }
     if (-not [Version]::TryParse($Version, [ref]$until)) { Write-Error "Version '$Version' is not a version. Cannot select changelog sections." }
 
     if (-not (Test-Path $Path -PathType Leaf)) {
