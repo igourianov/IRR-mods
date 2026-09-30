@@ -84,11 +84,23 @@ local function press()
         restore()
         error(started)
     end
-    -- Nothing started, so no finish will come to put the holds back.
-    if not started or target.InteractionState ~= ONGOING then
-        log.debug("QuickUse: interaction not started (ability started: %s)", tostring(started))
-        restore()
+    if started and target.InteractionState == ONGOING then return end
+
+    -- Nothing is holding, so no finish will come to put the holds back.
+    restore()
+    if not started then
+        log.debug("QuickUse: ability refused")
+        return
     end
+    -- A Tab interaction runs on a delayed start, and SGA_Interact stays active until a release, which only F sends. Left active, it refuses the next start from either key.
+    -- Release as F does. F's release lands before the delayed start too, and doesn't cancel it.
+    local ability = nil
+    comp.ActiveAbilities:ForEach(function(_, elem)
+        local a = elem:get()
+        if util.valid(a) and a:IsA(sga_class) then ability = a end
+    end)
+    manager:StopInteraction()
+    if ability then ability:DeactivateAbility() end
 end
 
 -- Read the target here only. By the post callback a parameter can hold unrelated values.

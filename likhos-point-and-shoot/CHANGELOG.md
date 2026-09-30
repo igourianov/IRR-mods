@@ -1,3 +1,6 @@
+# 1.0.80
+* fixed instant interact softlocking after picking up world item
+
 # 1.0.77
 * new Interact (Instant) keybind to open containers without hold
 
