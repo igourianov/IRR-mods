@@ -32,7 +32,7 @@ New keybind **Interact (Instant)**, that mimics vanilla **Interact** behavior bu
 
 ## Magnifier binding
 
-The EOTech+Magnifier combo now works using the mouse scroll, same way LPVO does. Old binding still works but unnecessary. Set `magnifier_zoom = false` in `Scripts\config.lua` to turn it off.
+The EOTech+Magnifier combo now works using the mouse scroll, same way LPVO does. Old binding still works but unnecessary.
 
 ## Requirements
 
