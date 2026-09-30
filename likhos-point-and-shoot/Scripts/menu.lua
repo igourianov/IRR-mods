@@ -22,9 +22,11 @@ local LABEL_TEXT     = "Text_3_4CDF99D140A67A062FBAA99D135648EC"
 local KEY_ACTION     = "InputAction_41_F0CC631D427AFF1C0FB2849BA41B6025"
 local KEY_MAPPED     = "PlayerMappedName_60_D667E47C4761808F2AAD738F1F328FEA"
 
--- Vanilla row name -> mod mappings placed directly under it, in this order.
+-- Vanilla row's mapped name -> mod mappings placed directly under it, in this order.
+-- Keyed by mapped name, not widget name: the Interact row's widget is the generic WB_SingleSettingBar, a name other settings pages reuse.
 local ROWS = {
-    PointShooting = { "LikhosPointShootingDirect", "LikhosFlashlight" },
+    IA_PointShooting = { "LikhosPointShootingDirect", "LikhosFlashlight" },
+    IA_Interact      = { "LikhosInteractInstant" },
 }
 
 local function mapped_name(row)
@@ -128,7 +130,7 @@ end
 
 local function on_row_constructed(context)
     local anchor = context:get()
-    local mappings = ROWS[anchor:GetFName():ToString()]
+    local mappings = ROWS[mapped_name(anchor)]
     if not mappings then return end
 
     -- The hook fires while the page may still be building its rows, so the list is changed on the next timer tick.

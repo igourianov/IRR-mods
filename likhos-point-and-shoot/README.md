@@ -1,6 +1,6 @@
 # Likho's Point and Shoot
 
-This mod reworks Point Shooting, tactical device activation and the flip magnifier.
+This mod reworks Point Shooting, tactical device activation and adds other QoL key bindings.
 
 ## Point Shooting
 
@@ -24,6 +24,11 @@ Contextual to NVG:
 New keybind to quickly access avilable light without opening the radial menu or cycling through activation modes.
 
 Works as both momentary switch and toggle. Contextual to NVG same way the laser is.
+
+## Interact (Instant)
+
+New keybind **Interact (Instant)**, that mimics vanilla **Interact** behavior but without hold delay. Tap it to open containers instantly. Locked containers will still use unlock delay, but do not require to hold the key. Old binding is unaffected.
+
 
 ## Magnifier binding
 

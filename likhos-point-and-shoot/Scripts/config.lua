@@ -40,5 +40,12 @@ return {
             action  = "Flashlight",   -- tap to leave the light on, hold to light it while held
             block_in_ui = true,
         },
+        {
+            id      = "quick_use",
+            enabled = true,
+            mapping = "LikhosInteractInstant",   -- Settings > Controls > Interact (Instant)
+            action  = "QuickUse",     -- tap to use what F would, holds completing at once
+            block_in_ui = true,
+        },
     },
 }

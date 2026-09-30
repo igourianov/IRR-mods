@@ -1,3 +1,6 @@
+# 1.0.77
+* new Interact (Instant) keybind to open containers without hold
+
 # 1.0.73
 * moved med item drop on use and whole number item tags out into backpack mod
 

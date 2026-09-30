@@ -8,6 +8,7 @@
 local log     = require("log")
 local util    = require("util")
 local devices = require("devices")
+local quick_use = require("quick_use")
 local config  = require("config")
 
 local M = {}
@@ -219,6 +220,10 @@ M.ACTIONS = {
         press   = flashlight_press,
         release = flashlight_release,
     },
+    -- docs/solutions/tap-to-use.md
+    ["QuickUse"] = {
+        press   = quick_use.press,
+    },
 }
 
 --- Actions found undefined this session, so the error logs once rather than every tick.
@@ -247,6 +252,7 @@ function M.reset()
     disabled = {}
     point_aim = nil
     flashlight = nil
+    quick_use.reset()
 end
 
 --- Startup check: report which configured actions are missing a definition, without touching the game.
