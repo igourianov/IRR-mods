@@ -1,3 +1,6 @@
+# 1.0.23
+* doubled tier 1 ammo spawn chance to reduce high tier ammo spawns
+
 # 1.0.21
 * in-raid ammo boxes hold 2-5 stacks of 30-60 rounds and roll tier 1 rounds less often
 

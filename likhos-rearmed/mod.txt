@@ -1,5 +1,5 @@
 [mod]
-version="1.0.21"
+version="1.0.23"
 ; Built pak. _P gives its files priority over the game's paks.
 pak="likhos_rearmed_P.pak"
 
