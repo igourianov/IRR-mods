@@ -1,3 +1,6 @@
+# 1.0.81
+* fixed instant interact softlocking on locked doors/containers after picking up world item
+
 # 1.0.80
 * fixed instant interact softlocking after picking up world item
 

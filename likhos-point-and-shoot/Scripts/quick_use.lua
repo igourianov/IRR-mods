@@ -55,6 +55,16 @@ local function zero_holds(target)
     override = { target = target:GetFullName(), options = options }
 end
 
+--- Deactivate the interact ability if it is still active. F's release does this, and a quick use has no release.
+local function release_ability(comp, sga_class)
+    local ability = nil
+    comp.ActiveAbilities:ForEach(function(_, elem)
+        local a = elem:get()
+        if util.valid(a) and a:IsA(sga_class) then ability = a end
+    end)
+    if ability then ability:DeactivateAbility() end
+end
+
 local function press()
     restore()
 
@@ -94,20 +104,23 @@ local function press()
     end
     -- A Tab interaction runs on a delayed start, and SGA_Interact stays active until a release, which only F sends. Left active, it refuses the next start from either key.
     -- Release as F does. F's release lands before the delayed start too, and doesn't cancel it.
-    local ability = nil
-    comp.ActiveAbilities:ForEach(function(_, elem)
-        local a = elem:get()
-        if util.valid(a) and a:IsA(sga_class) then ability = a end
-    end)
     manager:StopInteraction()
-    if ability then ability:DeactivateAbility() end
+    release_ability(comp, sga_class)
 end
 
 -- Read the target here only. By the post callback a parameter can hold unrelated values.
 local function on_finish(_, target)
     if not override then return end
     local finished = target:get()
-    if util.valid(finished) and finished:GetFullName() == override.target then restore() end
+    if not (util.valid(finished) and finished:GetFullName() == override.target) then return end
+    restore()
+    -- A Wait interaction (key unlock) leaves the ability active after it finishes, which refuses the next start.
+    local pc = FindFirstOf("PlayerController")
+    local comp_class = StaticFindObject(ABILITY_COMP)
+    local sga_class = StaticFindObject(SGA_INTERACT)
+    if not (util.valid(pc) and util.valid(pc.Pawn) and util.valid(comp_class) and util.valid(sga_class)) then return end
+    local comp = pc.Pawn:GetComponentByClass(comp_class)
+    if util.valid(comp) then release_ability(comp, sga_class) end
 end
 
 --- The Interact (Instant) key's press. Game thread.
