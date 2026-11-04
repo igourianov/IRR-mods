@@ -1,3 +1,6 @@
+# 1.0.82
+* fixed direct point shooting jittering above 60 fps
+
 # 1.0.81
 * fixed instant interact softlocking on locked doors/containers after picking up world item
 

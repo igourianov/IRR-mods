@@ -24,7 +24,7 @@ function M.on_release(bind)
     actions.invoke(bind.action, "release")
 end
 
---- Called every tick_ms from the game thread.
+--- Called every frame from the game thread.
 function M.tick(binds)
     for _, bind in ipairs(binds) do
         if bind.enabled and holding[bind.id] then

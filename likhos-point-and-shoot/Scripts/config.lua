@@ -13,10 +13,6 @@ return {
     -- Master switch. Set false to load the mod inert (useful when bisecting a crash after a game patch).
     enabled = true,
 
-    -- Tick loop interval, milliseconds.
-    -- 16ms ~= one frame at 60fps. Raise if you see CPU cost in the console.
-    tick_ms = 16,
-
     -- How long a hold-or-toggle key may be held and still count as a tap, milliseconds.
     -- Released inside this window, the light it turned on stays on until the next press. Held past it, the light goes off on release.
     tap_ms = 250,

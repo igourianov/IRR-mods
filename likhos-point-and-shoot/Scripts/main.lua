@@ -49,17 +49,17 @@ local loop_handle = nil
 local function start_tick_loop()
     if loop_handle then return end
 
-    local tick_ms = config.tick_ms or 16
     -- LoopAsync runs its callback on UE4SS's async thread. Calling ExecuteInGameThread from there every tick corrupted the Lua state (random crashes inside UE4SS's Lua runtime).
     -- This timer runs on the game thread only.
+    -- It runs every frame because PointAim holds IA_Aim with a one-frame press, and a frame without one reads as releasing aim. A fixed-delay loop jittered aim above 60 fps.
     -- UE4SS cancels the mod's delayed actions on unload, so a hot reload needs no explicit cancel. This build has no ModRef:OnUnload despite Types.lua declaring it.
-    loop_handle = LoopInGameThreadWithDelay(tick_ms, function()
+    loop_handle = LoopInGameThreadAfterFrames(1, function()
         util.safe("tick", function()
             input.poll(config.binds)
             triggers.tick(config.binds)
         end)
     end)
-    log.debug("tick loop started at %dms", tick_ms)
+    log.debug("tick loop started, every frame")
 end
 
 --------------------------------------------------------------------------
@@ -86,7 +86,7 @@ local function init()
     if config.magnifier_zoom then magnifier.install() end
     quick_use.install()
 
-    -- The tick loop runs Lua every tick_ms. Skip it when nothing can use it.
+    -- The tick loop runs Lua every frame. Skip it when nothing can use it.
     if register_binds() > 0 then start_tick_loop() end
 
     RegisterConsoleCommandHandler("kb_dump_imc", function()
