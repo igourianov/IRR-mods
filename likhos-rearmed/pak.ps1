@@ -9,7 +9,7 @@
     Then stages a renamed copy of every cooked asset listed in clone.json, e.g. a mag well that takes 300 BLK mags instead of 5.56 ones.
     Then it extracts every cooked asset listed in retarget.json and points its references to one asset at another, e.g. a weapon's chamber from the 5.56 ammo set to the 300 BLK one.
     Then it extracts every item definition listed in stats.json and sets its stat values, e.g. the 7.62x39 HP round's damage.
-    Then it extracts every NPC loadout preset listed in loadouts.json and sets the weapon pool it picks from.
+    Then it extracts every NPC loadout preset listed in loadouts.json and sets the weapon pool it picks from: the part of its faction's weighted pool that the preset selects.
     Last, it extracts every loot container preset listed in loot.json and sets its loot generation settings, e.g. how many ammo stacks an ammo box holds.
     Called by build.ps1, which packs the staged tree.
 #>
@@ -325,9 +325,32 @@ function Get-SlotSettings {
 }
 
 # ---------------------------------------------------------------- loadouts
-# An NPC preset rolls its weapon from the one slot whose ItemTypeSpawnWeights map weapon tags to weights. The listed pool replaces that map whole.
+# A faction's pool is the only place weapon weights are set. Each of its presets carries the pool weapons its selection names by class (Smg) or by weapon (Rifle.AK-103), at their pool weights.
+# An NPC preset rolls its weapon from the one slot whose ItemTypeSpawnWeights map weapon tags to weights. The preset's pool replaces that map whole.
 # Tags are the staged ini's, reclass applied, so the presets don't depend on tag redirects reaching them.
-$loadouts = Get-Content (Join-Path $PSScriptRoot 'loadouts.json') -Raw | ConvertFrom-Json
+function Select-Weapons {
+    param($Weapons, [string[]] $Prefixes)
+    $Weapons | Where-Object { $name = $_.Name; @($Prefixes | Where-Object { $name -eq $_ -or $name.StartsWith("$_.") }).Count }
+}
+
+# Keyed by preset path, so the loot stage can tell a preset is taken.
+$loadouts = [pscustomobject]@{}
+foreach ($faction in (Get-Content (Join-Path $PSScriptRoot 'loadouts.json') -Raw | ConvertFrom-Json).PSObject.Properties) {
+    $weapons = @($faction.Value.pool.PSObject.Properties)
+    $selected = [System.Collections.Generic.HashSet[string]]::new()
+    foreach ($preset in $faction.Value.presets.PSObject.Properties) {
+        foreach ($prefix in $preset.Value) {
+            if (-not @(Select-Weapons $weapons $prefix).Count) { Write-Error "$prefix in $($preset.Name)'s selection matches no $($faction.Name) weapon." }
+        }
+        if ($loadouts.PSObject.Properties[$preset.Name]) { Write-Error "$($preset.Name) is listed under two factions in loadouts.json." }
+        $carried = @(Select-Weapons $weapons $preset.Value)
+        foreach ($weapon in $carried) { $null = $selected.Add($weapon.Name) }
+        $loadouts | Add-Member $preset.Name $carried
+    }
+    foreach ($weapon in $weapons) {
+        if (-not $selected.Contains($weapon.Name)) { Write-Error "$($weapon.Name) in the $($faction.Name) pool is selected by no preset." }
+    }
+}
 $entries = @($loadouts.PSObject.Properties)
 $assets = @(Read-Assets $entries.Name -Parse)
 for ($n = 0; $n -lt $entries.Count; $n++) {
@@ -346,7 +369,7 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
     $pool = $pools[0]
 
     $template = $pool.Value[0] | ConvertTo-Json -Depth 100
-    $pool.Value = @(foreach ($weapon in $entry.Value.PSObject.Properties) {
+    $pool.Value = @(foreach ($weapon in $entry.Value) {
         $tag = "$weaponsTag.$($weapon.Name)"
         if ((Find-Tag $tag).Count -ne 1) { Write-Error "$tag in loadouts.json is not in the staged tag list." }
         if ($data.NameMap -notcontains $tag) { $data.NameMap += $tag }
@@ -359,7 +382,8 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
     })
 
     Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset") -Parse
-    Write-Host "  $(($asset -split '/')[-1]): $($pool.Value.Count) weapons"
+    $total = ($entry.Value | Measure-Object Value -Sum).Sum
+    Write-Host "  $(($asset -split '/')[-1]): $(($entry.Value | ForEach-Object { '{0} {1:0.#}%' -f $_.Name, (100 * $_.Value / $total) }) -join ', ')"
 }
 
 # ---------------------------------------------------------------- loot

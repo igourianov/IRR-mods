@@ -6,6 +6,7 @@ This mod rebalances various weapon stats and adjusts faction weapon pools.
 
 * FAL: Rifle -> DMR.
 * SVD: Sniper -> DMR.
+* VSS: Rifle -> DMR.
 * SKS: DMR -> Rifle.
 * AKS-74U, Rattler, Honey Badger: Rifle -> SMG.
 
@@ -35,11 +36,17 @@ Fixed the buffer tube + Viper combination being the overpowered choice on every 
 
 ## NPC loadouts
 
-Each faction's NPCs now carry weapons that fit the faction.
+Each faction's NPCs now carry weapons that fit the faction. Within each role, pricier weapons spawn less often.
 
-* IGC: mostly 5.45x39 platform with some Vityaz and Saiga. Snipers: SVD.
-* UICS: mostly M4 and MP5 + low chance of exotic NATO weapons. Snipers: SCAR-H and Galil.
-* VLF: 7.62x39 rifles and Chinese 5.56 rifles. Snipers: FAL.
+* IGC: mostly 5.45x39 platform with some Vityaz and Saiga. Snipers: SVD and VSS.
+* UICS: mostly M4 and the MP5 family + low chance of exotic NATO weapons. Snipers: M14, RFB and SCAR-H.
+* VLF: 7.62x39 rifles and Chinese 5.56 rifles. Snipers: M305 and FAL.
+
+Guards are the heavier tier. They carry only full rifles and LMGs, no SMGs or shotguns. Patrols carry the lighter weapons, and some UICS and VLF patrols carry only a pistol.
+
+* IGC patrols: AKS-74U, Vityaz and Saiga. Guards: AK rifles, AS Val and RPK.
+* UICS patrols: MP5 family, MPX, P90, Vector and shotguns. Guards: M4A1, AUG, SCAR-L, MCX Virtus and KAC LAMG.
+* VLF patrols: QBZ-97 and CQ. Guards: STV-380, SKS, AK-103 and AK-104.
 
 ## Ammo boxes
 
@@ -73,13 +80,17 @@ The mod replaces these game files:
   - AR-15 ACE Ultra Lite, AR-15 Magpul UBR and AR-15 Strike Industries Viper Mod 1
   - AK SAG ACR
   - SKS SAGE International SKSALCV chassis
-- Seven NPC loadout presets:
+- Eleven NPC loadout presets:
   - `DA_Inventory_AI_Patrol_IGC_A`
+  - `DA_Inventory_AI_Guard_IGC`
   - `DA_Inventory_AI_Sniper_IGC`
   - `DA_Inventory_AI_Patrol_UICS_A`
+  - `DA_Inventory_AI_Patrol_UICS_B`
+  - `DA_Inventory_AI_Guard_UICS`
   - `DA_Inventory_AI_Sniper_UICS`
   - `DA_Inventory_AI_Patrol_VLF_A`
   - `DA_Inventory_AI_Patrol_VLF_B`
+  - `DA_Inventory_AI_Guard_VLF`
   - `DA_Inventory_AI_Sniper_VLF`
 - The ammo box loot preset (`DA_LootContainer_AmmoBox`)
 

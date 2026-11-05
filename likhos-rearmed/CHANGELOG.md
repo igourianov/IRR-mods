@@ -1,3 +1,10 @@
+# 1.1.35
+* VSS moved to DMRs
+* guards carry only full rifles and LMGs, patrols carry the lighter weapons. Some UICS and VLF patrols carry only a pistol.
+* IGC guards no longer share the patrol weapon pool
+* snipers: IGC SVD and VSS, UICS M14, RFB and SCAR-H, VLF M305 and FAL
+* within each role, pricier weapons spawn less often
+
 # 1.0.24
 * rebuilt for the 2026-11-04 game update
 * ammo boxes can hold more than one stack of the same round, since the game's new loot system no longer offers the old setting

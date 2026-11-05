@@ -1,47 +1,71 @@
 {
-    "/Game/Blueprints/InventorySystem/Presets/Container/AI/IGC/DA_Inventory_AI_Patrol_IGC_A": {
-        "Smg.AKS-74U": 3,
-        "Smg.PP-19 Vitayz": 3,
-        "Shotgun.Saiga-12K": 2,
-        "Rifle.AK-74M": 2,
-        "Rifle.AK-12": 1,
-        "Rifle.AK-105": 1,
-        "Rifle.AKS-74": 3,
-        "Lmg.RPK-74": 0.2
+    "IGC": {
+        "pool": {
+            "Dmr.SVDS": 2,
+            "Dmr.VSS Vintorez": 0.5,
+            "Lmg.RPK-74": 0.2,
+            "Rifle.AKS-74": 3,
+            "Rifle.AK-74M": 2,
+            "Rifle.AK-105": 1,
+            "Rifle.AK-12": 1,
+            "Rifle.AS Val": 0.5,
+            "Shotgun.Saiga-12K": 0.75,
+            "Smg.AKS-74U": 3,
+            "Smg.PP-19 Vitayz": 3
+        },
+        "presets": {
+            "/Game/Blueprints/InventorySystem/Presets/Container/AI/IGC/DA_Inventory_AI_Patrol_IGC_A": ["Smg", "Shotgun"],
+            "/Game/Blueprints/InventorySystem/Presets/Container/AI/IGC/DA_Inventory_AI_Guard_IGC": ["Rifle", "Lmg"],
+            "/Game/Blueprints/InventorySystem/Presets/Container/AI/IGC/DA_Inventory_AI_Sniper_IGC": ["Dmr"]
+        }
     },
-    "/Game/Blueprints/InventorySystem/Presets/Container/AI/IGC/DA_Inventory_AI_Sniper_IGC": {
-        "Dmr.SVDS": 2
+    "UICS": {
+        "pool": {
+            "Dmr.FN SCAR-H": 0.75,
+            "Dmr.M14": 2,
+            "Dmr.RFB": 1,
+            "Lmg.KAC LAMG": 0.5,
+            "Pistol.Glock 19": 1,
+            "Pistol.P320": 1,
+            "Pistol.M9A3": 0.8,
+            "Pistol.FN Five Seven": 0.2,
+            "Rifle.Colt M4A1": 15,
+            "Rifle.AUG A3": 5,
+            "Rifle.FN SCAR-L": 5,
+            "Rifle.Sig Sauer MCX Virtus": 1,
+            "Shotgun.Benelli M2": 1.5,
+            "Shotgun.RIA VR80": 1,
+            "Smg.MP5": 2,
+            "Smg.MP5k": 5,
+            "Smg.MP5SD": 1,
+            "Smg.MPX": 1.5,
+            "Smg.FN P90": 1,
+            "Smg.KRISS Vector 45ACP": 1
+        },
+        "presets": {
+            "/Game/Blueprints/InventorySystem/Presets/Container/AI/UICS/DA_Inventory_AI_Patrol_UICS_A": ["Smg", "Shotgun"],
+            "/Game/Blueprints/InventorySystem/Presets/Container/AI/UICS/DA_Inventory_AI_Patrol_UICS_B": ["Pistol"],
+            "/Game/Blueprints/InventorySystem/Presets/Container/AI/UICS/DA_Inventory_AI_Guard_UICS": ["Rifle", "Lmg"],
+            "/Game/Blueprints/InventorySystem/Presets/Container/AI/UICS/DA_Inventory_AI_Sniper_UICS": ["Dmr"]
+        }
     },
-    "/Game/Blueprints/InventorySystem/Presets/Container/AI/UICS/DA_Inventory_AI_Patrol_UICS_A": {
-        "Rifle.Colt M4A1": 15,
-        "Shotgun.Benelli M2": 5,
-        "Smg.MP5": 5,
-        "Smg.MP5SD": 2,
-        "Smg.MP5k": 2,
-        "Smg.MPX": 2,
-        "Rifle.AUG A3": 5,
-        "Rifle.FN SCAR-L": 5,
-        "Rifle.Sig Sauer MCX Virtus": 1,
-        "Smg.KRISS Vector 45ACP": 1,
-        "Smg.FN P90": 1,
-        "Shotgun.RIA VR80": 1
-    },
-    "/Game/Blueprints/InventorySystem/Presets/Container/AI/UICS/DA_Inventory_AI_Sniper_UICS": {
-        "Dmr.Galil Ace": 1,
-        "Dmr.FN SCAR-H": 1
-    },
-    "/Game/Blueprints/InventorySystem/Presets/Container/AI/VLF/DA_Inventory_AI_Patrol_VLF_A": {
-        "Rifle.STV-380": 4,
-        "Rifle.Norinco QBZ-97": 3.5,
-        "Rifle.Norinco CQ": 3.5,
-        "Rifle.SKS": 3,
-        "Rifle.AK-103": 1,
-        "Rifle.AK-104": 1
-    },
-    "/Game/Blueprints/InventorySystem/Presets/Container/AI/VLF/DA_Inventory_AI_Patrol_VLF_B": {
-        "Pistol.QSZ-92": 2
-    },
-    "/Game/Blueprints/InventorySystem/Presets/Container/AI/VLF/DA_Inventory_AI_Sniper_VLF": {
-        "Dmr.FN FAL": 1
+    "VLF": {
+        "pool": {
+            "Dmr.Norinco M305": 2,
+            "Dmr.FN FAL": 0.5,
+            "Pistol.QSZ-92": 2,
+            "Rifle.STV-380": 1.5,
+            "Rifle.Norinco CQ": 3.5,
+            "Rifle.Norinco QBZ-97": 3.5,
+            "Rifle.SKS": 3,
+            "Rifle.AK-103": 1,
+            "Rifle.AK-104": 1
+        },
+        "presets": {
+            "/Game/Blueprints/InventorySystem/Presets/Container/AI/VLF/DA_Inventory_AI_Patrol_VLF_A": ["Rifle.Norinco QBZ-97", "Rifle.Norinco CQ"],
+            "/Game/Blueprints/InventorySystem/Presets/Container/AI/VLF/DA_Inventory_AI_Patrol_VLF_B": ["Pistol"],
+            "/Game/Blueprints/InventorySystem/Presets/Container/AI/VLF/DA_Inventory_AI_Guard_VLF": ["Rifle.STV-380", "Rifle.SKS", "Rifle.AK-103", "Rifle.AK-104"],
+            "/Game/Blueprints/InventorySystem/Presets/Container/AI/VLF/DA_Inventory_AI_Sniper_VLF": ["Dmr"]
+        }
     }
 }
