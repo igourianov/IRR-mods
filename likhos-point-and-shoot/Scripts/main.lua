@@ -12,6 +12,7 @@ local keymap   = require("keymap")
 local menu     = require("menu")
 local magnifier = require("magnifier")
 local quick_use = require("quick_use")
+local low_ready = require("low_ready")
 
 local config = require("config")
 
@@ -85,6 +86,7 @@ local function init()
     menu.install()
     if config.magnifier_zoom then magnifier.install() end
     quick_use.install()
+    if config.low_ready_default then low_ready.install() end
 
     -- The tick loop runs Lua every frame. Skip it when nothing can use it.
     if register_binds() > 0 then start_tick_loop() end

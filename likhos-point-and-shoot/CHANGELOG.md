@@ -1,3 +1,6 @@
+# 1.1.92
+* auto low ready lowers the gun right after aiming, sprinting or any other action instead of after 10 seconds of idle
+
 # 1.0.82
 * fixed direct point shooting jittering above 60 fps
 

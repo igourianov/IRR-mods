@@ -34,6 +34,14 @@ New keybind **Interact (Instant)**, that mimics vanilla **Interact** behavior bu
 
 The EOTech+Magnifier combo now works using the mouse scroll, same way LPVO does. Old binding still works but unnecessary.
 
+## Low ready by default
+
+Low ready is the resting position of the gun. After aiming, sprinting, reloading, firing or any other action ends, the gun goes back to low ready almost at once instead of after 10 seconds of idle.
+
+The mod shortens the delay of the game's own auto low ready, so turn on auto low ready in the gameplay settings. That setting stays your switch for this feature. Your saved settings are not changed. The **Low Ready** keybind still works, but the gun lowers again a moment later.
+
+In `Scripts\config.lua`, `low_ready_delay_ms` sets how long the gun stays up after the last action ends, and `low_ready_default = false` restores the game's own delay.
+
 ## Requirements
 
 - Incursion Red River, Steam version. Tested on build 22417726.

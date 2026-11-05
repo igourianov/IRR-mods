@@ -8,7 +8,7 @@
 
 return {
     -- "error" | "warn" | "info" | "debug"
-    log_level = "info",
+    log_level = "debug",
 
     -- Master switch. Set false to load the mod inert (useful when bisecting a crash after a game patch).
     enabled = true,
@@ -20,6 +20,11 @@ return {
     -- The zoom input folds and unfolds the magnifier on a hybrid sight: scroll forward unfolds, scroll back folds.
     -- Set false for vanilla zoom.
     magnifier_zoom = true,
+
+    -- Low ready is the weapon's resting position: the game's auto low ready lowers the gun this long after nothing holds it up, milliseconds.
+    -- Shortens the delay of the game's auto low ready, which must be turned on in its gameplay settings. Set false for the game's own delay.
+    low_ready_default = true,
+    low_ready_delay_ms = 10,
 
     binds = {
         {
