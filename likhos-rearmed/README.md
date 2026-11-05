@@ -46,8 +46,8 @@ Each faction's NPCs now carry weapons that fit the faction.
 In-raid ammo boxes hold more ammo and lean towards better rounds.
 
 * 2-5 stacks per box instead of 1-3.
-* 30-60 rounds per stack instead of 10-40.
-* Tier 1 rounds (5.56 FMJ, 9x19 PSO, 5.45 PS, 12ga buckshot, 7.62x39 HP) are about three times rarer, effectivelly making higher tiers more common.
+* 30-90 rounds per stack instead of 10-40.
+* Tier 1 rounds (5.56 FMJ, 9x19 PSO, 5.45 PS, 12ga buckshot, 7.62x39 HP) roll about a third less often, effectively making higher tiers more common.
 
 ## Installation
 

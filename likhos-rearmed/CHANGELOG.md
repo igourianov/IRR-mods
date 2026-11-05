@@ -1,3 +1,7 @@
+# 1.0.24
+* rebuilt for the 2026-11-04 game update
+* ammo boxes can hold more than one stack of the same round, since the game's new loot system no longer offers the old setting
+
 # 1.0.23
 * doubled tier 1 ammo spawn chance to reduce high tier ammo spawns
 

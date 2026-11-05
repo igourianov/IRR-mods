@@ -10,7 +10,7 @@
     Then it extracts every cooked asset listed in retarget.json and points its references to one asset at another, e.g. a weapon's chamber from the 5.56 ammo set to the 300 BLK one.
     Then it extracts every item definition listed in stats.json and sets its stat values, e.g. the 7.62x39 HP round's damage.
     Then it extracts every NPC loadout preset listed in loadouts.json and sets the weapon pool it picks from.
-    Last, it extracts every loot container preset listed in loot.json and sets its random item parameters, e.g. how many ammo stacks an ammo box holds.
+    Last, it extracts every loot container preset listed in loot.json and sets its loot generation settings, e.g. how many ammo stacks an ammo box holds.
     Called by build.ps1, which packs the staged tree.
 #>
 [CmdletBinding()]
@@ -312,8 +312,20 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
     Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset") -Parse
 }
 
+# ---------------------------------------------------------------- presets
+# A loadout or loot container preset fills each of its ContainerSlots from the LootGenerationSettings object the slot references, exported by the same asset.
+function Get-SlotSettings {
+    param($Data, [string] $Asset)
+    $preset = @($Data.Exports | Where-Object ObjectName -eq ($Asset -split '/')[-1])
+    if ($preset.Count -ne 1) { Write-Error "$Asset has no preset export." }
+    foreach ($slot in @(($preset[0].Data | Where-Object Name -eq 'ContainerSlots').Value)) {
+        $settings = ($slot.Value | Where-Object Name -eq 'LootSettings').Value
+        if ($settings -gt 0) { $Data.Exports[$settings - 1] }
+    }
+}
+
 # ---------------------------------------------------------------- loadouts
-# An NPC preset rolls its weapon from the one container whose ItemSpawnChances map weapon tags to weights. The listed pool replaces that map whole.
+# An NPC preset rolls its weapon from the one slot whose ItemTypeSpawnWeights map weapon tags to weights. The listed pool replaces that map whole.
 # Tags are the staged ini's, reclass applied, so the presets don't depend on tag redirects reaching them.
 $loadouts = Get-Content (Join-Path $PSScriptRoot 'loadouts.json') -Raw | ConvertFrom-Json
 $entries = @($loadouts.PSObject.Properties)
@@ -324,15 +336,13 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
     if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loadouts.json and another stage." }
 
     $data = $assets[$n]
-    $containers = @((@($data.Exports | Where-Object ObjectName -eq ($asset -split '/')[-1])[0].Data | Where-Object Name -eq 'DefaultItemsContainers').Value)
-    $pools = @(foreach ($container in $containers) {
-        $parameters = @($container.Value | Where-Object Name -eq 'RandomItemParameters')
-        $chances = @($parameters.Value | Where-Object Name -eq 'ItemSpawnChances')
-        if (-not $chances.Count -or -not $chances[0].Value.Count) { continue }
-        $keys = @($chances[0].Value | ForEach-Object { ($_[0].Value | Where-Object Name -eq 'TagName').Value })
-        if (-not @($keys | Where-Object { -not "$_".StartsWith("$weaponsTag.") }).Count) { $chances[0] }
+    $pools = @(foreach ($settings in Get-SlotSettings $data $asset) {
+        $weights = @($settings.Data | Where-Object Name -eq 'ItemTypeSpawnWeights')
+        if (-not $weights.Count -or -not $weights[0].Value.Count) { continue }
+        $keys = @($weights[0].Value | ForEach-Object { ($_[0].Value | Where-Object Name -eq 'TagName').Value })
+        if (-not @($keys | Where-Object { -not "$_".StartsWith("$weaponsTag.") }).Count) { $weights[0] }
     })
-    if ($pools.Count -ne 1) { Write-Error "$asset has $($pools.Count) weapon containers, expected one." }
+    if ($pools.Count -ne 1) { Write-Error "$asset has $($pools.Count) weapon pools, expected one." }
     $pool = $pools[0]
 
     $template = $pool.Value[0] | ConvertTo-Json -Depth 100
@@ -353,7 +363,8 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 }
 
 # ---------------------------------------------------------------- loot
-# A loot container rolls its contents from its preset's RandomItemParameters. A listed int or bool field is set, a listed map field has the value of each listed key set.
+# A loot container rolls its contents from the loot settings of its one slot. A listed int or bool field is set, a listed map field has the value of each listed key set.
+# An int or bool field at its class default is absent from the asset, so it is written in, typed by its JSON value.
 # Only keys the preset already has are set, since a new key would need its tag added to the name map.
 $loot = Get-Content (Join-Path $PSScriptRoot 'loot.json') -Raw | ConvertFrom-Json
 $entries = @($loot.PSObject.Properties)
@@ -365,13 +376,19 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
     if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $loadouts.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loot.json and another stage." }
 
     $data = $assets[$n]
-    $containers = @((@($data.Exports | Where-Object ObjectName -eq $name)[0].Data | Where-Object Name -eq 'DefaultItemsContainers').Value)
-    if ($containers.Count -ne 1) { Write-Error "$asset has $($containers.Count) item containers, expected one." }
-    $parameters = @(($containers[0].Value | Where-Object Name -eq 'RandomItemParameters').Value)
+    $settings = @(Get-SlotSettings $data $asset)
+    if ($settings.Count -ne 1) { Write-Error "$asset has $($settings.Count) slots with loot settings, expected one." }
+    $settings = $settings[0]
 
     foreach ($field in $entry.Value.PSObject.Properties) {
-        $property = @($parameters | Where-Object Name -eq $field.Name)
-        if ($property.Count -ne 1) { Write-Error "$asset has no $($field.Name) random item parameter." }
+        $property = @($settings.Data | Where-Object Name -eq $field.Name)
+        if (-not $property.Count -and ($field.Value -is [bool] -or $field.Value -is [long])) {
+            $bool = $field.Value -is [bool]
+            $property = @([pscustomobject]@{ '$type' = "UAssetAPI.PropertyTypes.Objects.$(if ($bool) { 'Bool' } else { 'Int' })PropertyData, UAssetAPI"; Name = $field.Name; ArrayIndex = 0; PropertyGuid = $null; IsZero = $true; PropertyTagFlags = 'None'; PropertyTypeName = $null; PropertyTagExtensions = 'NoExtension'; Value = if ($bool) { $false } else { 0 } })
+            $settings.Data = @($settings.Data) + $property
+            if ($data.NameMap -notcontains $field.Name) { $data.NameMap += $field.Name }
+        }
+        if ($property.Count -ne 1) { Write-Error "$asset has no $($field.Name) loot setting." }
         $property = $property[0]
 
         switch -Wildcard ($property.'$type') {
