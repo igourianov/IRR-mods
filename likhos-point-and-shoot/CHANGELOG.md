@@ -1,3 +1,7 @@
+# 1.1.115
+* auto low ready lowers the gun while walking after running
+* reduced animation transition jitter
+
 # 1.1.92
 * auto low ready lowers the gun right after aiming, sprinting or any other action instead of after 10 seconds of idle
 

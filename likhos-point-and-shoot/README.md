@@ -36,11 +36,11 @@ The EOTech+Magnifier combo now works using the mouse scroll, same way LPVO does.
 
 ## Low ready by default
 
-Low ready is the resting position of the gun. After aiming, sprinting, reloading, firing or any other action ends, the gun goes back to low ready almost at once instead of after 10 seconds of idle.
+Low ready is the resting position of the gun. As soon as aiming, sprinting, firing or any other action ends, the gun goes straight back to low ready, standing or moving, instead of after 10 seconds of idle. Reloading and interacting keep it in low ready. Holstering and drawing work as in vanilla.
 
-The mod shortens the delay of the game's own auto low ready, so turn on auto low ready in the gameplay settings. That setting stays your switch for this feature. Your saved settings are not changed. The **Low Ready** keybind still works, but the gun lowers again a moment later.
+Turn on auto low ready in the gameplay settings. That setting stays your switch for this feature. Your saved settings are not changed. With it on, the **Low Ready** keybind does nothing useful, since the gun lowers again right away.
 
-In `Scripts\config.lua`, `low_ready_delay_ms` sets how long the gun stays up after the last action ends, and `low_ready_default = false` restores the game's own delay.
+In `Scripts\config.lua`, `low_ready_run_delay_ms` sets how long after a run the gun lowers, and `low_ready_default = false` restores the game's own auto low ready.
 
 ## Requirements
 

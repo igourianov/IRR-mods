@@ -8,7 +8,7 @@
 
 return {
     -- "error" | "warn" | "info" | "debug"
-    log_level = "debug",
+    log_level = "info",
 
     -- Master switch. Set false to load the mod inert (useful when bisecting a crash after a game patch).
     enabled = true,
@@ -21,10 +21,11 @@ return {
     -- Set false for vanilla zoom.
     magnifier_zoom = true,
 
-    -- Low ready is the weapon's resting position: the game's auto low ready lowers the gun this long after nothing holds it up, milliseconds.
-    -- Shortens the delay of the game's auto low ready, which must be turned on in its gameplay settings. Set false for the game's own delay.
+    -- Low ready is the weapon's resting position: the gun lowers as soon as aiming, sprinting, firing or any other action ends.
+    -- Works only with auto low ready turned on in the gameplay settings. Set false for the game's own auto low ready.
     low_ready_default = true,
-    low_ready_delay_ms = 10,
+    -- How long after a run ends the gun lowers, milliseconds. Shorter makes the gun dip as the run ends.
+    low_ready_run_delay_ms = 150,
 
     binds = {
         {
