@@ -1,3 +1,6 @@
+# 1.1.117
+* fixed the zoom input not folding the magnifier while NVG is on
+
 # 1.1.115
 * auto low ready lowers the gun while walking after running
 * reduced animation transition jitter

@@ -45,11 +45,16 @@ local function has_folded_mode(sight)
     return found
 end
 
-local function is_current_sight(name)
-    local wc = actions.equipped_weapon_component()
-    if not wc then return false end
-    local current = wc:GetCurrentSightComponent()
-    return util.valid(current) and current:GetFullName() == name
+local function find_magnifier(wc)
+    local found = nil
+    wc.LocSightComponents:ForEach(function(_, elem)
+        local sight = elem:get()
+        if util.valid(sight) and has_folded_mode(sight) then
+            found = sight
+            return true
+        end
+    end)
+    return found
 end
 
 -- bIncrement reads correctly here only. By the post callback the parameter holds unrelated values.
@@ -63,12 +68,19 @@ local function on_post(context)
     call = nil
     if not before then return end
 
-    local sight = context:get()
-    local name = sight:GetFullName()
+    local called = context:get()
     -- A moved index means the notch zoomed. The magnifier flips only at the end stop.
-    if name ~= before.sight or sight.MagnificationIndex ~= before.index then return end
-    if not has_folded_mode(sight) then return end
+    if called:GetFullName() ~= before.sight or called.MagnificationIndex ~= before.index then return end
 
+    local wc = actions.equipped_weapon_component()
+    if not wc then return end
+    local current = wc:GetCurrentSightComponent()
+    if not (util.valid(current) and current:GetFullName() == before.sight) then return end
+    -- Under NVG the game aims an unfolded magnifier through the weapon's point sight, so the notch lands on a sight without one.
+    local sight = has_folded_mode(called) and called or find_magnifier(wc)
+    if not sight then return end
+
+    local name = sight:GetFullName()
     local mode = sight.SightModeKey:ToString()
     if pending then
         local elapsed = (os.clock() - pending.at) * 1000
@@ -78,7 +90,7 @@ local function on_post(context)
     end
 
     local target = before.increment and UNFOLDED or FOLDED
-    if mode == target or not is_current_sight(name) then return end
+    if mode == target then return end
 
     actions.inject_press(IA_TOGGLE_MAGNIFIER)
     pending = { sight = name, target = target, at = os.clock() }
