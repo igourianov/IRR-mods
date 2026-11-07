@@ -1,3 +1,6 @@
+# 1.2.37
+* in-raid med boxes hold only medical items, no more nylon and polyester fabric
+
 # 1.1.35
 * VSS moved to DMRs
 * guards carry only full rifles and LMGs, patrols carry the lighter weapons. Some UICS and VLF patrols carry only a pistol.

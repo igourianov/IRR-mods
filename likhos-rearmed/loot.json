@@ -9,5 +9,17 @@
         "RaritySpawnWeights": {
             "Inventory.Rarity Types.Tier 1": 0.65
         }
+    },
+    "/Game/Blueprints/InventorySystem/Presets/Container/Final/DA_LootContainer_MedBox_01": {
+        "ItemTypeSpawnWeights": {
+            "Inventory.Items.Barter.Tools.Nylon Fabric": 0,
+            "Inventory.Items.Barter.Tools.Polyester Fabric": 0
+        }
+    },
+    "/Game/Blueprints/InventorySystem/Presets/Container/Final/DA_LootContainer_MedBox_02": {
+        "ItemTypeSpawnWeights": {
+            "Inventory.Items.Barter.Tools.Nylon Fabric": 0,
+            "Inventory.Items.Barter.Tools.Polyester Fabric": 0
+        }
     }
 }

@@ -56,6 +56,10 @@ In-raid ammo boxes hold more ammo and lean towards better rounds.
 * 30-90 rounds per stack instead of 10-40.
 * Tier 1 rounds (5.56 FMJ, 9x19 PSO, 5.45 PS, 12ga buckshot, 7.62x39 HP) roll about a third less often, effectively making higher tiers more common.
 
+## Med boxes
+
+In-raid med boxes hold only medical items. Nylon and polyester fabric no longer spawn in them.
+
 ## Installation
 
 Extract the zip into `PROJECT QUARANTINE\Test_C\Content\Paks`. It places `likhos_rearmed_P.pak` in `Paks\~mods`.
@@ -92,7 +96,7 @@ The mod replaces these game files:
   - `DA_Inventory_AI_Patrol_VLF_B`
   - `DA_Inventory_AI_Guard_VLF`
   - `DA_Inventory_AI_Sniper_VLF`
-- The ammo box loot preset (`DA_LootContainer_AmmoBox`)
+- The loot presets of the ammo box (`DA_LootContainer_AmmoBox`) and the two med boxes (`DA_LootContainer_MedBox_01`, `DA_LootContainer_MedBox_02`)
 
 It conflicts with any other mod that replaces those files, and it needs an update after every game patch that changes them.
 
