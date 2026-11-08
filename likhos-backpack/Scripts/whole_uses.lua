@@ -14,8 +14,9 @@ local hooks = hook.new("whole uses", "use counts keep decimals")
 local TILE_CLASS = "/Game/Blueprints/InventorySystem/Widgets/W_InventoryItem.W_InventoryItem_C"
 local HOOK_FN    = TILE_CLASS .. ":K2_UpdateItemCount"
 
--- The use count stat's config class. Its tag, Inventory.Stats.Durability, is shared with weapon and armor durability, so the class tells it apart.
-local USES_CONFIG = "U_Content_C"
+-- The use count stat config classes. U_Content_C's tag, Inventory.Stats.Durability, is shared with weapon and armor durability, so the class tells it apart.
+-- U_Battery_C is the USB hacking devices' use count (docs/solutions/usb-uses-display.md).
+local USES_CONFIGS = { U_Content_C = true, U_Battery_C = true }
 
 local function counts_uses(tile)
     local definition = tile.ContainerItem.ItemDefinition
@@ -23,7 +24,7 @@ local function counts_uses(tile)
     local stats = definition.ItemStats
     for i = 1, #stats do
         local config = stats[i].StatItemConfig
-        if util.valid(config) and config:GetClass():GetFName():ToString() == USES_CONFIG then return true end
+        if util.valid(config) and USES_CONFIGS[config:GetClass():GetFName():ToString()] then return true end
     end
     return false
 end

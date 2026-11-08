@@ -8,7 +8,7 @@ Bandages and Painkillers now drop automatically after exhausting their use count
 
 ## Whole use counts
 
-Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter.
+Use counter on inventory tiles of medical items, keys, quest items and USB hacking devices now shows as whole values, reducing the visual clutter.
 
 ## Quick sell/deliver
 

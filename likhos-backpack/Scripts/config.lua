@@ -11,7 +11,7 @@ return {
     -- Set false to keep them in the inventory at 0 uses.
     medic_drop = true,
 
-    -- Items that count uses, like medical items and keys, show them as whole numbers on inventory tiles.
+    -- Items that count uses, like medical items, keys and USB hacking devices, show them as whole numbers on inventory tiles.
     -- Set false for the vanilla decimals.
     whole_uses = true,
 
