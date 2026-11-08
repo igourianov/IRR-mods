@@ -1,6 +1,6 @@
 -- whole_uses.lua : an item that counts uses shows them as whole numbers on its inventory tile (docs/solutions/medic-uses-display.md).
 --
--- Every game name here comes from docs/solutions/medic-uses-display.md.
+-- Every game name here comes from docs/solutions/medic-uses-display.md and docs/solutions/usb-uses-display.md.
 -- The native ItemWidget writes the uses, a float stat, into the tile with decimals. This rewrites that text once the game has drawn it.
 -- Holds no UObject between calls.
 
@@ -14,45 +14,73 @@ local hooks = hook.new("whole uses", "use counts keep decimals")
 local TILE_CLASS = "/Game/Blueprints/InventorySystem/Widgets/W_InventoryItem.W_InventoryItem_C"
 local HOOK_FN    = TILE_CLASS .. ":K2_UpdateItemCount"
 
--- The use count stat config classes. U_Content_C's tag, Inventory.Stats.Durability, is shared with weapon and armor durability, so the class tells it apart.
--- U_Battery_C is the USB hacking devices' use count (docs/solutions/usb-uses-display.md).
-local USES_CONFIGS = { U_Content_C = true, U_Battery_C = true }
+-- Use count stat config class to the tile format. U_Content_C's tag, Inventory.Stats.Durability, is shared with weapon and armor durability, so the class tells it apart.
+-- U_Battery_C is the USB hacking devices' use count, shown as the remaining percentage.
+local USES_FORMATS = { U_Content_C = "whole", U_Battery_C = "percent" }
 
-local function counts_uses(tile)
+local function uses_format(tile)
     local definition = tile.ContainerItem.ItemDefinition
-    if not util.valid(definition) then return false end
+    if not util.valid(definition) then return nil end
     local stats = definition.ItemStats
     for i = 1, #stats do
         local config = stats[i].StatItemConfig
-        if util.valid(config) and USES_CONFIGS[config:GetClass():GetFName():ToString()] then return true end
+        local format = util.valid(config) and USES_FORMATS[config:GetClass():GetFName():ToString()]
+        if format then return format end
     end
-    return false
+    return nil
 end
 
--- The text is rewritten from what the game drew rather than from the stat, so it can't disagree with the tile. Either decimal separator, since the game formats per culture.
+local function round(value)
+    return math.floor(value + 0.5)
+end
+
+-- Either decimal separator, since the game formats per culture.
+local function to_number(text)
+    return tonumber((text:gsub(",", ".")))
+end
+
+-- The text is rewritten from what the game drew rather than from the stat, so it can't disagree with the tile.
 local function round_numbers(block)
     if not util.valid(block) then return end
     local text = block:GetText():ToString()
-    local whole = text:gsub("%d+[%.,]%d+", function(number)
-        return tostring(math.floor(tonumber((number:gsub(",", "."))) + 0.5))
-    end)
+    local whole = text:gsub("%d+[%.,]%d+", function(number) return tostring(round(to_number(number))) end)
     if whole == text then return end
     block:SetText(FText(whole))
 end
 
-local function round_tile(path)
+-- Finds no number in a tile it already rewrote, as the maximum text is then empty, so a repeat call is a no-op.
+local function block_number(block)
+    if not util.valid(block) then return nil end
+    local number = block:GetText():ToString():match("%d+[%.,]?%d*")
+    return number and to_number(number)
+end
+
+local function show_percent(tile)
+    local remaining = block_number(tile.ItemCapacity)
+    local max = block_number(tile.ItemMaxCapacity)
+    if not remaining or not max or max <= 0 then return end
+    tile.ItemCapacity:SetText(FText(round(remaining / max * 100) .. "%"))
+    tile.ItemMaxCapacity:SetText(FText(""))
+end
+
+local function rewrite_tile(path, format)
     local tile = StaticFindObject(path)
     if not util.valid(tile) then return end
-    round_numbers(tile.ItemCapacity)
-    round_numbers(tile.ItemMaxCapacity)
+    if format == "percent" then
+        show_percent(tile)
+    else
+        round_numbers(tile.ItemCapacity)
+        round_numbers(tile.ItemMaxCapacity)
+    end
 end
 
 -- ItemWidget writes the count texts after it sends this event, so they are rewritten a tick later. The tile is passed by path, not held.
 local function on_update(context)
     local tile = context:get()
-    if not counts_uses(tile) then return end
+    local format = uses_format(tile)
+    if not format then return end
     local path = util.path(tile)
-    ExecuteInGameThreadWithDelay(1, hooks.guard(function() round_tile(path) end))
+    ExecuteInGameThreadWithDelay(1, hooks.guard(function() rewrite_tile(path, format) end))
 end
 
 --- Hook the inventory tile once its Blueprint class is loaded.

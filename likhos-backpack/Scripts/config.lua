@@ -7,7 +7,8 @@ return {
     -- Master switch. Set false to load the mod inert (useful when bisecting a crash after a game patch).
     enabled = true,
 
-    -- Items that count uses, like medical items, keys and USB hacking devices, show them as whole numbers on inventory tiles.
+    -- Items that count uses, like medical items and keys, show them as whole numbers on inventory tiles.
+    -- USB hacking devices show their remaining uses as a percentage.
     -- Set false for the vanilla decimals.
     whole_uses = true,
 
