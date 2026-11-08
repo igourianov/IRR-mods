@@ -1,5 +1,6 @@
 # Unreleased
 * removed item swap feature, the vanilla game now does it
+* verified on UE4SS experimental v3.0.1-1217 (2026-11-07)
 
 # 1.0.25
 * quick sell delivers mission items for their mission instead (Shift+Click)

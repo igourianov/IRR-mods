@@ -21,7 +21,7 @@ Use counter on inventory tiles of medical items, keys and quest items now shows 
 ## Requirements
 
 - Incursion Red River, Steam version. Tested on build 22417726.
-- [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) experimental release, installed separately. It is not included in the mod zip. Tested with the release of 2026-09-16. The stable 3.0.1 does not work with this game. If you already have it installed for another mod, skip to step 4.
+- [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) experimental release, installed separately. It is not included in the mod zip. Tested with the release of 2026-11-07 (v3.0.1-1217). The stable 3.0.1 does not work with this game. If you already have it installed for another mod, skip to step 4.
 
 ## Installation
 
