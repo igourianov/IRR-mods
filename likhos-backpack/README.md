@@ -2,10 +2,6 @@
 
 This mod provides several QoL improvements to inventory management.
 
-## Spent medical items
-
-Bandages and Painkillers now drop automatically after exhausting their use count.
-
 ## Whole use counts
 
 Use counter on inventory tiles of medical items, keys, quest items and USB hacking devices now shows as whole values, reducing the visual clutter.

@@ -1,5 +1,5 @@
 # Unreleased
-* removed item swap feature, the vanilla game now does it
+* removed item swap and spent medical item drop features, the vanilla game now does both natively
 * verified on UE4SS experimental v3.0.1-1217 (2026-11-07)
 * USB hacking devices show their uses as whole numbers
 
