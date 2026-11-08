@@ -228,5 +228,9 @@
     "/Game/Blueprints/InventorySystem/Items/Attachments/Stock/SKS_SAGE_International_SKSALCV_Chassis/ID_SKS_SAGE_International_SKSALCV_Chassis": {
         "Recoil": 0,
         "Ergonomics": 0
+    },
+    "/Game/Blueprints/InventorySystem/Items/Medical/Adrenaline_Injector/ID_Adrenaline_Injector": {
+        "RecoverMultiplier": 1.5,
+        "DrainMultiplier": 0.5
     }
 }

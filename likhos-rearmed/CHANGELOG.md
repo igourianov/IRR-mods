@@ -1,3 +1,6 @@
+# 1.3.42
+* adrenaline injector stamina boost raised from 10% to 50%
+
 # 1.2.37
 * in-raid med boxes hold only medical items, no more nylon and polyester fabric
 

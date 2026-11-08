@@ -8,7 +8,7 @@
     The old tag leaves the tag list and a redirect maps it to the new one. The engine applies redirects when it loads cooked assets and saves, so every item definition, loadout and preset that names the old tag follows.
     Then stages a renamed copy of every cooked asset listed in clone.json, e.g. a mag well that takes 300 BLK mags instead of 5.56 ones.
     Then it extracts every cooked asset listed in retarget.json and points its references to one asset at another, e.g. a weapon's chamber from the 5.56 ammo set to the 300 BLK one.
-    Then it extracts every item definition listed in stats.json and sets its stat values, e.g. the 7.62x39 HP round's damage.
+    Then it extracts every item definition listed in stats.json and sets its stat values, e.g. the 7.62x39 HP round's damage or the adrenaline injector's stamina recovery.
     Then it extracts every NPC loadout preset listed in loadouts.json and sets the weapon pool it picks from: the part of its faction's weighted pool that the preset selects.
     Last, it extracts every loot container preset listed in loot.json and sets its loot generation settings, e.g. how many ammo stacks an ammo box holds.
     Called by build.ps1, which packs the staged tree.
@@ -274,6 +274,22 @@ function Find-Stat {
     $found[0]
 }
 
+# Some values aren't ItemStats values. They live on the effect object that the stat object's StatEffect points at, exported by the same asset.
+function Find-StatEffect {
+    param([string] $Name)
+    $config = ((Find-Stat $Name).Value | Where-Object Name -eq 'StatItemConfig').Value
+    $effect = ($exports[$config - 1].Data | Where-Object Name -eq 'StatEffect').Value
+    if ($effect -le 0) { Write-Error "$asset's $Name stat has no effect in the asset." }
+    $exports[$effect - 1]
+}
+
+# Unversioned exports serialize property names by schema position, but FName values by name map index.
+function Get-NameValues {
+    param($Property)
+    if ($Property.'$type' -like 'UAssetAPI.PropertyTypes.Objects.NamePropertyData,*') { $Property.Value }
+    elseif ($Property.Value -is [array]) { foreach ($inner in $Property.Value) { Get-NameValues $inner } }
+}
+
 $stats = Get-Content (Join-Path $PSScriptRoot 'stats.json') -Raw | ConvertFrom-Json
 $entries = @($stats.PSObject.Properties)
 $assets = @(Read-Assets $entries.Name -Parse)
@@ -291,12 +307,30 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 
 
     foreach ($stat in $entry.Value.PSObject.Properties) {
-        # Bleeding chance isn't an ItemStats value. It lives on the wound effect that the ChanceToWound stat object points at.
         if ($stat.Name -eq 'BleedingChance') {
-            $config = ((Find-Stat 'ChanceToWound').Value | Where-Object Name -eq 'StatItemConfig').Value
-            $effect = ($exports[$config - 1].Data | Where-Object Name -eq 'StatEffect').Value
-            if ($effect -le 0) { Write-Error "$asset's ChanceToWound stat has no wound effect in the asset." }
-            $property = @($exports[$effect - 1].Data | Where-Object Name -eq 'BleedingChance')
+            $property = @((Find-StatEffect 'ChanceToWound').Data | Where-Object Name -eq 'BleedingChance')
+        } elseif ($stat.Name -in 'RecoverMultiplier', 'DrainMultiplier') {
+            # Stamina multipliers live in the Influence struct of the StaminaBoost stat's effect.
+            # An effect that keeps its template's Influence has none in the asset. A struct override replaces the whole inherited struct, so the template's one is copied in first.
+            $effect = Find-StatEffect 'StaminaBoost'
+            $influence = @($effect.Data | Where-Object Name -eq 'Influence')
+            if (-not $influence.Count) {
+                if ($effect.TemplateIndex -ge 0) { Write-Error "$asset's StaminaBoost effect has no imported template." }
+                # The template is the effect's counterpart under an object of another package, e.g. the stat class's default object.
+                $import = $data.Imports[-1 - $effect.TemplateIndex]
+                $owner = $data.Imports[-1 - $import.OuterIndex]
+                $package = $owner
+                while ($package.OuterIndex) { $package = $data.Imports[-1 - $package.OuterIndex] }
+                $source = @(Read-Assets $package.ObjectName -Parse)[0]
+                $template = @($source.Exports | Where-Object { $_.ObjectName -eq $import.ObjectName -and $_.OuterIndex -gt 0 -and $source.Exports[$_.OuterIndex - 1].ObjectName -eq $owner.ObjectName })
+                if ($template.Count -ne 1) { Write-Error "$($package.ObjectName) has no $($owner.ObjectName).$($import.ObjectName)." }
+                $influence = @($template[0].Data | Where-Object Name -eq 'Influence')
+                if ($influence.Count -ne 1) { Write-Error "$asset's StaminaBoost effect inherits no Influence from $($package.ObjectName)." }
+                # UAssetAPI writes unversioned properties in schema order, so appending is safe.
+                $effect.Data = @($effect.Data) + $influence
+                foreach ($name in Get-NameValues $influence[0]) { if ($data.NameMap -notcontains $name) { $data.NameMap += $name } }
+            }
+            $property = @($influence[0].Value | Where-Object Name -eq $stat.Name)
         } else {
             $property = @((Find-Stat $stat.Name).Value | Where-Object Name -eq 'Value')
         }
