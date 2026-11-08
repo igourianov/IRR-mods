@@ -2,12 +2,6 @@
 
 This mod provides several QoL improvements to inventory management.
 
-## Item swap
-
-Items in the inventory grids can now be swapped via drag and drop without moving the target item to a third spot first.
-Equipment and attachment slots not supported
-Source and target item must be the same size (rotation supported)
-
 ## Spent medical items
 
 Bandages and Painkillers now drop automatically after exhausting their use count.

@@ -1,3 +1,6 @@
+# Unreleased
+* removed item swap feature, the vanilla game now does it
+
 # 1.0.25
 * quick sell delivers mission items for their mission instead (Shift+Click)
 
