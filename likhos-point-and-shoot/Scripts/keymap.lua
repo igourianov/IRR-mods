@@ -49,7 +49,7 @@ function M.action(mapping)
 end
 
 --- Build the mod's actions and context if missing, register the context with user settings and activate it.
---- Registration also restores the user's saved keys. Game thread. Safe to repeat.
+--- Registration also restores the user's saved keys. The context is live on return. Game thread. Safe to repeat.
 function M.register()
     local settings, subsystem = user_settings()
     if not settings then
@@ -79,7 +79,8 @@ function M.register()
 
     -- The controls menu shows a row's key only if its context is active (FindInputActionKey reads QueryKeysMappedToAction).
     -- Below every vanilla context it can't consume their keys. Adding it again only resets its priority.
-    subsystem:AddMappingContext(imc, STACK_PRIORITY, {})
+    -- A row reads its key once, when built during a level load. A deferred stack rebuild left rows built in the meantime showing None.
+    subsystem:AddMappingContext(imc, STACK_PRIORITY, { bForceImmediately = true })
 end
 
 --- FKey tables for the keys currently bound to a mapping. Empty when unbound.

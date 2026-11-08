@@ -121,6 +121,9 @@ local function add_rows(anchor_path, mappings)
         return
     end
 
+    -- A row reads its key once, when built. The page can build before the PlayerController acquire registers the mod's context, so it is registered here too.
+    keymap.register()
+
     -- Every row is cloned from the vanilla one, but each lands under the row before it so the mod rows keep their declared order.
     local below = anchor
     for _, mapping in ipairs(mappings) do

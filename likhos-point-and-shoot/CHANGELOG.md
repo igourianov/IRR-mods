@@ -1,3 +1,6 @@
+# 1.1.122
+* fixed the mod's keybinds sometimes showing as None in the controls menu while still working
+
 # 1.1.117
 * fixed the zoom input not folding the magnifier while NVG is on
 
