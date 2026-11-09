@@ -15,8 +15,8 @@ local ABILITY_COMP = "/Script/Test_C.GameplayAbilityComponent"
 local SLOT_COUNT   = 4
 -- A used item sits at 0 uses for about 270 ms before it leaves, which a 250 ms poll sometimes missed.
 local POLL_MS      = 50
--- The tile count walks every item tile, so it runs on every COUNT_EVERY-th poll only.
-local COUNT_EVERY  = 5
+-- The root refresh walks the inventory once per bound slot and the tile count walks every item tile, so both run on every SLOW_EVERY-th poll only.
+local SLOW_EVERY   = 5
 local USES_TAG     = "Inventory.Stats.Durability"
 -- The uses stat's config class. Its tag, USES_TAG, is shared with weapon and armor durability, so a definition's stats are told apart by this class.
 local USES_CONFIG  = "U_Content_C"
@@ -178,12 +178,19 @@ local EMPTY_ITEM = { ItemUID = { A = 0, B = 0, C = 0, D = 0 } }
 
 --- Track the live binding of slot index, refill the slot once its recorded item has been used up, or clear it while it names an item outside the inventory.
 --- uid is the slot's QuickSlots entry, or nil. found is that item and its main container from locate, or nil when the entry is stale.
-local function check_slot(pc, comp, index, uid, found)
+--- refresh rereads the root of a tracked binding.
+local function check_slot(pc, comp, index, uid, found, refresh)
 	local record = records[index]
 	if found then
 		local uses = uses_left(found.item)
 		if record and util.same_guid(record.uid, uid) then
 			record.uses = uses
+			-- The bound item, or a container holding it, can move to other equipment with the slot still bound, e.g. from the pockets to the backpack.
+			if not refresh then return end
+			local root = root_key(comp, found.item, found.main)
+			if root == record.root then return end
+			log.debug("quick slot %d item %s moved from %s to %s", index, guid_str(uid), tostring(record.root), tostring(root))
+			record.root = root
 			return
 		end
 		local definition = found.item.ItemDefinition
@@ -234,7 +241,7 @@ local function show_count(tile, count)
 	if hidden then capacity:SetVisibility(HIT_TEST_INVISIBLE) end
 end
 
--- Polls run since load, to pace the tile count.
+-- Polls run since load, to pace the root refresh and the tile count.
 local polls = 0
 
 --- The slot index of tile when it is a quick slot tile of the inventory screen at screen_path showing its slot's recorded item, or nil.
@@ -303,11 +310,12 @@ local function poll()
 		local uid = util.guid(slot.ItemUID)
 		if not is_zero(uid) then wanted[slot.Index] = uid end
 	end
-	local found = locate(comp, wanted)
-	for index = 0, SLOT_COUNT - 1 do check_slot(pc, comp, index, wanted[index], found[index]) end
-
 	polls = polls + 1
-	if polls % COUNT_EVERY ~= 0 then return end
+	local slow = polls % SLOW_EVERY == 0
+	local found = locate(comp, wanted)
+	for index = 0, SLOT_COUNT - 1 do check_slot(pc, comp, index, wanted[index], found[index], slow) end
+
+	if not slow then return end
 	-- The component's inventory screen, W_PlayerInventory_C, which holds the quick slot widgets.
 	local screen = comp.InventoryWidgetRef
 	if not util.valid(screen) then return end

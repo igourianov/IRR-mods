@@ -1,3 +1,6 @@
+# Unreleased
+* fixed quick slot count showing 0 after its item is moved to other equipment, e.g. from the pockets to the backpack
+
 # 1.3.58
 * fixed quick slot staying bound after its item's container is stashed or dropped (vanilla bug)
 * fixed quick slot count showing late for a newly slotted item
