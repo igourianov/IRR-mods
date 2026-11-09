@@ -1,0 +1,5 @@
+{
+	"/Game/Blueprints/InventorySystem/Objects/Stats/U_PainDebuff": {
+		"GrantedGameplayTags": ["Character.Effects.Painkiller"]
+	}
+}

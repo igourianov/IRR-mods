@@ -62,6 +62,10 @@ In-raid med boxes hold only medical items. Nylon and polyester fabric no longer 
 
 Stamina boost raised from 10% to 50%: stamina recovers 50% faster and drains 50% slower for the 3 minutes the effect lasts. Food and drinks keep their vanilla stamina boosts.
 
+## Painkillers
+
+Morphine and the MFAK's Inject now hide the fracture screen distortion, the same as painkillers. The fracture itself stays until splinted.
+
 ## Installation
 
 Extract the zip into `PROJECT QUARANTINE\Test_C\Content\Paks`. It places `likhos_rearmed_P.pak` in `Paks\~mods`.
@@ -81,6 +85,7 @@ The mod replaces these game files:
 - The Rattler's preset (`DA_Sig_Sauer_MCX_Rattler`)
 - The 7.62x39 HP round's item definition (`ID_762x39_HP`)
 - The adrenaline injector's item definition (`ID_Adrenaline_Injector`)
+- The painkiller effect's stat config (`U_PainDebuff`)
 - The item definitions of every muzzle device except the AUG RAT Worx adapter, the M14 National Match brake and the AS VAL and VSS integral suppressors (`ID_*` under `Items/Attachments/Muzzle`)
 - The item definitions of these stocks (`ID_*` under `Items/Attachments/Stock`):
   - Buffer tubes: AR-15 PWS Enhanced, AK SAG, AR-15 Colt A2, FAL Folding and AR-15 Strike SI AR Advanced

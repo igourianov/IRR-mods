@@ -1,3 +1,6 @@
+# 1.5.56
+* morphine and the MFAK's Inject hide the fracture screen distortion like painkillers
+
 # 1.4.54
 * AR stocks rebalanced on one scale, from light ergo stocks (ACE, Ripstock, Zulu 2) to heavy recoil stocks (BCM, VLTOR). Viper moved from the recoil end to the middle, UBR has a bit less ergos
 * MCX stocks rebalanced in line with AR stocks
