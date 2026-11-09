@@ -25,7 +25,7 @@ local KINDS = {
 		vision = function(dev)
 			local mat = dev.LaserSettings.DefaultLaserMaterial.Laser
 			if not util.valid(mat) then return nil end
-			return LASER_MATERIALS[mat:GetFullName():match("^%S+ (.+)$")]
+			return LASER_MATERIALS[util.path(mat)]
 		end,
 	},
 	-- Lights are BP_FlashlightComponent_C, matched through their native parent.
