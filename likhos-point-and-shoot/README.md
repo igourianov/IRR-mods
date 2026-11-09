@@ -1,6 +1,6 @@
 # Likho's Point and Shoot
 
-This mod reworks Point Shooting, tactical device activation and adds other QoL key bindings.
+This mod reworks Point Shooting, tactical device use, and adds QoL and consumables key bindings.
 
 ## Point Shooting
 
