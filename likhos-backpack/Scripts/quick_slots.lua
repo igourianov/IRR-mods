@@ -256,6 +256,26 @@ end
 -- slot index -> path of the tile last found by quick_slot_tiles. Once the inventory screen has been opened its widgets stay, so without it every count pass would walk every item tile, stash included.
 local tile_paths = {}
 
+--- For each slot index key of slots, how many items of comp match its record as matching does. One pass over the inventory.
+local function count_matching(comp, slots)
+	local counts = {}
+	for index in pairs(slots) do counts[index] = 0 end
+	for item, main in inventory_items(comp) do
+		local definition = item.ItemDefinition
+		local def = util.valid(definition) and definition:GetFullName()
+		-- false once read: the item is spent or has no root, so it matches no record.
+		local root = nil
+		for index in pairs(slots) do
+			local record = records[index]
+			if def == record.def then
+				if root == nil then root = uses_left(item) > 0 and root_key(comp, item, main) or false end
+				if root == record.root then counts[index] = counts[index] + 1 end
+			end
+		end
+	end
+	return counts
+end
+
 local function poll()
 	local pc = FindFirstOf("PlayerController")
 	local library = StaticFindObject(LIBRARY_CDO)
@@ -283,6 +303,8 @@ local function poll()
 	-- The quick slot widgets exist only once the inventory screen has been opened.
 	if not FindFirstOf(SLOT_WIDGET) then return end
 	local tiles
+	-- slot index -> its tile, for the slots that show a count
+	local counted = {}
 	for index = 0, SLOT_COUNT - 1 do
 		local record = records[index]
 		if record and record.single and record.root then
@@ -293,9 +315,12 @@ local function poll()
 				tile = tiles[index]
 				tile_paths[index] = tile and util.path(tile) or nil
 			end
-			if tile then show_count(tile, #matching(comp, record.def, record.root)) end
+			counted[index] = tile
 		end
 	end
+	if next(counted) == nil then return end
+	local counts = count_matching(comp, counted)
+	for index, tile in pairs(counted) do show_count(tile, counts[index]) end
 end
 
 local loop_handle = nil
