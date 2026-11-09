@@ -65,3 +65,7 @@ In-game console: `kb_status`.
 - A new feature bumps minor by 1 by hand in `mod.txt`, keeping the patch number as is: `1.1.32` becomes `1.2.32`. Fixes and tweaks leave minor alone.
 - Major changes only when the user asks.
 
+## Log level
+
+A mod's `Scripts/config.lua` is committed with `log_level = "info"`. Setting `"debug"` for a test in game is fine, but set it back to `"info"` before committing unless the user asks to commit another level.
+
