@@ -237,24 +237,25 @@ end
 -- Polls run since load, to pace the tile count.
 local polls = 0
 
---- The slot index of tile when it is a quick slot tile showing its slot's recorded item, or nil.
+--- The slot index of tile when it is a quick slot tile of the inventory screen at screen_path showing its slot's recorded item, or nil.
 --- A tile's BaseContainerElementRef is the container element it was created for, here the quick slot widget.
 --- Neither the quick slot widget's ItemRef nor its GetContainerItems() gives the tile: the widget overrides AddItem and GetContainerItems, and the call returns an empty array to Lua.
---- A quick slot bar of an earlier screen may still exist, so a tile counts only while it shows the bound item.
+--- The inventory screen of an earlier level stays alive, its quick slot tiles showing the same bound items (seen in game 2026-11-09), so a tile counts only under the current screen.
 --- A tile the slot has replaced keeps its slot and item until garbage collection, which can take a minute (seen in game 2026-11-09), so a tile counts only while it has a parent.
-local function tile_slot(tile)
+local function tile_slot(tile, screen_path)
 	local element = tile.BaseContainerElementRef
 	if not (util.valid(element) and element:GetClass():GetFName():ToString() == SLOT_WIDGET) then return nil end
 	local index = element.QuickSlotIndex
 	local record = records[index]
-	if record and util.same_guid(tile.ContainerItem.ItemUID, record.uid) and util.valid(tile:GetParent()) then return index end
-	return nil
+	if not (record and util.same_guid(tile.ContainerItem.ItemUID, record.uid) and util.valid(tile:GetParent())) then return nil end
+	if util.path(tile):sub(1, #screen_path + 1) ~= screen_path .. "." then return nil end
+	return index
 end
 
-local function quick_slot_tiles()
+local function quick_slot_tiles(screen_path)
 	local tiles = {}
 	for _, tile in ipairs(FindAllOf(TILE_WIDGET) or {}) do
-		local index = util.valid(tile) and tile_slot(tile) or nil
+		local index = util.valid(tile) and tile_slot(tile, screen_path) or nil
 		if index then tiles[index] = tile end
 	end
 	return tiles
@@ -307,8 +308,10 @@ local function poll()
 
 	polls = polls + 1
 	if polls % COUNT_EVERY ~= 0 then return end
-	-- The quick slot widgets exist only once the inventory screen has been opened.
-	if not FindFirstOf(SLOT_WIDGET) then return end
+	-- The component's inventory screen, W_PlayerInventory_C, which holds the quick slot widgets.
+	local screen = comp.InventoryWidgetRef
+	if not util.valid(screen) then return end
+	local screen_path = util.path(screen)
 	local tiles
 	-- slot index -> its tile, for the slots that show a count
 	local counted = {}
@@ -316,9 +319,9 @@ local function poll()
 		local record = records[index]
 		if record and record.single and record.root then
 			local cached = tile_paths[index] and StaticFindObject(tile_paths[index])
-			local tile = util.valid(cached) and tile_slot(cached) == index and cached or nil
+			local tile = util.valid(cached) and tile_slot(cached, screen_path) == index and cached or nil
 			if not tile then
-				tiles = tiles or quick_slot_tiles()
+				tiles = tiles or quick_slot_tiles(screen_path)
 				tile = tiles[index]
 				tile_paths[index] = tile and util.path(tile) or nil
 			end

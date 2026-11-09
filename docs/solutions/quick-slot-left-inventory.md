@@ -18,14 +18,12 @@ Constraints:
 - Any slot whose `QuickSlots` entry names an item that is not in the player's inventory is cleared, whether or not the poll saw the item in the inventory before. That covers bindings already stale in an existing save, e.g. a chest rig left in the stash before this fix. Ruled out: clearing only slots the poll saw live and then lose. It needs the same check plus a condition, and leaves stale saved bindings in place.
 - A refill takes precedence over a clear. When the slot's recorded item was used up (`quick-slot-refill.md`), the slot is refilled from the same equipment, and cleared only when none is left there.
 - The dump has no function that removes a quick slot binding. The only writer is `UpdateQuickSlot`.
-- Seen in game 2026-11-09: `UpdateQuickSlot(Index, Item)` with an item whose only field set is a zero `ItemUID` clears the slot, and an open inventory screen shows it empty. A nested item's container moved to the stash or dropped leaves the item absent from the player's `MainContainers`.
+- Seen in game 2026-11-09: `UpdateQuickSlot(Index, Item)` with an item whose only field set is a zero `ItemUID` clears the slot, and an open inventory screen shows it empty. A nested item's container moved to the stash or dropped leaves the item absent from the player's `MainContainers`. Reloading the game keeps bound slots bound and cleared slots empty, so the first poll after a load sees the saved bindings' items in `MainContainers` and a cleared slot is saved as cleared.
 
 Assumptions, unverified:
 
-1. The cleared slot is saved as cleared.
-2. On the first poll after a level load or respawn that sees the player's inventory component, its `MainContainers` already hold every item the saved `QuickSlots` name. Otherwise that poll clears valid bindings. The build checks it with debug output at load.
-3. An item moved within the player's inventory never reads absent from `MainContainers` on a poll, since the poll runs on the game thread between frames.
-4. When a used item leaves the inventory, the game deletes its `QuickSlots` entry in the same frame (`quick-slot-refill.md`, frame by frame trace 2026-11-08), so a use never reads as a stale entry.
+1. An item moved within the player's inventory never reads absent from `MainContainers` on a poll, since the poll runs on the game thread between frames.
+2. When a used item leaves the inventory, the game deletes its `QuickSlots` entry in the same frame (`quick-slot-refill.md`, frame by frame trace 2026-11-08), so a use never reads as a stale entry.
 
 Names from `CXXHeaderDump` (dumped 2026-11-06, read 2026-11-09):
 
@@ -60,6 +58,6 @@ The module logs each clear at debug level, naming the slot and the item UID.
 
 ## Tradeoffs
 
-- Clearing any stale entry over only the ones seen leaving: one rule, and saves already holding stale bindings are fixed too. The cost is assumption 2. If the containers load after the first poll, a load clears valid bindings.
+- Clearing any stale entry over only the ones seen leaving: one rule, and saves already holding stale bindings are fixed too. The cost is a dependency on the game loading the inventory's containers before the first poll sees the component, seen to hold on a reload 2026-11-09. If a patch changes that order, a load clears valid bindings.
 - Poll over a hook on the move, drop or stash functions: the item can leave through several request paths (`RequestMoveItem`, `RequestDropItem`, `TrySwapItem`), and the poll already sees the result. The cost is up to one poll interval of a stale binding.
 - No memory of a cleared binding: a container brought back from the stash does not rebind its slot. Same as `quick-slot-refill.md`, nothing to save.
