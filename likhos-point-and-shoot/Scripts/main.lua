@@ -76,11 +76,9 @@ local function init()
 	if register_binds() > 0 then start_tick_loop() end
 
 	RegisterConsoleCommandHandler("kb_status", function()
-		log.info("player controller: %s",
-			input.get_player_controller() and "acquired" or "none")
+		log.info("player controller: %s", input.get_player_controller() and "acquired" or "none")
 		for _, b in ipairs(config.binds) do
-			log.info("  %-28s %-12s %s",
-				b.id, keymap.describe(b.mapping), b.enabled and "on" or "off")
+			log.info("  %-28s %-12s %s", b.id, keymap.describe(b.mapping), b.enabled and "on" or "off")
 		end
 		return true
 	end)

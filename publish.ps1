@@ -279,8 +279,7 @@ $upload = Invoke-NexusApi -Method Post -Path '/uploads' -Body @{ size_bytes = $s
 
 # Both headers are part of the presigned signature and must match exactly.
 try {
-	Invoke-WebRequest -Method Put -Uri $upload.presigned_url -InFile $archivePath -ContentType 'application/octet-stream' `
-		-Headers @{ 'Content-Disposition' = "attachment; filename=`"$uploadName`"" } -UseBasicParsing | Out-Null
+	Invoke-WebRequest -Method Put -Uri $upload.presigned_url -InFile $archivePath -ContentType 'application/octet-stream' -Headers @{ 'Content-Disposition' = "attachment; filename=`"$uploadName`"" } -UseBasicParsing | Out-Null
 } catch {
 	Write-Error "Upload of $archivePath failed: $(Get-ProblemDetail $_)"
 }
