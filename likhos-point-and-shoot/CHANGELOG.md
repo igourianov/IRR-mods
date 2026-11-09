@@ -1,3 +1,6 @@
+# 1.1.128
+* moved the mod's keybinds to their own Likho's Actions section at the top of the controls page
+
 # 1.1.123
 * verified on UE4SS experimental v3.0.1-1217 (2026-11-07)
 

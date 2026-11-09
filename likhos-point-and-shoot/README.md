@@ -60,7 +60,7 @@ In `Scripts\config.lua`, `low_ready_run_delay_ms` sets how long after a run the 
 
 3. Launch the game once. If `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS.log` appears, UE4SS works.
 4. Extract `likhos-point-and-shoot.zip` into `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\Mods\`. You should end up with a `likhos-point-and-shoot` folder there.
-5. Launch the game and assign the new keys under Settings > Controls.
+5. Launch the game and assign the new keys under Settings > Controls, in the **Likho's Actions** section at the top.
 
 ## Uninstall
 
