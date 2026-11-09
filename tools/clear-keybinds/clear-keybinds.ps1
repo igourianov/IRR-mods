@@ -12,9 +12,9 @@
 	Layout: docs/solutions/clear-keybinds.md.
 
 .EXAMPLE
-	.\tools\clear-keybinds.ps1                          # list saved mappings, marking unused mod mappings
-	.\tools\clear-keybinds.ps1 -Unused                  # remove unused mod mappings
-	.\tools\clear-keybinds.ps1 -Name LikhosQuickUse     # remove mappings by name, wildcards allowed
+	.\tools\clear-keybinds\clear-keybinds.ps1                          # list saved mappings, marking unused mod mappings
+	.\tools\clear-keybinds\clear-keybinds.ps1 -Unused                  # remove unused mod mappings
+	.\tools\clear-keybinds\clear-keybinds.ps1 -Name LikhosQuickUse     # remove mappings by name, wildcards allowed
 #>
 [CmdletBinding()]
 param(
@@ -24,7 +24,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$root = Split-Path $PSScriptRoot
+$root = Split-Path (Split-Path $PSScriptRoot)
+# .NET resolves relative paths against the process directory, not the PowerShell location.
+$Path = (Resolve-Path $Path).ProviderPath
 $bytes = [IO.File]::ReadAllBytes($Path)
 $pos = 0
 
@@ -143,7 +145,7 @@ if (-not $drop) {
 }
 
 # ---------------------------------------------------------------- write
-$cfgPath = Join-Path $root 'build.config.json'
+$cfgPath = Join-Path $root 'tools\build\build.config.json'
 if (Test-Path $cfgPath) {
 	$gameDir = (Get-Content $cfgPath -Raw | ConvertFrom-Json).game.dir
 	if (Get-Process | Where-Object { $_.Path -and $_.Path.StartsWith($gameDir, 'OrdinalIgnoreCase') }) {

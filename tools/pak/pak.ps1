@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-	Stage the files of the Likho's Rearmed pak.
+	Stage the files of a pak mod from the edit lists in its folder.
 
 .DESCRIPTION
 	Extracts the game's own DefaultGameplayTags.ini and moves every weapon listed in reclass.json to its new class.
@@ -12,10 +12,13 @@
 	Then it extracts every stat config listed in effects.json and sets properties of the effect template its items' effects inherit from, e.g. the tags a painkiller dose grants.
 	Then it extracts every NPC loadout preset listed in loadouts.json and sets the weapon pool it picks from: the part of its faction's weighted pool that the preset selects.
 	Last, it extracts every loot container preset listed in loot.json and sets its loot generation settings, e.g. how many ammo stacks an ammo box holds.
+	Every edit list must exist in the mod folder.
 	Called by build.ps1, which packs the staged tree.
 #>
 [CmdletBinding()]
 param(
+	# The pak mod's folder, holding reclass.json, clone.json, retarget.json, stats.json, effects.json, loadouts.json and loot.json.
+	[Parameter(Mandatory)] [string] $ModDir,
 	[Parameter(Mandatory)] [string] $Repak,
 	[Parameter(Mandatory)] [string] $UAssetGUI,
 	# Names of copies of the game's usmap in UAssetGUI's mappings folder, one per parallel UAssetGUI instance.
@@ -80,7 +83,7 @@ function Find-Tag {
 	Find-Lines "^\+GameplayTagList=\(Tag=`"$([regex]::Escape($Tag))`","
 }
 
-$reclass = Get-Content (Join-Path $PSScriptRoot 'reclass.json') -Raw | ConvertFrom-Json
+$reclass = Get-Content (Join-Path $ModDir 'reclass.json') -Raw | ConvertFrom-Json
 foreach ($entry in $reclass.PSObject.Properties) {
 	$name = ($entry.Name -split '\.', 2)[1]
 	$old = "$weaponsTag.$($entry.Name)"
@@ -110,7 +113,7 @@ foreach ($entry in $reclass.PSObject.Properties) {
 # ---------------------------------------------------------------- assets
 # Cooked assets are edited as UAssetGUI JSON. Without a usmap their exports stay raw bytes, so only the name map and the import and export tables are touched.
 # With -Parse the usmap turns exports into properties, whose names are no longer name map indexes, so renaming a name map entry would leave them behind. Only the stats stage parses.
-$work = Join-Path ([System.IO.Path]::GetTempPath()) "likhos-rearmed.$([System.IO.Path]::GetRandomFileName().Split('.')[0])"
+$work = Join-Path ([System.IO.Path]::GetTempPath()) "$(Split-Path $ModDir -Leaf).$([System.IO.Path]::GetRandomFileName().Split('.')[0])"
 New-Item -ItemType Directory $work | Out-Null
 
 function Invoke-UAssetGUI {
@@ -188,7 +191,7 @@ function Get-AssetNames {
 
 # ---------------------------------------------------------------- clone
 $cloned = [System.Collections.Generic.HashSet[string]]::new()
-$clone = Get-Content (Join-Path $PSScriptRoot 'clone.json') -Raw | ConvertFrom-Json
+$clone = Get-Content (Join-Path $ModDir 'clone.json') -Raw | ConvertFrom-Json
 $entries = @($clone.PSObject.Properties)
 $assets = @(Read-Assets $entries.Value.from)
 for ($n = 0; $n -lt $entries.Count; $n++) {
@@ -219,7 +222,7 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 }
 
 # ---------------------------------------------------------------- retarget
-$retarget = Get-Content (Join-Path $PSScriptRoot 'retarget.json') -Raw | ConvertFrom-Json
+$retarget = Get-Content (Join-Path $ModDir 'retarget.json') -Raw | ConvertFrom-Json
 $entries = @($retarget.PSObject.Properties)
 $assets = @(Read-Assets $entries.Name)
 for ($n = 0; $n -lt $entries.Count; $n++) {
@@ -291,7 +294,7 @@ function Get-NameValues {
 	elseif ($Property.Value -is [array]) { foreach ($inner in $Property.Value) { Get-NameValues $inner } }
 }
 
-$stats = Get-Content (Join-Path $PSScriptRoot 'stats.json') -Raw | ConvertFrom-Json
+$stats = Get-Content (Join-Path $ModDir 'stats.json') -Raw | ConvertFrom-Json
 $entries = @($stats.PSObject.Properties)
 $assets = @(Read-Assets $entries.Name -Parse)
 for ($n = 0; $n -lt $entries.Count; $n++) {
@@ -367,7 +370,7 @@ function New-Property {
 	[pscustomobject] $property
 }
 
-$effects = Get-Content (Join-Path $PSScriptRoot 'effects.json') -Raw | ConvertFrom-Json
+$effects = Get-Content (Join-Path $ModDir 'effects.json') -Raw | ConvertFrom-Json
 $entries = @($effects.PSObject.Properties)
 $assets = @(Read-Assets $entries.Name -Parse)
 for ($n = 0; $n -lt $entries.Count; $n++) {
@@ -431,7 +434,7 @@ function Select-Weapons {
 
 # Keyed by preset path, so the loot stage can tell a preset is taken.
 $loadouts = [pscustomobject]@{}
-foreach ($faction in (Get-Content (Join-Path $PSScriptRoot 'loadouts.json') -Raw | ConvertFrom-Json).PSObject.Properties) {
+foreach ($faction in (Get-Content (Join-Path $ModDir 'loadouts.json') -Raw | ConvertFrom-Json).PSObject.Properties) {
 	$weapons = @($faction.Value.pool.PSObject.Properties)
 	$selected = [System.Collections.Generic.HashSet[string]]::new()
 	foreach ($preset in $faction.Value.presets.PSObject.Properties) {
@@ -486,7 +489,7 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 # A loot container rolls its contents from the loot settings of its one slot. A listed int or bool field is set, a listed map field has the value of each listed key set.
 # An int or bool field at its class default is absent from the asset, so it is written in, typed by its JSON value.
 # Only keys the preset already has are set, since a new key would need its tag added to the name map.
-$loot = Get-Content (Join-Path $PSScriptRoot 'loot.json') -Raw | ConvertFrom-Json
+$loot = Get-Content (Join-Path $ModDir 'loot.json') -Raw | ConvertFrom-Json
 $entries = @($loot.PSObject.Properties)
 $assets = @(Read-Assets $entries.Name -Parse)
 for ($n = 0; $n -lt $entries.Count; $n++) {

@@ -22,35 +22,37 @@ UE4SS mods for **Incursion Red River** (Games of Tomorrow, UE 5.6, Steam).
 
 ```
 likhos-<name>/     one mod: mod.txt + Scripts/ + README
-                   a pak mod has pak= in mod.txt and a pak.ps1 that stages the pak's files instead of Scripts/
-tools/             repo scripts (clear-keybinds.ps1), plus tools build.ps1 downloads on first use (gitignored)
+                   a pak mod has pak= in mod.txt and the JSON edit lists tools/pak stages the pak's files from, instead of Scripts/
+tools/             one folder per repo tool, holding the script and its configs, plus tools build.ps1 downloads on first use (gitignored)
+  build/           copy mods into the game and bump the mod version
+  publish/         pack dist/<mod>.zip and upload it to Nexus Mods as a new file version
+  pak/             stage a pak mod's files from its edit lists, called by build
+  clear-keybinds/  list or remove key mappings saved by the game, e.g. leftovers from renamed mod mappings
 docs/solutions/    per-task solution docs, recon findings and session notes
-build.ps1          copy mods into the game and bump the mod version
-publish.ps1        pack dist/<mod>.zip and upload it to Nexus Mods as a new file version
 dist/              distribution zips, each holding the bare mod folder to extract into ue4ss\Mods (gitignored)
 ```
 
 ## First-time setup
 
 ```powershell
-Copy-Item build.config.example.json build.config.json
-# edit build.config.json -> game.dir
-.\build.ps1
+Copy-Item tools\build\build.config.example.json tools\build\build.config.json
+# edit tools\build\build.config.json -> game.dir
+.\tools\build\build.ps1
 ```
 
 Then launch the game. The UE4SS console should log the mod loading.
 
 ## Publishing to Nexus
 
-`publish.ps1` packs the mod folder into `dist\<mod>.zip` and uploads it as a new version of the mod's existing Nexus file, under the version in its `mod.txt`.
+`tools\publish\publish.ps1` packs the mod folder into `dist\<mod>.zip` and uploads it as a new version of the mod's existing Nexus file, under the version in its `mod.txt`.
 
 ```powershell
-.\publish.ps1 -DryRun    # pack the zip, show the request, upload nothing
-.\publish.ps1            # pack and publish
+.\tools\publish\publish.ps1 -DryRun    # pack the zip, show the request, upload nothing
+.\tools\publish\publish.ps1            # pack and publish
 ```
 
 One-time setup per mod:
 
-1. Create `nexus-api.key` holding a personal key from https://www.nexusmods.com/settings/api-keys (gitignored).
+1. Create `tools\publish\nexus-api.key` holding a personal key from https://www.nexusmods.com/settings/api-keys (gitignored).
 2. Upload the mod's first file on the Nexus site by hand.
-3. Put the `file_id` from the Files tab URL into `publish.config.json` (`docs/solutions/nexus-publish.md` has the API query for it).
+3. Put the `file_id` from the Files tab URL into `tools\publish\publish.config.json` (`docs/solutions/nexus-publish.md` has the API query for it).

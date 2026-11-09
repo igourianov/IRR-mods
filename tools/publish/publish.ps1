@@ -17,9 +17,9 @@
 	hand, then take its file_id from the Files tab URL.
 
 .EXAMPLE
-	.\publish.ps1                                   # publish the only configured mod
-	.\publish.ps1 likhos-point-and-shoot            # publish one mod
-	.\publish.ps1 likhos-point-and-shoot -DryRun    # pack the zip, show the request, upload nothing
+	.\tools\publish\publish.ps1                                   # publish the only configured mod
+	.\tools\publish\publish.ps1 likhos-point-and-shoot            # publish one mod
+	.\tools\publish\publish.ps1 likhos-point-and-shoot -DryRun    # pack the zip, show the request, upload nothing
 #>
 [CmdletBinding()]
 param(
@@ -36,7 +36,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
-$root = $PSScriptRoot
+$root = Split-Path (Split-Path $PSScriptRoot)
 
 $apiRoot = 'https://api.nexusmods.com/v3'
 # Anything larger needs a multipart upload, which this script does not implement.
@@ -50,11 +50,11 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 function Get-ApiKey {
 	if ($ApiKey) { return $ApiKey }
 
-	$keyPath = Join-Path $root 'nexus-api.key'
+	$keyPath = Join-Path $PSScriptRoot 'nexus-api.key'
 	if (-not (Test-Path $keyPath -PathType Leaf)) {
 		Write-Error @"
 nexus-api.key not found.
-Create it next to publish.ps1 holding your personal key from https://www.nexusmods.com/settings/api-keys, or pass -ApiKey.
+Create it in tools\publish\ holding your personal key from https://www.nexusmods.com/settings/api-keys, or pass -ApiKey.
 (It is gitignored - it is a credential.)
 "@
 	}
@@ -175,7 +175,7 @@ function Get-Changelog {
 }
 
 # ---------------------------------------------------------------- config
-$cfgPath = Join-Path $root 'publish.config.json'
+$cfgPath = Join-Path $PSScriptRoot 'publish.config.json'
 if (-not (Test-Path $cfgPath)) { Write-Error 'publish.config.json not found.' }
 $cfg = Get-Content $cfgPath -Raw | ConvertFrom-Json
 
@@ -219,11 +219,11 @@ New-Item -ItemType Directory -Force $distDir | Out-Null
 $archivePath = Join-Path $distDir "$Mod.zip"
 $pakMatch = [regex]::Match($modText,'(?m)^\s*pak\s*=\s*"([^"]+)"')
 if ($pakMatch.Success) {
-	# build.ps1 bumps mod.txt before it packs, so a pak older than any mod file predates the last change.
+	# build.ps1 bumps mod.txt before it packs, so a pak older than any mod file or pak.ps1 predates the last change.
 	$pakPath = Join-Path $distDir $pakMatch.Groups[1].Value
-	$newest = Get-ChildItem $src -Recurse -File | Sort-Object LastWriteTime | Select-Object -Last 1
+	$newest = Get-ChildItem $src, (Join-Path $root 'tools\pak') -Recurse -File | Sort-Object LastWriteTime | Select-Object -Last 1
 	if (-not (Test-Path $pakPath) -or (Get-Item $pakPath).LastWriteTime -lt $newest.LastWriteTime) {
-		Write-Error "$pakPath is missing or older than $($newest.Name). Run .\build.ps1 $Mod first."
+		Write-Error "$pakPath is missing or older than $($newest.Name). Run .\tools\build\build.ps1 $Mod first."
 	}
 	New-ModArchive -Source $pakPath -Path $archivePath -Folder '~mods'
 } else {

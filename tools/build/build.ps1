@@ -4,15 +4,15 @@
 
 .DESCRIPTION
 	A build bumps the patch segment of the mod's version in mod.txt when the mod folder has uncommitted changes.
-	A Lua mod gets the shared modules in lib\ copied into its Scripts folder, and a change to lib\ counts as a change to every Lua mod.
-	A mod whose mod.txt names a pak is a pak mod. Its pak.ps1 stages the files, repak packs them into dist\<pak> and the pak is copied into Content\Paks\~mods.
+	A Lua mod gets the shared modules in lib\ copied into its Scripts folder, and a change to lib\ counts as a change to every Lua mod. A change to tools\pak\ counts as a change to every pak mod.
+	A mod whose mod.txt names a pak is a pak mod. tools\pak\pak.ps1 stages its files from the edit lists in its folder, repak packs them into dist\<pak> and the pak is copied into Content\Paks\~mods.
 	The pinned tools a pak build needs, repak and UAssetGUI, are downloaded into tools\<name> on first use.
 	A pak build also needs the game's usmap, which UE4SS generates in game into its own folder.
 	Packaging and release live in publish.ps1.
 
 .EXAMPLE
-	.\build.ps1                             # deploy all mods
-	.\build.ps1 likhos-point-and-shoot      # deploy one mod
+	.\tools\build\build.ps1                             # deploy all mods
+	.\tools\build\build.ps1 likhos-point-and-shoot      # deploy one mod
 #>
 [CmdletBinding()]
 param(
@@ -21,14 +21,14 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$root = $PSScriptRoot
+$root = Split-Path (Split-Path $PSScriptRoot)
 
 # ---------------------------------------------------------------- config
-$cfgPath = Join-Path $root 'build.config.json'
+$cfgPath = Join-Path $PSScriptRoot 'build.config.json'
 if (-not (Test-Path $cfgPath)) {
 	Write-Error @"
 build.config.json not found.
-Copy build.config.example.json to build.config.json and set your game path.
+Copy tools\build\build.config.example.json to tools\build\build.config.json and set your game path.
 (It is gitignored - it holds a machine-specific path.)
 "@
 }
@@ -111,7 +111,7 @@ foreach ($m in $Mods) {
 
 	$text = [System.IO.File]::ReadAllText($modTxt)
 	$pakMatch = [regex]::Match($text, '(?m)^\s*pak\s*=\s*"([^"]+)"')
-	$sources = if ($pakMatch.Success) { @($m) } else { @($m, 'lib') }
+	$sources = if ($pakMatch.Success) { @($m, 'tools/pak') } else { @($m, 'lib') }
 	$match = [regex]::Match($text, $versionPattern)
 	$version = $null
 	if ($match.Success) {
@@ -148,7 +148,7 @@ foreach ($m in $Mods) {
 			$name
 		})
 
-		& (Join-Path $src 'pak.ps1') -Repak $repak -UAssetGUI (Get-Tool UAssetGUI) -Mappings $mappings -PaksDir $paksDir -StageDir $stage
+		& (Join-Path $root 'tools\pak\pak.ps1') -ModDir $src -Repak $repak -UAssetGUI (Get-Tool UAssetGUI) -Mappings $mappings -PaksDir $paksDir -StageDir $stage
 
 		New-Item -ItemType Directory -Force $distDir | Out-Null
 		$pakPath = Join-Path $distDir $pak

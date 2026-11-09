@@ -1,6 +1,6 @@
 # Machine-specific
-build.config.json
-nexus-api.key
+tools/build/build.config.json
+tools/publish/nexus-api.key
 
 # UE4SS dumps & generated SDK - large, regenerate per game patch
 *.usmap

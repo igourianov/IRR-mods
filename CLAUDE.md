@@ -18,7 +18,8 @@ The load-bearing ones:
 
 - `likhos-<name>/`: one mod, with `mod.txt`, `Scripts/` and `README.md`. All Lua lives flat in `Scripts/`; plain `require("log")`.
 - `lib/`: Lua modules shared by every Lua mod (`log`, `util`, `hook`). `build.ps1` and `publish.ps1` copy them into each mod's `Scripts/`, so a mod never has its own file with a `lib` name. Each mod names itself for log lines with `log.setup("<Name>", config.log_level)`.
-- A pak mod (`likhos-rearmed`) has `pak=` in `mod.txt` and a `pak.ps1` that stages the pak's files. `build.ps1` packs it with repak into `dist\` and installs it into `Content\Paks\~mods`.
+- A pak mod (`likhos-rearmed`) has `pak=` in `mod.txt` and the JSON edit lists (`reclass`, `clone`, `retarget`, `stats`, `effects`, `loadouts`, `loot`) that `tools\pak\pak.ps1` stages the pak's files from. `build.ps1` packs it with repak into `dist\` and installs it into `Content\Paks\~mods`.
+- `tools/`: one folder per repo tool (`build/`, `publish/`, `pak/`, `clear-keybinds/`), each holding the script and its configs. The scripts resolve paths from their own location, so they run from any directory. The tools `build.ps1` downloads (`repak/`, `UAssetGUI/`) and local backups in `tools/` are gitignored.
 - `docs/solutions/`: session level docs, one solution doc per piece of work, holding its design and its own recon. Read another solution doc only when the user points at it.
   A solution doc records what was done at the time and why. Do not update it when later work changes or supersedes that solution.
 
@@ -28,41 +29,41 @@ Class names, UFunction names and property paths must come from a UE4SS dump or L
 
 ## Commands
 
-### build.ps1
+### tools/build/build.ps1
 
 ```powershell
-.\build.ps1                          # build and deploy every mod folder that has mod.txt
-.\build.ps1 likhos-backpack          # one mod
-.\build.ps1 likhos-backpack likhos-rearmed   # several mods
+.\tools\build\build.ps1                          # build and deploy every mod folder that has mod.txt
+.\tools\build\build.ps1 likhos-backpack          # one mod
+.\tools\build\build.ps1 likhos-backpack likhos-rearmed   # several mods
 ```
 
-- Needs `build.config.json` (gitignored, copy of `build.config.example.json`) holding the game dir.
-- Bumps the patch number in `mod.txt` when the mod folder has uncommitted changes. For a Lua mod, a change in `lib\` also counts. The bumped `mod.txt` keeps the folder dirty, so every build bumps again until committed.
+- Needs `tools\build\build.config.json` (gitignored, copy of `tools\build\build.config.example.json`) holding the game dir.
+- Bumps the patch number in `mod.txt` when the mod folder has uncommitted changes. For a Lua mod, a change in `lib\` also counts, for a pak mod one in `tools\pak\`. The bumped `mod.txt` keeps the folder dirty, so every build bumps again until committed.
 - Lua mod: copies the mod folder to `ue4ss\Mods\<mod>` and `lib\*.lua` into its `Scripts\`. Fails if `Scripts\` has a file with a `lib` name.
-- Pak mod: runs the mod's `pak.ps1` to stage files, packs with repak into `dist\<pak>`, copies it into `Content\Paks\~mods`. Downloads repak and UAssetGUI into `tools\` on first use. Needs a usmap in the UE4SS folder, generated in game with the UE4SS mappings dump key after every game patch.
+- Pak mod: runs `tools\pak\pak.ps1` on the mod's edit lists to stage files, packs with repak into `dist\<pak>`, copies it into `Content\Paks\~mods`. Downloads repak and UAssetGUI into `tools\` on first use. Needs a usmap in the UE4SS folder, generated in game with the UE4SS mappings dump key after every game patch.
 
-### publish.ps1
+### tools/publish/publish.ps1
 
 ```powershell
-.\publish.ps1 likhos-backpack -DryRun   # pack dist\<mod>.zip, print the Nexus requests, upload nothing
-.\publish.ps1 likhos-backpack           # pack and upload as a new version of the mod's Nexus file
+.\tools\publish\publish.ps1 likhos-backpack -DryRun   # pack dist\<mod>.zip, print the Nexus requests, upload nothing
+.\tools\publish\publish.ps1 likhos-backpack           # pack and upload as a new version of the mod's Nexus file
 ```
 
-- Mod name is required unless `publish.config.json` lists only one mod.
-- Needs `publish.config.json` (`mod_id`, `file_id` per mod) and the API key in `nexus-api.key` (gitignored) or `-ApiKey`.
-- Publishes the version currently in `mod.txt`. It does not bump it. Run `build.ps1` first. A pak mod fails if `dist\<pak>` is older than any file in the mod folder.
+- Mod name is required unless `tools\publish\publish.config.json` lists only one mod.
+- Needs `tools\publish\publish.config.json` (`mod_id`, `file_id` per mod) and the API key in `tools\publish\nexus-api.key` (gitignored) or `-ApiKey`.
+- Publishes the version currently in `mod.txt`. It does not bump it. Run `build.ps1` first. A pak mod fails if `dist\<pak>` is older than any file in the mod folder or `tools\pak\`.
 - Refuses a version equal to or older than the live Nexus version unless `-Force`.
 - Posts the `CHANGELOG.md` sections newer than the live version, up to the published one, as the Nexus changelog. Every heading must be a bare version (`# 1.2.38`).
 - Other switches: `-Category main|optional|miscellaneous`, `-NoArchive` (keep the previous file version unarchived), `-NoBumpModVersion` (do not update the mod page version).
 
-### tools/clear-keybinds.ps1
+### tools/clear-keybinds/clear-keybinds.ps1
 
 Use it when a mod key mapping is renamed or removed, or when a saved key mapping needs to go. It edits `EnhancedInputUserSettings.sav` directly and backs it up first. Run it without switches to list first and tell the user what it would remove. The game must be closed. Layout and recon: `docs/solutions/clear-keybinds.md`.
 
 ```powershell
-.\tools\clear-keybinds.ps1                        # list saved mappings, mark unused Likhos* ones
-.\tools\clear-keybinds.ps1 -Unused                # remove Likhos* mappings no likhos-*\Scripts\*.lua mentions
-.\tools\clear-keybinds.ps1 -Name LikhosQuickUse   # remove by name, wildcards allowed
+.\tools\clear-keybinds\clear-keybinds.ps1                        # list saved mappings, mark unused Likhos* ones
+.\tools\clear-keybinds\clear-keybinds.ps1 -Unused                # remove Likhos* mappings no likhos-*\Scripts\*.lua mentions
+.\tools\clear-keybinds\clear-keybinds.ps1 -Name LikhosQuickUse   # remove by name, wildcards allowed
 ```
 
 In-game console: `kb_status`.
