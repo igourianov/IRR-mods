@@ -19,6 +19,7 @@ M.MAPPINGS = {
 	LikhosPointShootingDirect = { display = "Point Shooting + Laser (Hold)" },
 	LikhosFlashlight          = { display = "Flashlight (Hold/Toggle)" },
 	LikhosInteractInstant     = { display = "Interact (Instant)" },
+	LikhosConsumeFoodDrink    = { display = "Consume Food/Drink" },
 }
 
 local function action_name(mapping)

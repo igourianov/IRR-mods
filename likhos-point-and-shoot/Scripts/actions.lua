@@ -9,6 +9,7 @@ local log     = require("log")
 local util    = require("util")
 local devices = require("devices")
 local quick_use = require("quick_use")
+local consume = require("consume")
 local config  = require("config")
 
 local M = {}
@@ -217,6 +218,10 @@ M.ACTIONS = {
 	-- docs/solutions/tap-to-use.md
 	["QuickUse"] = {
 		press   = quick_use.press,
+	},
+	-- docs/solutions/eat-food-bind.md
+	["ConsumeFoodDrink"] = {
+		press   = consume.press,
 	},
 }
 

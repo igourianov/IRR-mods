@@ -49,5 +49,12 @@ return {
 			action  = "QuickUse",     -- tap to use what F would, holds completing at once
 			block_in_ui = true,
 		},
+		{
+			id      = "consume",
+			enabled = true,
+			mapping = "LikhosConsumeFoodDrink",   -- Settings > Controls > Consume Food/Drink
+			action  = "ConsumeFoodDrink",     -- use the first usable food or drink item in the inventory
+			block_in_ui = true,
+		},
 	},
 }

@@ -1,3 +1,6 @@
+# 1.2.132
+* added the Consume Food/Drink keybind: uses the first food or drink item in the inventory, like Quick Heal does for medical items
+
 # 1.1.129
 * renamed the Point Shooting (Direct) keybind to Point Shooting + Laser (Hold). A key already set on it is kept
 

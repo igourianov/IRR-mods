@@ -29,6 +29,9 @@ Works as both momentary switch and toggle. Contextual to NVG same way the laser 
 
 New keybind **Interact (Instant)**, that mimics vanilla **Interact** behavior but without hold delay. Tap it to open containers instantly. Locked containers will still use unlock delay, but do not require to hold the key. Old binding is unaffected.
 
+## Consume Food/Drink
+
+New keybind **Consume Food/Drink**, that works like vanilla **Quick Heal** but for food and drinks. Press it to eat or drink the first food or drink item found in your inventory, without opening it. Medical items are never used.
 
 ## Magnifier binding
 
