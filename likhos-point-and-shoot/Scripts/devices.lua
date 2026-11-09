@@ -69,7 +69,10 @@ function M.find(wc, name)
 	local found = nil
 	wc.TacticalAttachments:ForEach(function(_, elem)
 		local dev = elem:get()
-		if util.valid(dev) and dev:GetFullName() == name then found = dev end
+		if util.valid(dev) and dev:GetFullName() == name then
+			found = dev
+			return true
+		end
 	end)
 	return found
 end

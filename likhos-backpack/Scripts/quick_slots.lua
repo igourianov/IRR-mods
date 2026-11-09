@@ -158,7 +158,10 @@ local function using_item(pc)
 		local ability = elem:get()
 		if not util.valid(ability) then return end
 		for _, class in ipairs(classes) do
-			if ability:IsA(class) then using = true end
+			if ability:IsA(class) then
+				using = true
+				return true
+			end
 		end
 	end)
 	return using

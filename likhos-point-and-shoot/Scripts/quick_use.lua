@@ -71,7 +71,10 @@ local function release_ability(comp, sga_class)
 	local ability = nil
 	comp.ActiveAbilities:ForEach(function(_, elem)
 		local a = elem:get()
-		if util.valid(a) and a:IsA(sga_class) then ability = a end
+		if util.valid(a) and a:IsA(sga_class) then
+			ability = a
+			return true
+		end
 	end)
 	if ability then ability:DeactivateAbility() end
 end
