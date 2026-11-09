@@ -1,5 +1,6 @@
-# 1.3.52
+# Unreleased
 * a quick slot now correctly clears when its item's container leaves the inventory, e.g. a backpack moved to the stash or a chest rig dropped (this was a vanilla bug)
+* single use item count in a newly filled quick slot shows right away instead of after up to a minute
 
 # 1.3.51
 * quick slots no longer empty out if there is an item of the same type in the same container as the one that was just used

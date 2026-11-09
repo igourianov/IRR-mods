@@ -241,12 +241,13 @@ local polls = 0
 --- A tile's BaseContainerElementRef is the container element it was created for, here the quick slot widget.
 --- Neither the quick slot widget's ItemRef nor its GetContainerItems() gives the tile: the widget overrides AddItem and GetContainerItems, and the call returns an empty array to Lua.
 --- A quick slot bar of an earlier screen may still exist, so a tile counts only while it shows the bound item.
+--- A tile the slot has replaced keeps its slot and item until garbage collection, which can take a minute (seen in game 2026-11-09), so a tile counts only while it has a parent.
 local function tile_slot(tile)
 	local element = tile.BaseContainerElementRef
 	if not (util.valid(element) and element:GetClass():GetFName():ToString() == SLOT_WIDGET) then return nil end
 	local index = element.QuickSlotIndex
 	local record = records[index]
-	if record and util.same_guid(tile.ContainerItem.ItemUID, record.uid) then return index end
+	if record and util.same_guid(tile.ContainerItem.ItemUID, record.uid) and util.valid(tile:GetParent()) then return index end
 	return nil
 end
 
@@ -319,7 +320,8 @@ local function poll()
 			if not tile then
 				tiles = tiles or quick_slot_tiles()
 				tile = tiles[index]
-				tile_paths[index] = tile and util.path(tile) or nil			end
+				tile_paths[index] = tile and util.path(tile) or nil
+			end
 			counted[index] = tile
 		end
 	end
