@@ -8,11 +8,16 @@ return {
     enabled = true,
 
     -- Items that count uses, like medical items and keys, show them as whole numbers on inventory tiles.
-    -- USB hacking devices show their remaining uses as a percentage.
+    -- Single use items show no count until used. USB hacking devices show their remaining uses as a percentage.
     -- Set false for the vanilla decimals.
     whole_uses = true,
 
     -- Shift+Click on an item in the hideout sells it, like Sell from its context menu. A mission item is delivered instead, like Deliver.
     -- Set false for the vanilla behavior, where it does nothing.
     quick_sell = true,
+
+    -- A quick slot whose item is used up rebinds to another item of the same type from the same equipment, partly used ones first.
+    -- A quick slot of a single use item, like an injector or a grenade, shows how many of its type that equipment holds.
+    -- Set false for the vanilla behavior, where the slot empties after one use.
+    quick_slot_refill = true,
 }

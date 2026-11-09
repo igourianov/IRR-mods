@@ -7,6 +7,7 @@ local log  = require("log")
 local util = require("util")
 local whole_uses = require("whole_uses")
 local quick_sell = require("quick_sell")
+local quick_slots = require("quick_slots")
 
 local config = require("config")
 
@@ -21,6 +22,7 @@ local function init()
 
     if config.whole_uses then whole_uses.install() end
     if config.quick_sell then quick_sell.install() end
+    if config.quick_slot_refill then quick_slots.install() end
 
     log.info("ready")
 end

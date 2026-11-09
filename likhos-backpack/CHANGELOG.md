@@ -1,7 +1,7 @@
 # Unreleased
 * removed item swap and spent medical item drop features, the vanilla game now does both natively
-* verified on UE4SS experimental v3.0.1-1217 (2026-11-07)
 * USB hacking devices show their remaining uses as a percentage
+* single use items show no use count until used
 
 # 1.0.25
 * quick sell delivers mission items for their mission instead (Shift+Click)
