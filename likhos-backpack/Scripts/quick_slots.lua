@@ -51,16 +51,30 @@ local function is_zero(g)
 	return g.A == 0 and g.B == 0 and g.C == 0 and g.D == 0
 end
 
+--- Every item of comp with the main container holding it, in container order: `for item, main in inventory_items(comp)`.
+local function inventory_items(comp)
+	local containers = comp.MainContainers
+	local container_count = #containers
+	local i, j, item_count = 0, 0, 0
+	local container, items = nil, nil
+	return function()
+		while j >= item_count do
+			i = i + 1
+			if i > container_count then return nil end
+			container = containers[i]
+			items = container.ContainerItems
+			j, item_count = 0, #items
+		end
+		j = j + 1
+		return items[j], container
+	end
+end
+
 --- The item of comp with uid and the main container holding it, or nil.
 --- Read from comp.MainContainers rather than GetContainerItemByUID. A struct returned by a UFunction call crashes the game when passed to another one, still on UE4SS 1217, and UE4SS before 1217 crashes converting a returned ContainerItem to Lua. One read from a property passes fine.
 local function find_item(comp, uid)
-	local containers = comp.MainContainers
-	for i = 1, #containers do
-		local container = containers[i]
-		local items = container.ContainerItems
-		for j = 1, #items do
-			if util.same_guid(items[j].ItemUID, uid) then return items[j], container end
-		end
+	for item, main in inventory_items(comp) do
+		if util.same_guid(item.ItemUID, uid) then return item, main end
 	end
 	return nil
 end
@@ -69,16 +83,10 @@ end
 local function locate(comp, wanted)
 	local found = {}
 	if next(wanted) == nil then return found end
-	local containers = comp.MainContainers
-	for i = 1, #containers do
-		local container = containers[i]
-		local items = container.ContainerItems
-		for j = 1, #items do
-			local item = items[j]
-			local uid = item.ItemUID
-			for index, w in pairs(wanted) do
-				if util.same_guid(uid, w) then found[index] = { item = item, main = container } end
-			end
+	for item, main in inventory_items(comp) do
+		local uid = item.ItemUID
+		for index, w in pairs(wanted) do
+			if util.same_guid(uid, w) then found[index] = { item = item, main = main } end
 		end
 	end
 	return found
@@ -115,15 +123,9 @@ end
 --- A spent item can sit at 0 uses: briefly before the game removes it, or for good when saved that way by an older version of this mod.
 local function matching(comp, def, root)
 	local found = {}
-	local containers = comp.MainContainers
-	for i = 1, #containers do
-		local container = containers[i]
-		local items = container.ContainerItems
-		for j = 1, #items do
-			local item = items[j]
-			local definition = item.ItemDefinition
-			if util.valid(definition) and definition:GetFullName() == def and uses_left(item) > 0 and root_key(comp, item, container) == root then found[#found + 1] = item end
-		end
+	for item, main in inventory_items(comp) do
+		local definition = item.ItemDefinition
+		if util.valid(definition) and definition:GetFullName() == def and uses_left(item) > 0 and root_key(comp, item, main) == root then found[#found + 1] = item end
 	end
 	return found
 end
