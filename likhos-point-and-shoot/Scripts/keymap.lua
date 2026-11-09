@@ -83,16 +83,30 @@ function M.register()
 	subsystem:AddMappingContext(imc, STACK_PRIORITY, { bForceImmediately = true })
 end
 
---- FKey tables for the keys currently bound to a mapping. Empty when unbound.
-function M.keys(mapping)
-	local out = {}
+--- The active key profile, or nil before Enhanced Input user settings exist.
+--- Looked up per call: the user settings belong to the local player.
+function M.profile()
 	local settings = user_settings()
-	if not settings then return out end
+	if not settings then return nil end
 	local profile = settings:GetActiveKeyProfile()
-	if not util.valid(profile) then return out end
+	return util.valid(profile) and profile or nil
+end
 
+-- mapping -> its row FName, built once. An FName is a plain value, not a UObject.
+local row_names = {}
+
+--- FKey tables for the keys bound to a mapping in profile. Empty when unbound or without a profile.
+function M.keys(mapping, profile)
+	local out = {}
+	if not profile then return out end
+
+	local row = row_names[mapping]
+	if not row then
+		row = FName(mapping)
+		row_names[mapping] = row
+	end
 	local found = {}
-	profile:GetMappedKeysInRow(FName(mapping), found)
+	profile:GetMappedKeysInRow(row, found)
 	for _, k in ipairs(found) do
 		-- The out array holds struct wrappers. An unbound row reports one key, None.
 		local name = k:get().KeyName
@@ -106,7 +120,7 @@ end
 --- Human-readable keys for kb_status.
 function M.describe(mapping)
 	local names = {}
-	for _, k in ipairs(M.keys(mapping)) do table.insert(names, k.KeyName:ToString()) end
+	for _, k in ipairs(M.keys(mapping, M.profile())) do table.insert(names, k.KeyName:ToString()) end
 	return #names > 0 and table.concat(names, ", ") or "unbound"
 end
 

@@ -63,11 +63,12 @@ function M.poll(binds)
 	local pc = M.get_player_controller()
 	if not pc then return end
 
+	local profile = keymap.profile()
 	for _, bind in ipairs(binds) do
 		if registered[bind.id] then
 			-- Keys are read every tick, so a rebind in the controls menu applies at once. No key mapped: never down.
 			local down = false
-			for _, key in ipairs(keymap.keys(bind.mapping)) do
+			for _, key in ipairs(keymap.keys(bind.mapping, profile)) do
 				if pc:IsInputKeyDown(key) then down = true end
 			end
 			local was = key_down[bind.id]
