@@ -20,9 +20,9 @@ Never use `LoopAsync` or `ExecuteAsync`. A `LoopAsync` callback that calls `Exec
 
 Never hold a `UObject` across a level load. The pawn is destroyed on every raid transition and respawn; the reference becomes a dangling pointer.
 
-- Cache the **PlayerController**, not the pawn — it survives respawns.
+- Cache the **PlayerController**, not the pawn. It survives respawns.
 - Re-acquire via `FindFirstOf` at call time; it is cheap enough.
-- Always check `util.valid(obj)` — UE4SS returns an invalid-object stub, not `nil`, so a plain `if obj then` check passes on a dead object.
+- Always check `util.valid(obj)`. UE4SS returns an invalid-object stub, not `nil`, so a plain `if obj then` check passes on a dead object.
 
 ## Reflection, never offsets
 
@@ -34,8 +34,8 @@ Bind by name (`/Script/Test_C.SomeClass:SomeFunction`), resolved lazily. A game 
 
 ## Error handling
 
-Wrap every boundary — key handler, tick, hook body — in `util.safe`. An uncaught Lua error inside a hook can take the game down with it.
+Wrap every boundary (key handler, tick, hook body) in `util.safe`. An uncaught Lua error inside a hook can take the game down with it.
 
 ## Logging
 
-Use `log.info` for lifecycle, `log.debug` for per-keypress detail (off by default — it is per-frame noise otherwise), `log.error` only for a genuine failure the user can act on.
+Use `log.info` for lifecycle, `log.debug` for per-keypress detail (off by default, since it is per-frame noise otherwise), `log.error` only for a genuine failure the user can act on.

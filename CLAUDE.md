@@ -4,22 +4,22 @@ UE4SS Lua mods for **Incursion Red River** (UE 5.6, Steam, no anti-cheat).
 
 ## Before changing code
 
-Read `CODE_GUIDE.md`. Its rules are not style preferences — each one exists because breaking it crashes the game or silently breaks after a patch.
+Read `CODE_GUIDE.md`. Its rules are not style preferences. Each one exists because breaking it crashes the game or silently breaks after a patch.
 
 The load-bearing ones:
 
 - `RegisterKeyBind` callbacks run **off the game thread**. Hop via `ExecuteInGameThread` before touching a UObject.
 - Never use `LoopAsync` / `ExecuteAsync`. Per-tick loops use `LoopInGameThreadWithDelay`. `LoopAsync` calling `ExecuteInGameThread` every tick corrupted the Lua state and crashed the game.
 - Never cache a UObject across a level load. Cache the PlayerController, not the pawn.
-- `util.valid(obj)`, never `if obj then` — UE4SS returns an invalid stub.
+- `util.valid(obj)`, never `if obj then`. UE4SS returns an invalid stub.
 - No memory offsets. Resolve by name through reflection, lazily.
 
 ## Layout
 
-- `likhos-<name>/` — one mod: `mod.txt`, `Scripts/`, `README.md`. All Lua lives flat in `Scripts/`; plain `require("log")`.
-- `lib/` — Lua modules shared by every Lua mod (`log`, `util`, `hook`). `build.ps1` and `publish.ps1` copy them into each mod's `Scripts/`, so a mod never has its own file with a `lib` name. Each mod names itself for log lines with `log.setup("<Name>", config.log_level)`.
+- `likhos-<name>/`: one mod, with `mod.txt`, `Scripts/` and `README.md`. All Lua lives flat in `Scripts/`; plain `require("log")`.
+- `lib/`: Lua modules shared by every Lua mod (`log`, `util`, `hook`). `build.ps1` and `publish.ps1` copy them into each mod's `Scripts/`, so a mod never has its own file with a `lib` name. Each mod names itself for log lines with `log.setup("<Name>", config.log_level)`.
 - A pak mod (`likhos-rearmed`) has `pak=` in `mod.txt` and a `pak.ps1` that stages the pak's files. `build.ps1` packs it with repak into `dist\` and installs it into `Content\Paks\~mods`.
-- `docs/solutions/` — session level docs: one solution doc per piece of work, holding its design and its own recon. Read another solution doc only when the user points at it.
+- `docs/solutions/`: session level docs, one solution doc per piece of work, holding its design and its own recon. Read another solution doc only when the user points at it.
   A solution doc records what was done at the time and why. Do not update it when later work changes or supersedes that solution.
 
 ## Do not fabricate game internals
