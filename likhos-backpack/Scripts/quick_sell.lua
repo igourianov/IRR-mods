@@ -22,13 +22,9 @@ local function item_str(item)
 	return string.format("%s %08x", item.ItemDefinition:GetFName():ToString(), item.ItemUID.A & 0xffffffff)
 end
 
-local function same_guid(a, b)
-	return a.A == b.A and a.B == b.B and a.C == b.C and a.D == b.D
-end
-
 local function deliver_or_sell(path, uid)
 	local tile = StaticFindObject(path)
-	if not util.valid(tile) or not same_guid(tile.ContainerItem.ItemUID, uid) then
+	if not util.valid(tile) or not util.same_guid(tile.ContainerItem.ItemUID, uid) then
 		log.debug("quick sell: the clicked tile is gone or shows another item")
 		return
 	end
@@ -61,8 +57,7 @@ local function on_mouse_down(context, _, mouse_event)
 
 	local tile = context:get()
 	local path = util.path(tile)
-	local id = tile.ContainerItem.ItemUID
-	local uid = { A = id.A, B = id.B, C = id.C, D = id.D }
+	local uid = util.guid(tile.ContainerItem.ItemUID)
 	ExecuteInGameThreadWithDelay(1, hooks.guard(function() deliver_or_sell(path, uid) end))
 end
 

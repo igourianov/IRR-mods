@@ -22,4 +22,13 @@ function M.path(obj)
 	return obj:GetFullName():match("^%S+ (.+)$")
 end
 
+--- A plain Lua copy of an FGuid, which stays valid after the struct it was read from is gone.
+function M.guid(g)
+	return { A = g.A, B = g.B, C = g.C, D = g.D }
+end
+
+function M.same_guid(a, b)
+	return a.A == b.A and a.B == b.B and a.C == b.C and a.D == b.D
+end
+
 return M

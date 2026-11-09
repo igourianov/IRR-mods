@@ -43,14 +43,6 @@ local EQUIP_TO = 0
 -- Containers nest a few levels deep. The cap only guards against a cycle in bad data.
 local MAX_DEPTH = 16
 
-local function guid(g)
-	return { A = g.A, B = g.B, C = g.C, D = g.D }
-end
-
-local function same_guid(a, b)
-	return a.A == b.A and a.B == b.B and a.C == b.C and a.D == b.D
-end
-
 local function guid_str(g)
 	return string.format("%08x%08x%08x%08x", g.A & 0xffffffff, g.B & 0xffffffff, g.C & 0xffffffff, g.D & 0xffffffff)
 end
@@ -67,7 +59,7 @@ local function find_item(comp, uid)
 		local container = containers[i]
 		local items = container.ContainerItems
 		for j = 1, #items do
-			if same_guid(items[j].ItemUID, uid) then return items[j], container end
+			if util.same_guid(items[j].ItemUID, uid) then return items[j], container end
 		end
 	end
 	return nil
@@ -85,7 +77,7 @@ local function locate(comp, wanted)
 			local item = items[j]
 			local uid = item.ItemUID
 			for index, w in pairs(wanted) do
-				if same_guid(uid, w) then found[index] = { item = item, main = container } end
+				if util.same_guid(uid, w) then found[index] = { item = item, main = container } end
 			end
 		end
 	end
@@ -184,7 +176,7 @@ local function check_slot(pc, comp, index, uid, found)
 	local record = records[index]
 	if found then
 		local uses = uses_left(found.item)
-		if record and same_guid(record.uid, uid) then
+		if record and util.same_guid(record.uid, uid) then
 			record.uses = uses
 			return
 		end
@@ -213,7 +205,7 @@ local function check_slot(pc, comp, index, uid, found)
 		log.debug("quick slot %d empty: no %s left in %s", index, tostring(record.def), tostring(record.root))
 		return
 	end
-	local new_uid = guid(item.ItemUID)
+	local new_uid = util.guid(item.ItemUID)
 	comp:UpdateQuickSlot(index, item)
 	records[index] = { uid = new_uid, def = record.def, root = record.root, single = record.single, uses = item_uses }
 	log.debug("quick slot %d refilled with %s %s from %s", index, record.def, guid_str(new_uid), record.root)
@@ -246,7 +238,7 @@ local function tile_slot(tile)
 	if not (util.valid(element) and element:GetClass():GetFName():ToString() == SLOT_WIDGET) then return nil end
 	local index = element.QuickSlotIndex
 	local record = records[index]
-	if record and same_guid(tile.ContainerItem.ItemUID, record.uid) then return index end
+	if record and util.same_guid(tile.ContainerItem.ItemUID, record.uid) then return index end
 	return nil
 end
 
@@ -278,7 +270,7 @@ local function poll()
 	local slots = comp.QuickSlots
 	for i = 1, #slots do
 		local slot = slots[i]
-		local uid = guid(slot.ItemUID)
+		local uid = util.guid(slot.ItemUID)
 		if not is_zero(uid) then wanted[slot.Index] = uid end
 	end
 	local found = locate(comp, wanted)
