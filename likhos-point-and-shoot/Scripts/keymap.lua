@@ -16,7 +16,7 @@ local IMC_NAME = "IMC_LikhosKeybinds"
 local STACK_PRIORITY = -1000
 
 M.MAPPINGS = {
-	LikhosPointShootingDirect = { display = "Point Shooting (Direct)" },
+	LikhosPointShootingDirect = { display = "Point Shooting + Laser (Hold)" },
 	LikhosFlashlight          = { display = "Flashlight (Hold/Toggle)" },
 	LikhosInteractInstant     = { display = "Interact (Instant)" },
 }

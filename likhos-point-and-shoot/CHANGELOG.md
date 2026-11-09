@@ -1,3 +1,6 @@
+# 1.1.129
+* renamed the Point Shooting (Direct) keybind to Point Shooting + Laser (Hold). A key already set on it is kept
+
 # 1.1.128
 * moved the mod's keybinds to their own Likho's Actions section at the top of the controls page
 

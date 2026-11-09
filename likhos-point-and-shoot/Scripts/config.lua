@@ -31,7 +31,7 @@ return {
 		{
 			id      = "point_aim",
 			enabled = true,
-			mapping = "LikhosPointShootingDirect",   -- Settings > Controls > Point Shooting (Direct)
+			mapping = "LikhosPointShootingDirect",   -- Settings > Controls > Point Shooting + Laser (Hold)
 			action  = "PointAim",     -- hold to aim straight into point sight
 			block_in_ui = true,
 		},

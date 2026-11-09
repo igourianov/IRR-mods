@@ -6,13 +6,13 @@ This mod reworks Point Shooting, tactical device activation and adds other QoL k
 
 It is meant for close range engagement. Its advantage over gun sights is speed, which is sadly defeated by the vanilla's awkward control scheme.
 
-This mod decouples point shooting from aiming. Adds a new keybind **Point Shooting (Direct)** that allows the user to go directly into point shooting pose bypassing regular aim.
+This mod decouples point shooting from aiming. Adds a new keybind **Point Shooting + Laser (Hold)** that allows the user to go directly into point shooting pose bypassing regular aim.
 
 Hold mode only (no toggle). Recommended to bind the new key to a mouse side button for quick access.
 
 ## Laser activation
 
-**Point Shooting (Direct)** additionally activates first laser module it finds equipped on the gun.
+**Point Shooting + Laser (Hold)** additionally activates first laser module it finds equipped on the gun.
 
 Contextual to NVG:
 
