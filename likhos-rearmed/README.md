@@ -30,9 +30,13 @@ Fixed the buffer tube + Viper combination being the overpowered choice on every 
 
 * Removed recoil bonuses from buffer tubes and nerfed their ergonomics, since their stats stacked with the stock on top.
 * Removed bonuses from the SKS SAGE chassis. Like the M700 chassis, it has no built-in grip or stock, which are added separately, so the stats stacked.
-* Shifted ACE and UBR stocks into ergos instead of recoil.
+* Shifted ACE, Ripstock, Zulu 2, Viper, UBR and Daniel Defense stocks into ergos instead of recoil. ACE leans the most into ergos, Daniel Defense the least.
+* Shifted BCM Gunfighter and VLTOR IMOD stocks into recoil instead of ergos. These are the top recoil choices.
+* Rebalanced MCX stocks, also used by the MPX, in line with AR stocks, which MCX can mount through an adapter. Collapsible leans the most into ergos, Folding Collapsible Tube the most into recoil.
 * Buffed recoil bonus on AK SAG ACR stock.
-* Nerfed recoil bonus on Viper stock.
+* Shifted PP-19 and AKS-74U folding stocks into ergos instead of recoil.
+* Buffed ergos on KPYK skeleton and AK-12 collapsible stocks.
+* Buffed RPK-74 folding stock. It's now the heavier recoil option against the KPYK.
 
 ## NPC loadouts
 
@@ -83,11 +87,12 @@ The mod replaces these game files:
 - The Rattler's preset (`DA_Sig_Sauer_MCX_Rattler`)
 - The 7.62x39 HP round's item definition (`ID_762x39_HP`)
 - The adrenaline injector's item definition (`ID_Adrenaline_Injector`)
-- The item definitions of every muzzle device except the AUG RAT Worx adapter (`ID_*` under `Items/Attachments/Muzzle`)
+- The item definitions of every muzzle device except the AUG RAT Worx adapter, the M14 National Match brake and the AS VAL and VSS integral suppressors (`ID_*` under `Items/Attachments/Muzzle`)
 - The item definitions of these stocks (`ID_*` under `Items/Attachments/Stock`):
   - Buffer tubes: AR-15 PWS Enhanced, AK SAG, AR-15 Colt A2, FAL Folding and AR-15 Strike SI AR Advanced
-  - AR-15 ACE Ultra Lite, AR-15 Magpul UBR and AR-15 Strike Industries Viper Mod 1
-  - AK SAG ACR
+  - AR-15 ACE Ultra Lite, AR-15 CMMG Ripstock, AR-15 Odin Works Zulu 2, AR-15 Strike Industries Viper Mod 1, AR-15 Magpul UBR, AR-15 Daniel Defense, AR-15 BCM Gunfighter Mod 0 and AR-15 VLTOR IMOD
+  - MCX Collapsible, Folding Mini Skeleton, Folding Visor, Folding Skeleton and Folding Collapsible Tube
+  - AK SAG ACR, PP-19, AKS-74U, KPYK CRC-5002-9033, RPK-74 Folding and AK-12 Collapsible
   - SKS SAGE International SKSALCV chassis
 - Eleven NPC loadout presets:
   - `DA_Inventory_AI_Patrol_IGC_A`

@@ -1,3 +1,10 @@
+# 1.4.54
+* AR stocks rebalanced on one scale, from light ergo stocks (ACE, Ripstock, Zulu 2) to heavy recoil stocks (BCM, VLTOR). Viper moved from the recoil end to the middle, UBR has a bit less ergos
+* MCX stocks rebalanced in line with AR stocks
+* AK folding stocks rebalanced: PP-19 and AKS-74U lean into ergos, RPK-74 into recoil, KPYK and AK-12 got better ergos
+* muzzle devices added in game 1.4.0.0 follow the muzzle device rebalance
+* DT338 brake and PP-19 muzzle ergos and MPX flash hider recoil back to vanilla
+
 # 1.3.42
 * adrenaline injector stamina boost raised from 10% to 50%
 
