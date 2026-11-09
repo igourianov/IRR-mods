@@ -2,6 +2,8 @@
 * fixed quick slot staying bound after its item's container is stashed or dropped (vanilla bug)
 * fixed quick slot count showing late for a newly slotted item
 * fixed quick slot count missing after a level load
+* optimized quick slot count lookup
+* reduced log output noise
 
 # 1.3.51
 * quick slots no longer empty out if there is an item of the same type in the same container as the one that was just used
