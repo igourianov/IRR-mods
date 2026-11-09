@@ -1,7 +1,7 @@
--- quick_slots.lua : a quick slot whose item is used up rebinds to another item of the same definition from the same equipment (docs/solutions/quick-slot-refill.md).
+-- quick_slots.lua : a quick slot whose item is used up rebinds to another item of the same definition from the inventory (docs/solutions/quick-slot-refill.md, docs/solutions/quick-slot-whole-inventory.md).
 -- A quick slot naming an item that is no longer in the inventory is cleared (docs/solutions/quick-slot-left-inventory.md).
 --
--- Every game name here comes from those two docs.
+-- Every game name here comes from those docs.
 -- Items leave the inventory through several paths, some native, and the quick slot widgets exist only in the inventory screen, so the slots are polled rather than hooked.
 -- Holds no UObject between polls: records keep UIDs and paths only.
 
@@ -15,8 +15,8 @@ local ABILITY_COMP = "/Script/Test_C.GameplayAbilityComponent"
 local SLOT_COUNT   = 4
 -- A used item sits at 0 uses for about 270 ms before it leaves, which a 250 ms poll sometimes missed.
 local POLL_MS      = 50
--- The root refresh walks the inventory once per bound slot and the tile count walks every item tile, so both run on every SLOW_EVERY-th poll only.
-local SLOW_EVERY   = 5
+-- The tile count walks every item tile, so it runs on every COUNT_EVERY-th poll only.
+local COUNT_EVERY  = 5
 local USES_TAG     = "Inventory.Stats.Durability"
 -- The uses stat's config class. Its tag, USES_TAG, is shared with weapon and armor durability, so a definition's stats are told apart by this class.
 local USES_CONFIG  = "U_Content_C"
@@ -38,12 +38,6 @@ local USE_ABILITIES = {
 	"/Game/Blueprints/SimpleGameplayAbilitySystem/Abilities/SGA_UseMedic.SGA_UseMedic_C",
 }
 
--- EContainerType: EquipTo = 0. Equipment and attachment slots are EquipTo.
-local EQUIP_TO = 0
-
--- Containers nest a few levels deep. The cap only guards against a cycle in bad data.
-local MAX_DEPTH = 16
-
 local function guid_str(g)
 	return string.format("%08x%08x%08x%08x", g.A & 0xffffffff, g.B & 0xffffffff, g.C & 0xffffffff, g.D & 0xffffffff)
 end
@@ -52,63 +46,44 @@ local function is_zero(g)
 	return g.A == 0 and g.B == 0 and g.C == 0 and g.D == 0
 end
 
---- Every item of comp with the main container holding it, in container order: `for item, main in inventory_items(comp)`.
+--- Every item of comp, in container order: `for item in inventory_items(comp)`.
+--- Read from comp.MainContainers rather than GetContainerItemByUID. A struct returned by a UFunction call crashes the game when passed to another one, still on UE4SS 1217, and UE4SS before 1217 crashes converting a returned ContainerItem to Lua. One read from a property passes fine.
 local function inventory_items(comp)
 	local containers = comp.MainContainers
 	local container_count = #containers
 	local i, j, item_count = 0, 0, 0
-	local container, items = nil, nil
+	local items = nil
 	return function()
 		while j >= item_count do
 			i = i + 1
 			if i > container_count then return nil end
-			container = containers[i]
-			items = container.ContainerItems
+			items = containers[i].ContainerItems
 			j, item_count = 0, #items
 		end
 		j = j + 1
-		return items[j], container
+		return items[j]
 	end
 end
 
---- The item of comp with uid and the main container holding it, or nil.
---- Read from comp.MainContainers rather than GetContainerItemByUID. A struct returned by a UFunction call crashes the game when passed to another one, still on UE4SS 1217, and UE4SS before 1217 crashes converting a returned ContainerItem to Lua. One read from a property passes fine.
-local function find_item(comp, uid)
-	for item, main in inventory_items(comp) do
-		if util.same_guid(item.ItemUID, uid) then return item, main end
+--- Whether comp holds an item with uid.
+local function holds(comp, uid)
+	for item in inventory_items(comp) do
+		if util.same_guid(item.ItemUID, uid) then return true end
 	end
-	return nil
+	return false
 end
 
---- For each slot index of wanted (index -> uid), the item of comp with that uid and its main container. One pass over the inventory.
+--- For each slot index of wanted (index -> uid), the item of comp with that uid. One pass over the inventory.
 local function locate(comp, wanted)
 	local found = {}
 	if next(wanted) == nil then return found end
-	for item, main in inventory_items(comp) do
+	for item in inventory_items(comp) do
 		local uid = item.ItemUID
 		for index, w in pairs(wanted) do
-			if util.same_guid(uid, w) then found[index] = { item = item, main = main } end
+			if util.same_guid(uid, w) then found[index] = item end
 		end
 	end
 	return found
-end
-
---- Whether item sits in an equipment or attachment slot of main rather than a grid.
-local function is_equipped(main, item)
-	local settings = main.ContainerElements[item.ContainerIndex + 1].ContainerSettings
-	return util.valid(settings) and settings:GetContainerType() == EQUIP_TO
-end
-
---- A key naming the equipment item sits in: the equipped item whose grids hold it at any depth, or the character grid holding it.
---- A container item's own grids are main containers whose MainContainerUID is its ItemUID.
-local function root_key(comp, item, main)
-	for _ = 1, MAX_DEPTH do
-		if is_equipped(main, item) then return guid_str(item.ItemUID) end
-		local parent, parent_main = find_item(comp, main.MainContainerUID)
-		if not parent then return guid_str(main.MainContainerUID) .. ":" .. item.ContainerIndex end
-		item, main = parent, parent_main
-	end
-	return nil
 end
 
 local function uses_left(item)
@@ -120,15 +95,12 @@ local function uses_left(item)
 	return math.huge
 end
 
---- The items of comp with definition path def under root and uses left, in container order.
+--- The definition path of item when it has uses left, or nil.
 --- A spent item can sit at 0 uses: briefly before the game removes it, or for good when saved that way by an older version of this mod.
-local function matching(comp, def, root)
-	local found = {}
-	for item, main in inventory_items(comp) do
-		local definition = item.ItemDefinition
-		if util.valid(definition) and definition:GetFullName() == def and uses_left(item) > 0 and root_key(comp, item, main) == root then found[#found + 1] = item end
-	end
-	return found
+local function usable_def(item)
+	local definition = item.ItemDefinition
+	if not util.valid(definition) or uses_left(item) <= 0 then return nil end
+	return definition:GetFullName()
 end
 
 --- Whether items of definition are used up in one use: a uses stat of 1, or no uses stat and no stacking (grenades).
@@ -167,7 +139,7 @@ local function using_item(pc)
 	return using
 end
 
--- slot index -> { uid, def, root, single, uses }, the last live binding of each slot. single is whether its definition is single use.
+-- slot index -> { uid, def, single, uses }, the last live binding of each slot. single is whether its definition is single use.
 -- uses is the item's uses left at the last poll. A used item lingers in the inventory at 0 uses before the game removes it.
 local records = {}
 -- Path of the inventory component the records came from.
@@ -177,49 +149,45 @@ local records_comp = nil
 local EMPTY_ITEM = { ItemUID = { A = 0, B = 0, C = 0, D = 0 } }
 
 --- Track the live binding of slot index, refill the slot once its recorded item has been used up, or clear it while it names an item outside the inventory.
---- uid is the slot's QuickSlots entry, or nil. found is that item and its main container from locate, or nil when the entry is stale.
---- refresh rereads the root of a tracked binding.
-local function check_slot(pc, comp, index, uid, found, refresh)
+--- uid is the slot's QuickSlots entry, or nil. item is that item from locate, or nil when the entry is stale.
+local function check_slot(pc, comp, index, uid, item)
 	local record = records[index]
-	if found then
-		local uses = uses_left(found.item)
+	if item then
+		local uses = uses_left(item)
 		if record and util.same_guid(record.uid, uid) then
 			record.uses = uses
-			-- The bound item, or a container holding it, can move to other equipment with the slot still bound, e.g. from the pockets to the backpack.
-			if not refresh then return end
-			local root = root_key(comp, found.item, found.main)
-			if root == record.root then return end
-			log.debug("quick slot %d item %s moved from %s to %s", index, guid_str(uid), tostring(record.root), tostring(root))
-			record.root = root
 			return
 		end
-		local definition = found.item.ItemDefinition
+		local definition = item.ItemDefinition
 		local def = util.valid(definition) and definition:GetFullName() or nil
-		local root = root_key(comp, found.item, found.main)
 		local single = single_use(definition)
-		records[index] = { uid = uid, def = def, root = root, single = single, uses = uses }
-		log.debug("quick slot %d bound to %s %s in %s, single use %s", index, tostring(def), guid_str(uid), tostring(root), tostring(single))
+		records[index] = { uid = uid, def = def, single = single, uses = uses }
+		log.debug("quick slot %d bound to %s %s, single use %s", index, tostring(def), guid_str(uid), tostring(single))
 		return
 	end
 
 	records[index] = nil
 	-- Used up: left the inventory after a poll saw it at 0 uses, or while a use ran.
 	-- Otherwise the slot was cleared by hand with its item still in the inventory, or the item was dropped, discarded or sold.
-	local used = record and not find_item(comp, record.uid) and (record.uses <= 0 or using_item(pc))
+	local used = record and record.def and not holds(comp, record.uid) and (record.uses <= 0 or using_item(pc))
 	-- Fewest uses left first, so partly used items are finished before fresh ones. Ties keep container order.
-	local item, item_uses
-	for _, candidate in ipairs(used and record.root and record.def and matching(comp, record.def, record.root) or {}) do
-		local uses = uses_left(candidate)
-		if not item or uses < item_uses then item, item_uses = candidate, uses end
+	local refill, refill_uses
+	if used then
+		for candidate in inventory_items(comp) do
+			if usable_def(candidate) == record.def then
+				local uses = uses_left(candidate)
+				if not refill or uses < refill_uses then refill, refill_uses = candidate, uses end
+			end
+		end
 	end
-	if item then
-		local new_uid = util.guid(item.ItemUID)
-		comp:UpdateQuickSlot(index, item)
-		records[index] = { uid = new_uid, def = record.def, root = record.root, single = record.single, uses = item_uses }
-		log.debug("quick slot %d refilled with %s %s from %s", index, record.def, guid_str(new_uid), record.root)
+	if refill then
+		local new_uid = util.guid(refill.ItemUID)
+		comp:UpdateQuickSlot(index, refill)
+		records[index] = { uid = new_uid, def = record.def, single = record.single, uses = refill_uses }
+		log.debug("quick slot %d refilled with %s %s", index, record.def, guid_str(new_uid))
 		return
 	end
-	if used then log.debug("quick slot %d empty: no %s left in %s", index, tostring(record.def), tostring(record.root)) end
+	if used then log.debug("quick slot %d empty: no %s left", index, record.def) end
 	-- An entry naming an item outside the inventory: the item sat in a container moved to another inventory, like the stash or the floor, and the game leaves the slot bound then.
 	if not uid then return end
 	comp:UpdateQuickSlot(index, EMPTY_ITEM)
@@ -241,7 +209,7 @@ local function show_count(tile, count)
 	if hidden then capacity:SetVisibility(HIT_TEST_INVISIBLE) end
 end
 
--- Polls run since load, to pace the root refresh and the tile count.
+-- Polls run since load, to pace the tile count.
 local polls = 0
 
 --- The slot index of tile when it is a quick slot tile of the inventory screen at screen_path showing its slot's recorded item, or nil.
@@ -271,22 +239,14 @@ end
 -- slot index -> path of the tile last found by quick_slot_tiles. Once the inventory screen has been opened its widgets stay, so without it every count pass would walk every item tile, stash included.
 local tile_paths = {}
 
---- For each slot index key of slots, how many items of comp match its record as matching does. One pass over the inventory.
+--- Definition path -> how many items of comp have it and uses left, for the definitions of the records of the slot index keys of slots. One pass over the inventory.
 local function count_matching(comp, slots)
 	local counts = {}
-	for index in pairs(slots) do counts[index] = 0 end
-	for item, main in inventory_items(comp) do
-		local definition = item.ItemDefinition
-		local def = util.valid(definition) and definition:GetFullName()
-		-- false once read: the item is spent or has no root, so it matches no record.
-		local root = nil
-		for index in pairs(slots) do
-			local record = records[index]
-			if def == record.def then
-				if root == nil then root = uses_left(item) > 0 and root_key(comp, item, main) or false end
-				if root == record.root then counts[index] = counts[index] + 1 end
-			end
-		end
+	for index in pairs(slots) do counts[records[index].def] = 0 end
+	for item in inventory_items(comp) do
+		local def = usable_def(item)
+		local count = def and counts[def]
+		if count then counts[def] = count + 1 end
 	end
 	return counts
 end
@@ -310,12 +270,11 @@ local function poll()
 		local uid = util.guid(slot.ItemUID)
 		if not is_zero(uid) then wanted[slot.Index] = uid end
 	end
-	polls = polls + 1
-	local slow = polls % SLOW_EVERY == 0
 	local found = locate(comp, wanted)
-	for index = 0, SLOT_COUNT - 1 do check_slot(pc, comp, index, wanted[index], found[index], slow) end
+	for index = 0, SLOT_COUNT - 1 do check_slot(pc, comp, index, wanted[index], found[index]) end
 
-	if not slow then return end
+	polls = polls + 1
+	if polls % COUNT_EVERY ~= 0 then return end
 	-- The component's inventory screen, W_PlayerInventory_C, which holds the quick slot widgets.
 	local screen = comp.InventoryWidgetRef
 	if not util.valid(screen) then return end
@@ -325,7 +284,7 @@ local function poll()
 	local counted = {}
 	for index = 0, SLOT_COUNT - 1 do
 		local record = records[index]
-		if record and record.single and record.root then
+		if record and record.single and record.def then
 			local cached = tile_paths[index] and StaticFindObject(tile_paths[index])
 			local tile = util.valid(cached) and tile_slot(cached, screen_path) == index and cached or nil
 			if not tile then
@@ -338,7 +297,7 @@ local function poll()
 	end
 	if next(counted) == nil then return end
 	local counts = count_matching(comp, counted)
-	for index, tile in pairs(counted) do show_count(tile, counts[index]) end
+	for index, tile in pairs(counted) do show_count(tile, counts[records[index].def]) end
 end
 
 local loop_handle = nil

@@ -16,8 +16,8 @@ return {
 	-- Set false for the vanilla behavior, where it does nothing.
 	quick_sell = true,
 
-	-- A quick slot whose item is used up rebinds to another item of the same type from the same equipment, partly used ones first.
-	-- A quick slot of a single use item, like an injector or a grenade, shows how many of its type that equipment holds.
+	-- A quick slot whose item is used up rebinds to another item of the same type from the inventory, partly used ones first.
+	-- A quick slot of a single use item, like an injector or a grenade, shows how many of its type the inventory holds.
 	-- Set false for the vanilla behavior, where the slot empties after one use.
 	quick_slot_refill = true,
 }
