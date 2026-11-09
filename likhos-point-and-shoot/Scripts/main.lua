@@ -18,20 +18,6 @@ local config = require("config")
 
 --------------------------------------------------------------------------
 
-local function validate()
-	local missing = actions.audit(config.binds)
-	local names = {}
-	for name in pairs(missing) do table.insert(names, name) end
-
-	if #names > 0 then
-		table.sort(names)
-		log.warn("%d action(s) referenced by config.lua but not defined in " ..
-			"actions.lua: %s", #names, table.concat(names, ", "))
-		log.warn("Fill these in from recon before enabling those binds. " ..
-			"See docs/solutions/recon.md.")
-	end
-end
-
 local function register_binds()
 	local count = 0
 	for _, bind in ipairs(config.binds) do
@@ -74,8 +60,6 @@ local function init()
 		return
 	end
 
-	validate()
-
 	input.watch_player_controller(function()
 		actions.reset()
 		magnifier.reset()
@@ -91,11 +75,6 @@ local function init()
 	-- The tick loop runs Lua every frame. Skip it when nothing can use it.
 	if register_binds() > 0 then start_tick_loop() end
 
-	RegisterConsoleCommandHandler("kb_dump_imc", function()
-		input.dump_mapping_contexts()
-		return true
-	end)
-
 	RegisterConsoleCommandHandler("kb_status", function()
 		log.info("player controller: %s",
 			input.get_player_controller() and "acquired" or "none")
@@ -106,7 +85,7 @@ local function init()
 		return true
 	end)
 
-	log.info("ready. console commands: kb_status, kb_dump_imc")
+	log.info("ready. console command: kb_status")
 end
 
 util.safe("init", init)

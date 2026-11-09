@@ -18,9 +18,6 @@ local HOOK_FN    = TILE_CLASS .. ":OnMouseButtonDown"
 local CONTEXT_CLASSES = { "U_Deliver_C", "U_Sell_C" }
 local INPUT_LIB  = "/Script/Engine.Default__KismetInputLibrary"
 
--- TEMP recon: what vanilla's context menu passes as Owner when Sell is picked there. Remove once confirmed.
-local SELL_EXECUTE_FN = "/Game/Blueprints/InventorySystem/Objects/ItemContexts/U_Sell.U_Sell_C:Execute"
-
 local function item_str(item)
 	return string.format("%s %08x", item.ItemDefinition:GetFName():ToString(), item.ItemUID.A & 0xffffffff)
 end
@@ -69,16 +66,9 @@ local function on_mouse_down(context, _, mouse_event)
 	ExecuteInGameThreadWithDelay(1, hooks.guard(function() deliver_or_sell(path, uid) end))
 end
 
--- TEMP recon, see SELL_EXECUTE_FN.
-local function on_sell_execute(context, owner)
-	local o = owner:get()
-	log.debug("quick sell recon: Sell executed on %s, owner %s", context:get():GetFullName(), util.valid(o) and o:GetFullName() or "invalid")
-end
-
 --- Hook the inventory tile's click handler once its Blueprint class is loaded.
 function M.install()
 	hooks.install(HOOK_FN, TILE_CLASS, on_mouse_down)
-	hooks.install(SELL_EXECUTE_FN, "/Game/Blueprints/InventorySystem/Objects/ItemContexts/U_Sell.U_Sell_C", on_sell_execute)
 end
 
 return M

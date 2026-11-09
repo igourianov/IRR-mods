@@ -1,4 +1,4 @@
--- input.lua : PlayerController lifecycle, mapped key polling, IMC dump.
+-- input.lua : PlayerController lifecycle and mapped key polling.
 
 local log      = require("log")
 local util     = require("util")
@@ -84,40 +84,6 @@ function M.poll(binds)
 			elseif down and not context.allows(bind, pc) then
 				-- A menu opened mid-hold. Release now; the next press starts a fresh hold.
 				triggers.on_release(bind)
-			end
-		end
-	end
-end
-
---------------------------------------------------------------------------
--- Recon
---------------------------------------------------------------------------
-
---- Dump every loaded InputMappingContext and its mappings to the console.
---- Used to find the action behind a vanilla key. Console: kb_dump_imc
-function M.dump_mapping_contexts()
-	local contexts = FindAllOf("InputMappingContext")
-	if not contexts then
-		log.warn("no InputMappingContext objects loaded")
-		return
-	end
-
-	for _, imc in ipairs(contexts) do
-		if util.valid(imc) then
-			log.info("IMC: %s", imc:GetFullName())
-			local ok = pcall(function()
-				imc.Mappings:ForEach(function(idx, elem)
-					local m = elem:get()
-					local action = m.Action
-					local key    = m.Key
-					log.info("  [%d] action=%s key=%s",
-						idx,
-						util.valid(action) and action:GetFullName() or "?",
-						tostring(key.KeyName))
-				end)
-			end)
-			if not ok then
-				log.warn("  could not enumerate Mappings on this IMC")
 			end
 		end
 	end

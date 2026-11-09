@@ -2,7 +2,7 @@
 
 return {
 	-- "error" | "warn" | "info" | "debug"
-	log_level = "debug",
+	log_level = "info",
 
 	-- Master switch. Set false to load the mod inert (useful when bisecting a crash after a game patch).
 	enabled = true,

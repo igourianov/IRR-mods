@@ -255,15 +255,4 @@ function M.reset()
 	quick_use.reset()
 end
 
---- Startup check: report which configured actions are missing a definition, without touching the game.
-function M.audit(binds)
-	local missing = {}
-	for _, b in ipairs(binds) do
-		if b.action and not M.ACTIONS[b.action] then
-			missing[b.action] = true
-		end
-	end
-	return missing
-end
-
 return M

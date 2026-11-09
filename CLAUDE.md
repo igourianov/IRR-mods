@@ -72,7 +72,7 @@ hours of debugging.
 - Posts the `CHANGELOG.md` sections newer than the live version, up to the published one, as the Nexus changelog. Every heading must be a bare version (`# 1.2.38`).
 - Other switches: `-Category main|optional|miscellaneous`, `-NoArchive` (keep the previous file version unarchived), `-NoBumpModVersion` (do not update the mod page version).
 
-In-game console: `kb_status`, `kb_dump_imc`.
+In-game console: `kb_status`.
 
 ## Mod version
 
