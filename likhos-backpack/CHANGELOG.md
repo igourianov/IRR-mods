@@ -1,7 +1,10 @@
 # Unreleased
-* removed item swap and spent medical item drop features, the vanilla game now does both natively
+* quick slots no longer empty out if there is an itemof the sametime in the same container as the one that was just used
+* single use items show total count in the quick slot
+* single use items show no use count in the inventory until used
 * USB hacking devices show their remaining uses as a percentage
-* single use items show no use count until used
+* removed item swap and spent medical item drop features, the vanilla game now does both natively
+* verified on UE4SS experimental v3.0.1-1217 (2026-11-07)
 
 # 1.0.25
 * quick sell delivers mission items for their mission instead (Shift+Click)

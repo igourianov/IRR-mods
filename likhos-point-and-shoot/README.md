@@ -44,7 +44,7 @@ In `Scripts\config.lua`, `low_ready_run_delay_ms` sets how long after a run the 
 
 ## Requirements
 
-- Incursion Red River, Steam version. Tested on build 22417726.
+- Incursion Red River, Steam version. Tested on build 26487830.
 - [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) experimental release, installed separately. It is not included in the mod zip. Tested with the release of 2026-11-07 (v3.0.1-1217). The stable 3.0.1 does not work with this game. If you already have it installed for another mod, skip to step 4.
 
 ## Installation

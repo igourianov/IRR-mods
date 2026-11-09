@@ -1,3 +1,6 @@
+# 1.1.123
+* verified on UE4SS experimental v3.0.1-1217 (2026-11-07)
+
 # 1.1.122
 * fixed the mod's keybinds sometimes showing as None in the controls menu while still working
 
