@@ -26,17 +26,11 @@ Each type of muzzle device now has its own role instead of suppressors being the
 
 ## Stocks rebalance
 
-Fixed the buffer tube + Viper combination being the overpowered choice on every gun. Fixed a couple of odd outliers.
+Most stocks are rescaled by build. Lightweight and skeletonized stocks give the most ergonomics and the least recoil reduction. Heavy, well padded stocks give the least ergonomics and the most recoil reduction.
 
-* Removed recoil bonuses from buffer tubes and nerfed their ergonomics, since their stats stacked with the stock on top.
-* Removed bonuses from the SKS SAGE chassis. Like the M700 chassis, it has no built-in grip or stock, which are added separately, so the stats stacked.
-* Shifted ACE, Ripstock, Zulu 2, Viper, UBR and Daniel Defense stocks into ergos instead of recoil. ACE leans the most into ergos, Daniel Defense the least.
-* Shifted BCM Gunfighter and VLTOR IMOD stocks into recoil instead of ergos. These are the top recoil choices.
-* Rebalanced MCX stocks, also used by the MPX, in line with AR stocks, which MCX can mount through an adapter. Collapsible leans the most into ergos, Folding Collapsible Tube the most into recoil.
-* Buffed recoil bonus on AK SAG ACR stock.
-* Shifted PP-19 and AKS-74U folding stocks into ergos instead of recoil.
-* Buffed ergos on KPYK skeleton and AK-12 collapsible stocks.
-* Buffed RPK-74 folding stock. It's now the heavier recoil option against the KPYK.
+* Rescaled AR, MCX/MPX and AK stocks along that scale. MCX and MPX stocks follow the AR scale, since the MCX mounts AR stocks through an adapter.
+* Removed recoil bonuses from buffer tubes and lowered their ergonomics. Their stats stacked with the stock mounted on them, which made buffer tube + Viper the best pick on every AR.
+* Removed bonuses from the SKS SAGE chassis. Like the M700 chassis, its grip and stock are added separately, so the stats stacked.
 
 ## NPC loadouts
 
