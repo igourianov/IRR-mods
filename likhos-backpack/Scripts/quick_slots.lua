@@ -30,11 +30,11 @@ local HIT_TEST_INVISIBLE = 3
 -- Abilities that take an item out of the inventory by using it. A drop, discard or sale runs none of them.
 -- They cover items without a uses stat (grenades). A used injector leaves the inventory after its use ability has ended, so items with a uses stat are told used up by reaching 0 uses instead.
 local USE_ABILITIES = {
-    "/Script/Test_C.SimpleGameplayAbility_UseQuickSlot",
-    "/Script/Test_C.SimpleGameplayAbility_UseItem",
-    "/Script/Test_C.SimpleGameplayAbility_ThrowGrenade",
-    "/Script/Test_C.SimpleGameplayAbility_QuickHeal",
-    "/Game/Blueprints/SimpleGameplayAbilitySystem/Abilities/SGA_UseMedic.SGA_UseMedic_C",
+	"/Script/Test_C.SimpleGameplayAbility_UseQuickSlot",
+	"/Script/Test_C.SimpleGameplayAbility_UseItem",
+	"/Script/Test_C.SimpleGameplayAbility_ThrowGrenade",
+	"/Script/Test_C.SimpleGameplayAbility_QuickHeal",
+	"/Game/Blueprints/SimpleGameplayAbilitySystem/Abilities/SGA_UseMedic.SGA_UseMedic_C",
 }
 
 -- EContainerType: EquipTo = 0. Equipment and attachment slots are EquipTo.
@@ -44,132 +44,132 @@ local EQUIP_TO = 0
 local MAX_DEPTH = 16
 
 local function guid(g)
-    return { A = g.A, B = g.B, C = g.C, D = g.D }
+	return { A = g.A, B = g.B, C = g.C, D = g.D }
 end
 
 local function same_guid(a, b)
-    return a.A == b.A and a.B == b.B and a.C == b.C and a.D == b.D
+	return a.A == b.A and a.B == b.B and a.C == b.C and a.D == b.D
 end
 
 local function guid_str(g)
-    return string.format("%08x%08x%08x%08x", g.A & 0xffffffff, g.B & 0xffffffff, g.C & 0xffffffff, g.D & 0xffffffff)
+	return string.format("%08x%08x%08x%08x", g.A & 0xffffffff, g.B & 0xffffffff, g.C & 0xffffffff, g.D & 0xffffffff)
 end
 
 local function is_zero(g)
-    return g.A == 0 and g.B == 0 and g.C == 0 and g.D == 0
+	return g.A == 0 and g.B == 0 and g.C == 0 and g.D == 0
 end
 
 --- The item of comp with uid and the main container holding it, or nil.
 --- Read from comp.MainContainers rather than GetContainerItemByUID. A struct returned by a UFunction call crashes the game when passed to another one, still on UE4SS 1217, and UE4SS before 1217 crashes converting a returned ContainerItem to Lua. One read from a property passes fine.
 local function find_item(comp, uid)
-    local containers = comp.MainContainers
-    for i = 1, #containers do
-        local container = containers[i]
-        local items = container.ContainerItems
-        for j = 1, #items do
-            if same_guid(items[j].ItemUID, uid) then return items[j], container end
-        end
-    end
-    return nil
+	local containers = comp.MainContainers
+	for i = 1, #containers do
+		local container = containers[i]
+		local items = container.ContainerItems
+		for j = 1, #items do
+			if same_guid(items[j].ItemUID, uid) then return items[j], container end
+		end
+	end
+	return nil
 end
 
 --- For each slot index of wanted (index -> uid), the item of comp with that uid and its main container. One pass over the inventory.
 local function locate(comp, wanted)
-    local found = {}
-    if next(wanted) == nil then return found end
-    local containers = comp.MainContainers
-    for i = 1, #containers do
-        local container = containers[i]
-        local items = container.ContainerItems
-        for j = 1, #items do
-            local item = items[j]
-            local uid = item.ItemUID
-            for index, w in pairs(wanted) do
-                if same_guid(uid, w) then found[index] = { item = item, main = container } end
-            end
-        end
-    end
-    return found
+	local found = {}
+	if next(wanted) == nil then return found end
+	local containers = comp.MainContainers
+	for i = 1, #containers do
+		local container = containers[i]
+		local items = container.ContainerItems
+		for j = 1, #items do
+			local item = items[j]
+			local uid = item.ItemUID
+			for index, w in pairs(wanted) do
+				if same_guid(uid, w) then found[index] = { item = item, main = container } end
+			end
+		end
+	end
+	return found
 end
 
 --- Whether item sits in an equipment or attachment slot of main rather than a grid.
 local function is_equipped(main, item)
-    local settings = main.ContainerElements[item.ContainerIndex + 1].ContainerSettings
-    return util.valid(settings) and settings:GetContainerType() == EQUIP_TO
+	local settings = main.ContainerElements[item.ContainerIndex + 1].ContainerSettings
+	return util.valid(settings) and settings:GetContainerType() == EQUIP_TO
 end
 
 --- A key naming the equipment item sits in: the equipped item whose grids hold it at any depth, or the character grid holding it.
 --- A container item's own grids are main containers whose MainContainerUID is its ItemUID.
 local function root_key(comp, item, main)
-    for _ = 1, MAX_DEPTH do
-        if is_equipped(main, item) then return guid_str(item.ItemUID) end
-        local parent, parent_main = find_item(comp, main.MainContainerUID)
-        if not parent then return guid_str(main.MainContainerUID) .. ":" .. item.ContainerIndex end
-        item, main = parent, parent_main
-    end
-    return nil
+	for _ = 1, MAX_DEPTH do
+		if is_equipped(main, item) then return guid_str(item.ItemUID) end
+		local parent, parent_main = find_item(comp, main.MainContainerUID)
+		if not parent then return guid_str(main.MainContainerUID) .. ":" .. item.ContainerIndex end
+		item, main = parent, parent_main
+	end
+	return nil
 end
 
 local function uses_left(item)
-    local stats = item.CurrentStats
-    for i = 1, #stats do
-        local stat = stats[i]
-        if stat.Tag.TagName:ToString() == USES_TAG then return stat.Value end
-    end
-    return math.huge
+	local stats = item.CurrentStats
+	for i = 1, #stats do
+		local stat = stats[i]
+		if stat.Tag.TagName:ToString() == USES_TAG then return stat.Value end
+	end
+	return math.huge
 end
 
 --- The items of comp with definition path def under root and uses left, in container order.
 --- A spent item can sit at 0 uses: briefly before the game removes it, or for good when saved that way by an older version of this mod.
 local function matching(comp, def, root)
-    local found = {}
-    local containers = comp.MainContainers
-    for i = 1, #containers do
-        local container = containers[i]
-        local items = container.ContainerItems
-        for j = 1, #items do
-            local item = items[j]
-            local definition = item.ItemDefinition
-            if util.valid(definition) and definition:GetFullName() == def and uses_left(item) > 0 and root_key(comp, item, container) == root then found[#found + 1] = item end
-        end
-    end
-    return found
+	local found = {}
+	local containers = comp.MainContainers
+	for i = 1, #containers do
+		local container = containers[i]
+		local items = container.ContainerItems
+		for j = 1, #items do
+			local item = items[j]
+			local definition = item.ItemDefinition
+			if util.valid(definition) and definition:GetFullName() == def and uses_left(item) > 0 and root_key(comp, item, container) == root then found[#found + 1] = item end
+		end
+	end
+	return found
 end
 
 --- Whether items of definition are used up in one use: a uses stat of 1, or no uses stat and no stacking (grenades).
 local function single_use(definition)
-    if not util.valid(definition) then return false end
-    local stats = definition.ItemStats
-    for i = 1, #stats do
-        local stat = stats[i]
-        local config = stat.StatItemConfig
-        if util.valid(config) and config:GetClass():GetFName():ToString() == USES_CONFIG then return stat.Value == 1 end
-    end
-    return not definition.ItemProperties.CanStack
+	if not util.valid(definition) then return false end
+	local stats = definition.ItemStats
+	for i = 1, #stats do
+		local stat = stats[i]
+		local config = stat.StatItemConfig
+		if util.valid(config) and config:GetClass():GetFName():ToString() == USES_CONFIG then return stat.Value == 1 end
+	end
+	return not definition.ItemProperties.CanStack
 end
 
 --- Whether one of the player's active abilities uses an item.
 local function using_item(pc)
-    local comp_class = StaticFindObject(ABILITY_COMP)
-    local pawn = pc.Pawn
-    if not (util.valid(comp_class) and util.valid(pawn)) then return false end
-    local comp = pawn:GetComponentByClass(comp_class)
-    if not util.valid(comp) then return false end
-    -- The Blueprint class is found only once loaded, and an unloaded class has no instance to match.
-    local classes = {}
-    for _, path in ipairs(USE_ABILITIES) do
-        local class = StaticFindObject(path)
-        if util.valid(class) then classes[#classes + 1] = class end
-    end
-    local using = false
-    comp.ActiveAbilities:ForEach(function(_, elem)
-        local ability = elem:get()
-        if not util.valid(ability) then return end
-        for _, class in ipairs(classes) do
-            if ability:IsA(class) then using = true end
-        end
-    end)
-    return using
+	local comp_class = StaticFindObject(ABILITY_COMP)
+	local pawn = pc.Pawn
+	if not (util.valid(comp_class) and util.valid(pawn)) then return false end
+	local comp = pawn:GetComponentByClass(comp_class)
+	if not util.valid(comp) then return false end
+	-- The Blueprint class is found only once loaded, and an unloaded class has no instance to match.
+	local classes = {}
+	for _, path in ipairs(USE_ABILITIES) do
+		local class = StaticFindObject(path)
+		if util.valid(class) then classes[#classes + 1] = class end
+	end
+	local using = false
+	comp.ActiveAbilities:ForEach(function(_, elem)
+		local ability = elem:get()
+		if not util.valid(ability) then return end
+		for _, class in ipairs(classes) do
+			if ability:IsA(class) then using = true end
+		end
+	end)
+	return using
 end
 
 -- slot index -> { uid, def, root, single, uses }, the last live binding of each slot. single is whether its definition is single use.
@@ -181,57 +181,57 @@ local records_comp = nil
 --- Track the live binding of slot index, or refill the slot once its recorded item has been used up.
 --- uid is the slot's QuickSlots entry, or nil. found is that item and its main container from locate, or nil when the entry is stale.
 local function check_slot(pc, comp, index, uid, found)
-    local record = records[index]
-    if found then
-        local uses = uses_left(found.item)
-        if record and same_guid(record.uid, uid) then
-            record.uses = uses
-            return
-        end
-        local definition = found.item.ItemDefinition
-        local def = util.valid(definition) and definition:GetFullName() or nil
-        local root = root_key(comp, found.item, found.main)
-        local single = single_use(definition)
-        records[index] = { uid = uid, def = def, root = root, single = single, uses = uses }
-        log.debug("quick slot %d bound to %s %s in %s, single use %s", index, tostring(def), guid_str(uid), tostring(root), tostring(single))
-        return
-    end
-    if not record then return end
+	local record = records[index]
+	if found then
+		local uses = uses_left(found.item)
+		if record and same_guid(record.uid, uid) then
+			record.uses = uses
+			return
+		end
+		local definition = found.item.ItemDefinition
+		local def = util.valid(definition) and definition:GetFullName() or nil
+		local root = root_key(comp, found.item, found.main)
+		local single = single_use(definition)
+		records[index] = { uid = uid, def = def, root = root, single = single, uses = uses }
+		log.debug("quick slot %d bound to %s %s in %s, single use %s", index, tostring(def), guid_str(uid), tostring(root), tostring(single))
+		return
+	end
+	if not record then return end
 
-    records[index] = nil
-    -- Still in the inventory: the slot was cleared by hand.
-    if find_item(comp, record.uid) then return end
-    -- Left with uses left and no use running: dropped, discarded or sold.
-    if not (record.uses <= 0 or using_item(pc)) then return end
-    -- Fewest uses left first, so partly used items are finished before fresh ones. Ties keep container order.
-    local item, item_uses
-    for _, candidate in ipairs(record.root and record.def and matching(comp, record.def, record.root) or {}) do
-        local uses = uses_left(candidate)
-        if not item or uses < item_uses then item, item_uses = candidate, uses end
-    end
-    if not item then
-        log.debug("quick slot %d empty: no %s left in %s", index, tostring(record.def), tostring(record.root))
-        return
-    end
-    local new_uid = guid(item.ItemUID)
-    comp:UpdateQuickSlot(index, item)
-    records[index] = { uid = new_uid, def = record.def, root = record.root, single = record.single, uses = item_uses }
-    log.debug("quick slot %d refilled with %s %s from %s", index, record.def, guid_str(new_uid), record.root)
+	records[index] = nil
+	-- Still in the inventory: the slot was cleared by hand.
+	if find_item(comp, record.uid) then return end
+	-- Left with uses left and no use running: dropped, discarded or sold.
+	if not (record.uses <= 0 or using_item(pc)) then return end
+	-- Fewest uses left first, so partly used items are finished before fresh ones. Ties keep container order.
+	local item, item_uses
+	for _, candidate in ipairs(record.root and record.def and matching(comp, record.def, record.root) or {}) do
+		local uses = uses_left(candidate)
+		if not item or uses < item_uses then item, item_uses = candidate, uses end
+	end
+	if not item then
+		log.debug("quick slot %d empty: no %s left in %s", index, tostring(record.def), tostring(record.root))
+		return
+	end
+	local new_uid = guid(item.ItemUID)
+	comp:UpdateQuickSlot(index, item)
+	records[index] = { uid = new_uid, def = record.def, root = record.root, single = record.single, uses = item_uses }
+	log.debug("quick slot %d refilled with %s %s from %s", index, record.def, guid_str(new_uid), record.root)
 end
 
 --- Show count on a quick slot tile in place of its uses.
 --- Only texts and a hidden ItemCapacity change, which the game's own redraw sets again for the next item the tile shows.
 local function show_count(tile, count)
-    local capacity, max = tile.ItemCapacity, tile.ItemMaxCapacity
-    if not (util.valid(capacity) and util.valid(max)) then return end
-    local text = tostring(count)
-    local shown, max_shown = capacity:GetText():ToString(), max:GetText():ToString()
-    local visibility = capacity:GetVisibility()
-    local hidden = visibility == COLLAPSED or visibility == HIDDEN
-    if shown == text and max_shown == "" and not hidden then return end
-    capacity:SetText(FText(text))
-    max:SetText(FText(""))
-    if hidden then capacity:SetVisibility(HIT_TEST_INVISIBLE) end
+	local capacity, max = tile.ItemCapacity, tile.ItemMaxCapacity
+	if not (util.valid(capacity) and util.valid(max)) then return end
+	local text = tostring(count)
+	local shown, max_shown = capacity:GetText():ToString(), max:GetText():ToString()
+	local visibility = capacity:GetVisibility()
+	local hidden = visibility == COLLAPSED or visibility == HIDDEN
+	if shown == text and max_shown == "" and not hidden then return end
+	capacity:SetText(FText(text))
+	max:SetText(FText(""))
+	if hidden then capacity:SetVisibility(HIT_TEST_INVISIBLE) end
 end
 
 -- Polls run since load, to pace the tile count.
@@ -242,77 +242,77 @@ local polls = 0
 --- Neither the quick slot widget's ItemRef nor its GetContainerItems() gives the tile: the widget overrides AddItem and GetContainerItems, and the call returns an empty array to Lua.
 --- A quick slot bar of an earlier screen may still exist, so a tile counts only while it shows the bound item.
 local function tile_slot(tile)
-    local element = tile.BaseContainerElementRef
-    if not (util.valid(element) and element:GetClass():GetFName():ToString() == SLOT_WIDGET) then return nil end
-    local index = element.QuickSlotIndex
-    local record = records[index]
-    if record and same_guid(tile.ContainerItem.ItemUID, record.uid) then return index end
-    return nil
+	local element = tile.BaseContainerElementRef
+	if not (util.valid(element) and element:GetClass():GetFName():ToString() == SLOT_WIDGET) then return nil end
+	local index = element.QuickSlotIndex
+	local record = records[index]
+	if record and same_guid(tile.ContainerItem.ItemUID, record.uid) then return index end
+	return nil
 end
 
 local function quick_slot_tiles()
-    local tiles = {}
-    for _, tile in ipairs(FindAllOf(TILE_WIDGET) or {}) do
-        local index = util.valid(tile) and tile_slot(tile) or nil
-        if index then tiles[index] = tile end
-    end
-    return tiles
+	local tiles = {}
+	for _, tile in ipairs(FindAllOf(TILE_WIDGET) or {}) do
+		local index = util.valid(tile) and tile_slot(tile) or nil
+		if index then tiles[index] = tile end
+	end
+	return tiles
 end
 
 -- slot index -> path of the tile last found by quick_slot_tiles. Once the inventory screen has been opened its widgets stay, so without it every count pass would walk every item tile, stash included.
 local tile_paths = {}
 
 local function poll()
-    local pc = FindFirstOf("PlayerController")
-    local library = StaticFindObject(LIBRARY_CDO)
-    local comp = util.valid(pc) and util.valid(library) and library:GetPlayerInventoryComponent(pc) or nil
-    local path = util.valid(comp) and util.path(comp) or nil
-    if path ~= records_comp then
-        records, records_comp = {}, path
-        return
-    end
-    if not path then return end
+	local pc = FindFirstOf("PlayerController")
+	local library = StaticFindObject(LIBRARY_CDO)
+	local comp = util.valid(pc) and util.valid(library) and library:GetPlayerInventoryComponent(pc) or nil
+	local path = util.valid(comp) and util.path(comp) or nil
+	if path ~= records_comp then
+		records, records_comp = {}, path
+		return
+	end
+	if not path then return end
 
-    -- Read from the QuickSlots property, not GetContainerItemByQuickSlotIndex. UE4SS before 1217 crashes converting that function's returned ContainerItem to Lua, at its SoftItemDefinition, and the mod still runs there.
-    local wanted = {}
-    local slots = comp.QuickSlots
-    for i = 1, #slots do
-        local slot = slots[i]
-        local uid = guid(slot.ItemUID)
-        if not is_zero(uid) then wanted[slot.Index] = uid end
-    end
-    local found = locate(comp, wanted)
-    for index = 0, SLOT_COUNT - 1 do check_slot(pc, comp, index, wanted[index], found[index]) end
+	-- Read from the QuickSlots property, not GetContainerItemByQuickSlotIndex. UE4SS before 1217 crashes converting that function's returned ContainerItem to Lua, at its SoftItemDefinition, and the mod still runs there.
+	local wanted = {}
+	local slots = comp.QuickSlots
+	for i = 1, #slots do
+		local slot = slots[i]
+		local uid = guid(slot.ItemUID)
+		if not is_zero(uid) then wanted[slot.Index] = uid end
+	end
+	local found = locate(comp, wanted)
+	for index = 0, SLOT_COUNT - 1 do check_slot(pc, comp, index, wanted[index], found[index]) end
 
-    polls = polls + 1
-    if polls % COUNT_EVERY ~= 0 then return end
-    -- The quick slot widgets exist only once the inventory screen has been opened.
-    if not FindFirstOf(SLOT_WIDGET) then return end
-    local tiles
-    for index = 0, SLOT_COUNT - 1 do
-        local record = records[index]
-        if record and record.single and record.root then
-            local cached = tile_paths[index] and StaticFindObject(tile_paths[index])
-            local tile = util.valid(cached) and tile_slot(cached) == index and cached or nil
-            if not tile then
-                tiles = tiles or quick_slot_tiles()
-                tile = tiles[index]
-                tile_paths[index] = tile and util.path(tile) or nil
-            end
-            if tile then show_count(tile, #matching(comp, record.def, record.root)) end
-        end
-    end
+	polls = polls + 1
+	if polls % COUNT_EVERY ~= 0 then return end
+	-- The quick slot widgets exist only once the inventory screen has been opened.
+	if not FindFirstOf(SLOT_WIDGET) then return end
+	local tiles
+	for index = 0, SLOT_COUNT - 1 do
+		local record = records[index]
+		if record and record.single and record.root then
+			local cached = tile_paths[index] and StaticFindObject(tile_paths[index])
+			local tile = util.valid(cached) and tile_slot(cached) == index and cached or nil
+			if not tile then
+				tiles = tiles or quick_slot_tiles()
+				tile = tiles[index]
+				tile_paths[index] = tile and util.path(tile) or nil
+			end
+			if tile then show_count(tile, #matching(comp, record.def, record.root)) end
+		end
+	end
 end
 
 local loop_handle = nil
 
 --- Start the poll. UE4SS cancels the mod's delayed actions on unload, so a hot reload needs no explicit cancel.
 function M.install()
-    if loop_handle then return end
-    loop_handle = LoopInGameThreadWithDelay(POLL_MS, function()
-        util.safe("quick slot poll", poll)
-    end)
-    log.info("quick slot refill: polling every %d ms", POLL_MS)
+	if loop_handle then return end
+	loop_handle = LoopInGameThreadWithDelay(POLL_MS, function()
+		util.safe("quick slot poll", poll)
+	end)
+	log.info("quick slot refill: polling every %d ms", POLL_MS)
 end
 
 return M

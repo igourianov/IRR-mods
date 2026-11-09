@@ -1,37 +1,37 @@
 <#
 .SYNOPSIS
-    Package a mod as dist\<mod>.zip and upload it to Nexus Mods as a new version of an existing mod file.
+	Package a mod as dist\<mod>.zip and upload it to Nexus Mods as a new version of an existing mod file.
 
 .DESCRIPTION
-    Zips the mod folder from this workspace, then publishes it through the Nexus v3 upload
-    API under the version in its mod.txt. The zip holds the bare mod folder, so extracting
-    it into ue4ss\Mods installs the mod. A Lua mod's zip also holds the shared modules from
-    lib\ in its Scripts folder, as build.ps1 deploys it. A pak mod's zip holds ~mods\<pak> from the last
-    build.ps1 run instead, so extracting it into Content\Paks installs the mod.
+	Zips the mod folder from this workspace, then publishes it through the Nexus v3 upload
+	API under the version in its mod.txt. The zip holds the bare mod folder, so extracting
+	it into ue4ss\Mods installs the mod. A Lua mod's zip also holds the shared modules from
+	lib\ in its Scripts folder, as build.ps1 deploys it. A pak mod's zip holds ~mods\<pak> from the last
+	build.ps1 run instead, so extracting it into Content\Paks installs the mod.
 
-    The line items of every CHANGELOG.md section newer than the version live on Nexus, up to
-    the version being published, are posted as that version's changelog as plain text lines.
+	The line items of every CHANGELOG.md section newer than the version live on Nexus, up to
+	the version being published, are posted as that version's changelog as plain text lines.
 
-    Needs publish.config.json (mod_id and file_id per mod) and a personal API key in
-    nexus-api.key. The mod file must already exist on Nexus: upload the first file by
-    hand, then take its file_id from the Files tab URL.
+	Needs publish.config.json (mod_id and file_id per mod) and a personal API key in
+	nexus-api.key. The mod file must already exist on Nexus: upload the first file by
+	hand, then take its file_id from the Files tab URL.
 
 .EXAMPLE
-    .\publish.ps1                                   # publish the only configured mod
-    .\publish.ps1 likhos-point-and-shoot            # publish one mod
-    .\publish.ps1 likhos-point-and-shoot -DryRun    # pack the zip, show the request, upload nothing
+	.\publish.ps1                                   # publish the only configured mod
+	.\publish.ps1 likhos-point-and-shoot            # publish one mod
+	.\publish.ps1 likhos-point-and-shoot -DryRun    # pack the zip, show the request, upload nothing
 #>
 [CmdletBinding()]
 param(
-    [Parameter(Position = 0)]
-    [string] $Mod,
-    [string] $ApiKey,
-    [ValidateSet('main', 'optional', 'miscellaneous')]
-    [string] $Category,
-    [switch] $NoArchive,
-    [switch] $NoBumpModVersion,
-    [switch] $Force,
-    [switch] $DryRun
+	[Parameter(Position = 0)]
+	[string] $Mod,
+	[string] $ApiKey,
+	[ValidateSet('main', 'optional', 'miscellaneous')]
+	[string] $Category,
+	[switch] $NoArchive,
+	[switch] $NoBumpModVersion,
+	[switch] $Force,
+	[switch] $DryRun
 )
 
 $ErrorActionPreference = 'Stop'
@@ -48,130 +48,130 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 # ---------------------------------------------------------------- helpers
 function Get-ApiKey {
-    if ($ApiKey) { return $ApiKey }
+	if ($ApiKey) { return $ApiKey }
 
-    $keyPath = Join-Path $root 'nexus-api.key'
-    if (-not (Test-Path $keyPath -PathType Leaf)) {
-        Write-Error @"
+	$keyPath = Join-Path $root 'nexus-api.key'
+	if (-not (Test-Path $keyPath -PathType Leaf)) {
+		Write-Error @"
 nexus-api.key not found.
 Create it next to publish.ps1 holding your personal key from https://www.nexusmods.com/settings/api-keys, or pass -ApiKey.
 (It is gitignored - it is a credential.)
 "@
-    }
+	}
 
-    $key = [System.IO.File]::ReadAllText($keyPath).Trim()
-    if (-not $key) { Write-Error 'nexus-api.key is empty.' }
-    return $key
+	$key = [System.IO.File]::ReadAllText($keyPath).Trim()
+	if (-not $key) { Write-Error 'nexus-api.key is empty.' }
+	return $key
 }
 
 function New-ModArchive {
-    param([string] $Source, [string] $Path, [string] $Folder = (Split-Path $Source -Leaf), [System.IO.FileInfo[]] $Lib = @())
+	param([string] $Source, [string] $Path, [string] $Folder = (Split-Path $Source -Leaf), [System.IO.FileInfo[]] $Lib = @())
 
-    if (Test-Path $Path) { Remove-Item $Path -Force }
-    $base = if (Test-Path $Source -PathType Leaf) { Split-Path $Source } else { $Source }
+	if (Test-Path $Path) { Remove-Item $Path -Force }
+	$base = if (Test-Path $Source -PathType Leaf) { Split-Path $Source } else { $Source }
 
-    # Entries are written one by one so their names use '/'. Backslash names extract as flat files outside Windows Explorer.
-    $zip = [System.IO.Compression.ZipFile]::Open($Path, 'Create')
-    try {
-        foreach ($file in Get-ChildItem $Source -Recurse -File) {
-            $entry = "$Folder/" + ($file.FullName.Substring($base.Length + 1) -replace '\\', '/')
-            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $entry) | Out-Null
-        }
-        foreach ($file in $Lib) {
-            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, "$Folder/Scripts/$($file.Name)") | Out-Null
-        }
-    } finally {
-        $zip.Dispose()
-    }
+	# Entries are written one by one so their names use '/'. Backslash names extract as flat files outside Windows Explorer.
+	$zip = [System.IO.Compression.ZipFile]::Open($Path, 'Create')
+	try {
+		foreach ($file in Get-ChildItem $Source -Recurse -File) {
+			$entry = "$Folder/" + ($file.FullName.Substring($base.Length + 1) -replace '\\', '/')
+			[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $entry) | Out-Null
+		}
+		foreach ($file in $Lib) {
+			[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, "$Folder/Scripts/$($file.Name)") | Out-Null
+		}
+	} finally {
+		$zip.Dispose()
+	}
 }
 
 function Get-ProblemDetail {
-    param($ErrorRecord)
+	param($ErrorRecord)
 
-    # PowerShell 7 has already read the response body into ErrorDetails. Its HttpResponseMessage has no GetResponseStream.
-    $response = $ErrorRecord.Exception.Response
-    $body = $ErrorRecord.ErrorDetails.Message
-    if (-not $response -or -not $body) { return $ErrorRecord.Exception.Message }
-    return "$([int]$response.StatusCode) $body"
+	# PowerShell 7 has already read the response body into ErrorDetails. Its HttpResponseMessage has no GetResponseStream.
+	$response = $ErrorRecord.Exception.Response
+	$body = $ErrorRecord.ErrorDetails.Message
+	if (-not $response -or -not $body) { return $ErrorRecord.Exception.Message }
+	return "$([int]$response.StatusCode) $body"
 }
 
 function Invoke-NexusApi {
-    param([string] $Method, [string] $Path, $Body)
+	param([string] $Method, [string] $Path, $Body)
 
-    $request = @{
-        Method  = $Method
-        Uri     = "$apiRoot$Path"
-        Headers = @{ apikey = $script:apiKey }
-    }
-    if ($Body) {
-        $request.Body = ($Body | ConvertTo-Json -Depth 4 -Compress)
-        $request.ContentType = 'application/json'
-    }
+	$request = @{
+		Method  = $Method
+		Uri     = "$apiRoot$Path"
+		Headers = @{ apikey = $script:apiKey }
+	}
+	if ($Body) {
+		$request.Body = ($Body | ConvertTo-Json -Depth 4 -Compress)
+		$request.ContentType = 'application/json'
+	}
 
-    try { $response = Invoke-RestMethod @request }
-    catch { Write-Error "$Method $Path failed: $(Get-ProblemDetail $_)" }
-    return $response.data
+	try { $response = Invoke-RestMethod @request }
+	catch { Write-Error "$Method $Path failed: $(Get-ProblemDetail $_)" }
+	return $response.data
 }
 
 function Get-LiveVersion {
-    param([string] $FileId)
+	param([string] $FileId)
 
-    $live = (Invoke-NexusApi -Method Get -Path "/mod-files/$FileId/versions").versions |
-        Where-Object { $_.category -notin @('archived', 'old_version', 'removed') } |
-        Select-Object -First 1
-    return $live.version
+	$live = (Invoke-NexusApi -Method Get -Path "/mod-files/$FileId/versions").versions |
+		Where-Object { $_.category -notin @('archived', 'old_version', 'removed') } |
+		Select-Object -First 1
+	return $live.version
 }
 
 function Assert-NewerVersion {
-    param([string] $FileId, [string] $Live, [string] $Version)
+	param([string] $FileId, [string] $Live, [string] $Version)
 
-    if (-not $Live) { return }
+	if (-not $Live) { return }
 
-    if ($Live -eq $Version) {
-        Write-Error "$Version is already published on mod file $FileId. Build a new version or pass -Force."
-    }
+	if ($Live -eq $Version) {
+		Write-Error "$Version is already published on mod file $FileId. Build a new version or pass -Force."
+	}
 
-    $published = New-Object Version
-    $staged = New-Object Version
-    if ([Version]::TryParse($Live, [ref]$published) -and [Version]::TryParse($Version, [ref]$staged) -and $staged -lt $published) {
-        Write-Error "$Version is older than the published $Live. Pass -Force to publish it anyway."
-    }
+	$published = New-Object Version
+	$staged = New-Object Version
+	if ([Version]::TryParse($Live, [ref]$published) -and [Version]::TryParse($Version, [ref]$staged) -and $staged -lt $published) {
+		Write-Error "$Version is older than the published $Live. Pass -Force to publish it anyway."
+	}
 
-    Write-Host "replacing $Live -> $Version" -ForegroundColor Yellow
+	Write-Host "replacing $Live -> $Version" -ForegroundColor Yellow
 }
 
 function Get-Changelog {
-    param([string] $Path, [string] $Live, [string] $Version)
+	param([string] $Path, [string] $Live, [string] $Version)
 
-    $since = New-Object Version
-    $until = New-Object Version
-    # A placeholder first upload (e.g. '1') is not a version, so every changelog section counts as new.
-    if ($Live -and -not [Version]::TryParse($Live, [ref]$since)) { $Live = '' }
-    if (-not [Version]::TryParse($Version, [ref]$until)) { Write-Error "Version '$Version' is not a version. Cannot select changelog sections." }
+	$since = New-Object Version
+	$until = New-Object Version
+	# A placeholder first upload (e.g. '1') is not a version, so every changelog section counts as new.
+	if ($Live -and -not [Version]::TryParse($Live, [ref]$since)) { $Live = '' }
+	if (-not [Version]::TryParse($Version, [ref]$until)) { Write-Error "Version '$Version' is not a version. Cannot select changelog sections." }
 
-    if (-not (Test-Path $Path -PathType Leaf)) {
-        Write-Warning "$Path not found. Publishing without a changelog."
-        return ''
-    }
+	if (-not (Test-Path $Path -PathType Leaf)) {
+		Write-Warning "$Path not found. Publishing without a changelog."
+		return ''
+	}
 
-    $lines = New-Object System.Collections.Generic.List[string]
-    $include = $false
-    foreach ($line in [System.IO.File]::ReadAllLines($Path)) {
-        $heading = [regex]::Match($line, '^\s*#+\s*(.*?)\s*$')
-        if ($heading.Success) {
-            $section = New-Object Version
-            if (-not [Version]::TryParse($heading.Groups[1].Value, [ref]$section)) { Write-Error "$Path heading '$line' is not a version." }
-            $include = (-not $Live -or $section -gt $since) -and $section -le $until
-            continue
-        }
-        if (-not $include) { continue }
+	$lines = New-Object System.Collections.Generic.List[string]
+	$include = $false
+	foreach ($line in [System.IO.File]::ReadAllLines($Path)) {
+		$heading = [regex]::Match($line, '^\s*#+\s*(.*?)\s*$')
+		if ($heading.Success) {
+			$section = New-Object Version
+			if (-not [Version]::TryParse($heading.Groups[1].Value, [ref]$section)) { Write-Error "$Path heading '$line' is not a version." }
+			$include = (-not $Live -or $section -gt $since) -and $section -le $until
+			continue
+		}
+		if (-not $include) { continue }
 
-        $text = ($line -replace '^\s*[-*+]\s+', '').Trim()
-        if ($text) { $lines.Add($text) }
-    }
+		$text = ($line -replace '^\s*[-*+]\s+', '').Trim()
+		if ($text) { $lines.Add($text) }
+	}
 
-    if ($lines.Count -eq 0) { Write-Warning "$Path has no changes between the published '$Live' and $Version. Publishing without a changelog." }
-    return $lines -join "`n"
+	if ($lines.Count -eq 0) { Write-Warning "$Path has no changes between the published '$Live' and $Version. Publishing without a changelog." }
+	return $lines -join "`n"
 }
 
 # ---------------------------------------------------------------- config
@@ -181,8 +181,8 @@ $cfg = Get-Content $cfgPath -Raw | ConvertFrom-Json
 
 $entries = $cfg.mods.PSObject.Properties
 if (-not $Mod) {
-    if (@($entries).Count -ne 1) { Write-Error "Specify a mod. publish.config.json lists: $(($entries | ForEach-Object Name) -join ', ')" }
-    $Mod = @($entries)[0].Name
+	if (@($entries).Count -ne 1) { Write-Error "Specify a mod. publish.config.json lists: $(($entries | ForEach-Object Name) -join ', ')" }
+	$Mod = @($entries)[0].Name
 }
 # A tab-completed argument like .\likhos-point-and-shoot\ would otherwise miss its config entry.
 $Mod = Split-Path $Mod.TrimEnd('\', '/') -Leaf
@@ -193,7 +193,7 @@ $settings = $entry.Value
 
 $fileId = $settings.file_id
 if (-not $fileId) {
-    Write-Error @"
+	Write-Error @"
 No file_id for $Mod in publish.config.json.
 Upload the mod's first file on Nexus by hand, then copy file_id out of the Files tab URL:
 https://www.nexusmods.com/$($cfg.nexus.game)/mods/$($settings.mod_id)?tab=files
@@ -211,7 +211,7 @@ if (-not $versionMatch.Success) { Write-Error "$modTxt has no version entry." }
 $version = $versionMatch.Groups[1].Value
 
 if ($version -notmatch '^[a-zA-Z0-9.-]+$' -or $version.Length -gt 50) {
-    Write-Error "Version '$version' is rejected by Nexus. Allowed: letters, digits and .- up to 50 chars."
+	Write-Error "Version '$version' is rejected by Nexus. Allowed: letters, digits and .- up to 50 chars."
 }
 
 $distDir = Join-Path $root 'dist'
@@ -219,21 +219,21 @@ New-Item -ItemType Directory -Force $distDir | Out-Null
 $archivePath = Join-Path $distDir "$Mod.zip"
 $pakMatch = [regex]::Match($modText,'(?m)^\s*pak\s*=\s*"([^"]+)"')
 if ($pakMatch.Success) {
-    # build.ps1 bumps mod.txt before it packs, so a pak older than any mod file predates the last change.
-    $pakPath = Join-Path $distDir $pakMatch.Groups[1].Value
-    $newest = Get-ChildItem $src -Recurse -File | Sort-Object LastWriteTime | Select-Object -Last 1
-    if (-not (Test-Path $pakPath) -or (Get-Item $pakPath).LastWriteTime -lt $newest.LastWriteTime) {
-        Write-Error "$pakPath is missing or older than $($newest.Name). Run .\build.ps1 $Mod first."
-    }
-    New-ModArchive -Source $pakPath -Path $archivePath -Folder '~mods'
+	# build.ps1 bumps mod.txt before it packs, so a pak older than any mod file predates the last change.
+	$pakPath = Join-Path $distDir $pakMatch.Groups[1].Value
+	$newest = Get-ChildItem $src -Recurse -File | Sort-Object LastWriteTime | Select-Object -Last 1
+	if (-not (Test-Path $pakPath) -or (Get-Item $pakPath).LastWriteTime -lt $newest.LastWriteTime) {
+		Write-Error "$pakPath is missing or older than $($newest.Name). Run .\build.ps1 $Mod first."
+	}
+	New-ModArchive -Source $pakPath -Path $archivePath -Folder '~mods'
 } else {
-    New-ModArchive -Source $src -Path $archivePath -Lib (Get-ChildItem (Join-Path $root 'lib') -Filter *.lua -File)
+	New-ModArchive -Source $src -Path $archivePath -Lib (Get-ChildItem (Join-Path $root 'lib') -Filter *.lua -File)
 }
 Write-Host "packed $Mod v$version -> $archivePath" -ForegroundColor Green
 
 $sizeBytes = (Get-Item $archivePath).Length
 if ($sizeBytes -gt $maxSizeBytes) {
-    Write-Error "$Mod.zip is $([math]::Round($sizeBytes / 1MB, 1)) MiB. Files over 100 MiB need a multipart upload, which this script does not implement."
+	Write-Error "$Mod.zip is $([math]::Round($sizeBytes / 1MB, 1)) MiB. Files over 100 MiB need a multipart upload, which this script does not implement."
 }
 
 # ---------------------------------------------------------------- publish
@@ -242,56 +242,56 @@ $fileCategory = if ($Category) { $Category } elseif ($settings.category) { $sett
 $bumpModVersion = if ($NoBumpModVersion) { $false } elseif ($null -ne $settings.update_mod_version) { [bool]$settings.update_mod_version } else { $true }
 
 $versionRequest = @{
-    upload_id                    = $null
-    name                         = $uploadName
-    version                      = $version
-    file_category                = $fileCategory
-    archive_existing_file        = (-not $NoArchive)
-    update_mod_version           = $bumpModVersion
-    primary_mod_manager_download = ($fileCategory -eq 'main')
+	upload_id                    = $null
+	name                         = $uploadName
+	version                      = $version
+	file_category                = $fileCategory
+	archive_existing_file        = (-not $NoArchive)
+	update_mod_version           = $bumpModVersion
+	primary_mod_manager_download = ($fileCategory -eq 'main')
 }
 
 $script:apiKey = Get-ApiKey
 $liveVersion = Get-LiveVersion -FileId $fileId
 if (-not $Force) { Assert-NewerVersion -FileId $fileId -Live $liveVersion -Version $version }
 $changelogRequest = @{
-    version   = $version
-    changelog = Get-Changelog -Path (Join-Path $src 'CHANGELOG.md') -Live $liveVersion -Version $version
+	version   = $version
+	changelog = Get-Changelog -Path (Join-Path $src 'CHANGELOG.md') -Live $liveVersion -Version $version
 }
 if ($changelogRequest.changelog) {
-    # The changelogs endpoint takes the v3 mod id, not the game-scoped id from the mod page URL.
-    $changelogPath = "/mods/$((Invoke-NexusApi -Method Get -Path "/games/$($cfg.nexus.game)/mods/$($settings.mod_id)").id)/changelogs"
+	# The changelogs endpoint takes the v3 mod id, not the game-scoped id from the mod page URL.
+	$changelogPath = "/mods/$((Invoke-NexusApi -Method Get -Path "/games/$($cfg.nexus.game)/mods/$($settings.mod_id)").id)/changelogs"
 }
 
 Write-Host "publishing $Mod v$version -> mod file $fileId ($fileCategory, $([math]::Round($sizeBytes / 1MB, 2)) MiB)"
 
 if ($DryRun) {
-    Write-Host "dry run. POST /mod-files/$fileId/versions would send:" -ForegroundColor Yellow
-    Write-Host ($versionRequest | ConvertTo-Json -Depth 4)
-    if ($changelogRequest.changelog) {
-        Write-Host "POST $changelogPath would send:" -ForegroundColor Yellow
-        Write-Host ($changelogRequest | ConvertTo-Json -Depth 4)
-    }
-    return
+	Write-Host "dry run. POST /mod-files/$fileId/versions would send:" -ForegroundColor Yellow
+	Write-Host ($versionRequest | ConvertTo-Json -Depth 4)
+	if ($changelogRequest.changelog) {
+		Write-Host "POST $changelogPath would send:" -ForegroundColor Yellow
+		Write-Host ($changelogRequest | ConvertTo-Json -Depth 4)
+	}
+	return
 }
 
 $upload = Invoke-NexusApi -Method Post -Path '/uploads' -Body @{ size_bytes = $sizeBytes; filename = $uploadName }
 
 # Both headers are part of the presigned signature and must match exactly.
 try {
-    Invoke-WebRequest -Method Put -Uri $upload.presigned_url -InFile $archivePath -ContentType 'application/octet-stream' `
-        -Headers @{ 'Content-Disposition' = "attachment; filename=`"$uploadName`"" } -UseBasicParsing | Out-Null
+	Invoke-WebRequest -Method Put -Uri $upload.presigned_url -InFile $archivePath -ContentType 'application/octet-stream' `
+		-Headers @{ 'Content-Disposition' = "attachment; filename=`"$uploadName`"" } -UseBasicParsing | Out-Null
 } catch {
-    Write-Error "Upload of $archivePath failed: $(Get-ProblemDetail $_)"
+	Write-Error "Upload of $archivePath failed: $(Get-ProblemDetail $_)"
 }
 
 $state = (Invoke-NexusApi -Method Post -Path "/uploads/$($upload.id)/finalise").state
 $attempts = 0
 while ($state -ne 'available') {
-    if ($attempts -ge 60) { Write-Error "Upload $($upload.id) is still '$state' after 2 minutes." }
-    Start-Sleep -Seconds 2
-    $attempts++
-    $state = (Invoke-NexusApi -Method Get -Path "/uploads/$($upload.id)").state
+	if ($attempts -ge 60) { Write-Error "Upload $($upload.id) is still '$state' after 2 minutes." }
+	Start-Sleep -Seconds 2
+	$attempts++
+	$state = (Invoke-NexusApi -Method Get -Path "/uploads/$($upload.id)").state
 }
 
 $versionRequest.upload_id = $upload.id
@@ -300,7 +300,7 @@ $created = Invoke-NexusApi -Method Post -Path "/mod-files/$fileId/versions" -Bod
 Write-Host "published version $($created.version.id)" -ForegroundColor Green
 
 if ($changelogRequest.changelog) {
-    Invoke-NexusApi -Method Post -Path $changelogPath -Body $changelogRequest | Out-Null
-    Write-Host "added changelog for $version" -ForegroundColor Green
+	Invoke-NexusApi -Method Post -Path $changelogPath -Body $changelogRequest | Out-Null
+	Write-Host "added changelog for $version" -ForegroundColor Green
 }
 Write-Host "https://www.nexusmods.com/$($cfg.nexus.game)/mods/$($settings.mod_id)"

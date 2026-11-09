@@ -35,77 +35,77 @@ local call = nil
 local pending = nil
 
 local function has_folded_mode(sight)
-    local found = false
-    sight.SightModes:ForEach(function(key)
-        if key:get():ToString() == FOLDED then
-            found = true
-            return true
-        end
-    end)
-    return found
+	local found = false
+	sight.SightModes:ForEach(function(key)
+		if key:get():ToString() == FOLDED then
+			found = true
+			return true
+		end
+	end)
+	return found
 end
 
 local function find_magnifier(wc)
-    local found = nil
-    wc.LocSightComponents:ForEach(function(_, elem)
-        local sight = elem:get()
-        if util.valid(sight) and has_folded_mode(sight) then
-            found = sight
-            return true
-        end
-    end)
-    return found
+	local found = nil
+	wc.LocSightComponents:ForEach(function(_, elem)
+		local sight = elem:get()
+		if util.valid(sight) and has_folded_mode(sight) then
+			found = sight
+			return true
+		end
+	end)
+	return found
 end
 
 -- bIncrement reads correctly here only. By the post callback the parameter holds unrelated values.
 local function on_pre(context, increment)
-    local sight = context:get()
-    call = { sight = sight:GetFullName(), increment = increment:get(), index = sight.MagnificationIndex }
+	local sight = context:get()
+	call = { sight = sight:GetFullName(), increment = increment:get(), index = sight.MagnificationIndex }
 end
 
 local function on_post(context)
-    local before = call
-    call = nil
-    if not before then return end
+	local before = call
+	call = nil
+	if not before then return end
 
-    local called = context:get()
-    -- A moved index means the notch zoomed. The magnifier flips only at the end stop.
-    if called:GetFullName() ~= before.sight or called.MagnificationIndex ~= before.index then return end
+	local called = context:get()
+	-- A moved index means the notch zoomed. The magnifier flips only at the end stop.
+	if called:GetFullName() ~= before.sight or called.MagnificationIndex ~= before.index then return end
 
-    local wc = actions.equipped_weapon_component()
-    if not wc then return end
-    local current = wc:GetCurrentSightComponent()
-    if not (util.valid(current) and current:GetFullName() == before.sight) then return end
-    -- Under NVG the game aims an unfolded magnifier through the weapon's point sight, so the notch lands on a sight without one.
-    local sight = has_folded_mode(called) and called or find_magnifier(wc)
-    if not sight then return end
+	local wc = actions.equipped_weapon_component()
+	if not wc then return end
+	local current = wc:GetCurrentSightComponent()
+	if not (util.valid(current) and current:GetFullName() == before.sight) then return end
+	-- Under NVG the game aims an unfolded magnifier through the weapon's point sight, so the notch lands on a sight without one.
+	local sight = has_folded_mode(called) and called or find_magnifier(wc)
+	if not sight then return end
 
-    local name = sight:GetFullName()
-    local mode = sight.SightModeKey:ToString()
-    if pending then
-        local elapsed = (os.clock() - pending.at) * 1000
-        -- Notches arriving before the game has handled the injected press would otherwise send a second toggle that undoes the first.
-        if mode ~= pending.target and name == pending.sight and elapsed < PENDING_TIMEOUT_MS then return end
-        pending = nil
-    end
+	local name = sight:GetFullName()
+	local mode = sight.SightModeKey:ToString()
+	if pending then
+		local elapsed = (os.clock() - pending.at) * 1000
+		-- Notches arriving before the game has handled the injected press would otherwise send a second toggle that undoes the first.
+		if mode ~= pending.target and name == pending.sight and elapsed < PENDING_TIMEOUT_MS then return end
+		pending = nil
+	end
 
-    local target = before.increment and UNFOLDED or FOLDED
-    if mode == target then return end
+	local target = before.increment and UNFOLDED or FOLDED
+	if mode == target then return end
 
-    actions.inject_press(IA_TOGGLE_MAGNIFIER)
-    pending = { sight = name, target = target, at = os.clock() }
-    log.debug("magnifier: flipping %s to %s", name, target)
+	actions.inject_press(IA_TOGGLE_MAGNIFIER)
+	pending = { sight = name, target = target, at = os.clock() }
+	log.debug("magnifier: flipping %s to %s", name, target)
 end
 
 --- Hook the sight's magnification call. The class is native.
 function M.install()
-    hooks.install(HOOK_FN, nil, on_pre, on_post)
+	hooks.install(HOOK_FN, nil, on_pre, on_post)
 end
 
 --- Drop per-call and pending flip state. Called on level load.
 function M.reset()
-    call = nil
-    pending = nil
+	call = nil
+	pending = nil
 end
 
 return M

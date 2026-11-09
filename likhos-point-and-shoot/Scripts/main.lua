@@ -19,94 +19,94 @@ local config = require("config")
 --------------------------------------------------------------------------
 
 local function validate()
-    local missing = actions.audit(config.binds)
-    local names = {}
-    for name in pairs(missing) do table.insert(names, name) end
+	local missing = actions.audit(config.binds)
+	local names = {}
+	for name in pairs(missing) do table.insert(names, name) end
 
-    if #names > 0 then
-        table.sort(names)
-        log.warn("%d action(s) referenced by config.lua but not defined in " ..
-                 "actions.lua: %s", #names, table.concat(names, ", "))
-        log.warn("Fill these in from recon before enabling those binds. " ..
-                 "See docs/solutions/recon.md.")
-    end
+	if #names > 0 then
+		table.sort(names)
+		log.warn("%d action(s) referenced by config.lua but not defined in " ..
+			"actions.lua: %s", #names, table.concat(names, ", "))
+		log.warn("Fill these in from recon before enabling those binds. " ..
+			"See docs/solutions/recon.md.")
+	end
 end
 
 local function register_binds()
-    local count = 0
-    for _, bind in ipairs(config.binds) do
-        if bind.enabled then
-            if input.register(bind) then count = count + 1 end
-        else
-            log.debug("bind '%s' disabled in config", bind.id)
-        end
-    end
-    log.info("%d of %d bind(s) active", count, #config.binds)
-    return count
+	local count = 0
+	for _, bind in ipairs(config.binds) do
+		if bind.enabled then
+			if input.register(bind) then count = count + 1 end
+		else
+			log.debug("bind '%s' disabled in config", bind.id)
+		end
+	end
+	log.info("%d of %d bind(s) active", count, #config.binds)
+	return count
 end
 
 local loop_handle = nil
 
 local function start_tick_loop()
-    if loop_handle then return end
+	if loop_handle then return end
 
-    -- LoopAsync runs its callback on UE4SS's async thread. Calling ExecuteInGameThread from there every tick corrupted the Lua state (random crashes inside UE4SS's Lua runtime).
-    -- This timer runs on the game thread only.
-    -- It runs every frame because PointAim holds IA_Aim with a one-frame press, and a frame without one reads as releasing aim. A fixed-delay loop jittered aim above 60 fps.
-    -- UE4SS cancels the mod's delayed actions on unload, so a hot reload needs no explicit cancel. This build has no ModRef:OnUnload despite Types.lua declaring it.
-    loop_handle = LoopInGameThreadAfterFrames(1, function()
-        util.safe("tick", function()
-            input.poll(config.binds)
-            triggers.tick(config.binds)
-        end)
-    end)
-    log.debug("tick loop started, every frame")
+	-- LoopAsync runs its callback on UE4SS's async thread. Calling ExecuteInGameThread from there every tick corrupted the Lua state (random crashes inside UE4SS's Lua runtime).
+	-- This timer runs on the game thread only.
+	-- It runs every frame because PointAim holds IA_Aim with a one-frame press, and a frame without one reads as releasing aim. A fixed-delay loop jittered aim above 60 fps.
+	-- UE4SS cancels the mod's delayed actions on unload, so a hot reload needs no explicit cancel. This build has no ModRef:OnUnload despite Types.lua declaring it.
+	loop_handle = LoopInGameThreadAfterFrames(1, function()
+		util.safe("tick", function()
+			input.poll(config.binds)
+			triggers.tick(config.binds)
+		end)
+	end)
+	log.debug("tick loop started, every frame")
 end
 
 --------------------------------------------------------------------------
 
 local function init()
-    log.setup("PointAndShoot", config.log_level)
-    log.info("loading")
+	log.setup("PointAndShoot", config.log_level)
+	log.info("loading")
 
-    if not config.enabled then
-        log.warn("config.enabled is false - loaded inert")
-        return
-    end
+	if not config.enabled then
+		log.warn("config.enabled is false - loaded inert")
+		return
+	end
 
-    validate()
+	validate()
 
-    input.watch_player_controller(function()
-        actions.reset()
-        magnifier.reset()
-        -- This callback runs inside the PlayerController's construction. Build and register the mod's input objects a tick later.
-        -- A hot reload needs no call: the registration lives in the engine's user settings, not in Lua.
-        ExecuteInGameThreadWithDelay(1, function() util.safe("keymap register", keymap.register) end)
-    end)
-    menu.install()
-    if config.magnifier_zoom then magnifier.install() end
-    quick_use.install()
-    if config.low_ready_default then low_ready.install() end
+	input.watch_player_controller(function()
+		actions.reset()
+		magnifier.reset()
+		-- This callback runs inside the PlayerController's construction. Build and register the mod's input objects a tick later.
+		-- A hot reload needs no call: the registration lives in the engine's user settings, not in Lua.
+		ExecuteInGameThreadWithDelay(1, function() util.safe("keymap register", keymap.register) end)
+	end)
+	menu.install()
+	if config.magnifier_zoom then magnifier.install() end
+	quick_use.install()
+	if config.low_ready_default then low_ready.install() end
 
-    -- The tick loop runs Lua every frame. Skip it when nothing can use it.
-    if register_binds() > 0 then start_tick_loop() end
+	-- The tick loop runs Lua every frame. Skip it when nothing can use it.
+	if register_binds() > 0 then start_tick_loop() end
 
-    RegisterConsoleCommandHandler("kb_dump_imc", function()
-        input.dump_mapping_contexts()
-        return true
-    end)
+	RegisterConsoleCommandHandler("kb_dump_imc", function()
+		input.dump_mapping_contexts()
+		return true
+	end)
 
-    RegisterConsoleCommandHandler("kb_status", function()
-        log.info("player controller: %s",
-                 input.get_player_controller() and "acquired" or "none")
-        for _, b in ipairs(config.binds) do
-            log.info("  %-28s %-12s %s",
-                     b.id, keymap.describe(b.mapping), b.enabled and "on" or "off")
-        end
-        return true
-    end)
+	RegisterConsoleCommandHandler("kb_status", function()
+		log.info("player controller: %s",
+			input.get_player_controller() and "acquired" or "none")
+		for _, b in ipairs(config.binds) do
+			log.info("  %-28s %-12s %s",
+				b.id, keymap.describe(b.mapping), b.enabled and "on" or "off")
+		end
+		return true
+	end)
 
-    log.info("ready. console commands: kb_status, kb_dump_imc")
+	log.info("ready. console commands: kb_status, kb_dump_imc")
 end
 
 util.safe("init", init)

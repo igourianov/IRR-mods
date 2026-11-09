@@ -1,9 +1,9 @@
 {
-    "Rifle.FN FAL": "Dmr",
-    "Rifle.AKS-74U": "Smg",
-    "Rifle.Honey Badger": "Smg",
-    "Rifle.Sig Sauer MCX Rattler": "Smg",
-    "Dmr.SKS": "Rifle",
-    "SniperRifle.SVDS": "Dmr",
-    "Rifle.VSS Vintorez": "Dmr"
+	"Rifle.FN FAL": "Dmr",
+	"Rifle.AKS-74U": "Smg",
+	"Rifle.Honey Badger": "Smg",
+	"Rifle.Sig Sauer MCX Rattler": "Smg",
+	"Dmr.SKS": "Rifle",
+	"SniperRifle.SVDS": "Dmr",
+	"Rifle.VSS Vintorez": "Dmr"
 }

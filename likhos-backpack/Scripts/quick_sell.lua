@@ -22,63 +22,63 @@ local INPUT_LIB  = "/Script/Engine.Default__KismetInputLibrary"
 local SELL_EXECUTE_FN = "/Game/Blueprints/InventorySystem/Objects/ItemContexts/U_Sell.U_Sell_C:Execute"
 
 local function item_str(item)
-    return string.format("%s %08x", item.ItemDefinition:GetFName():ToString(), item.ItemUID.A & 0xffffffff)
+	return string.format("%s %08x", item.ItemDefinition:GetFName():ToString(), item.ItemUID.A & 0xffffffff)
 end
 
 local function same_guid(a, b)
-    return a.A == b.A and a.B == b.B and a.C == b.C and a.D == b.D
+	return a.A == b.A and a.B == b.B and a.C == b.C and a.D == b.D
 end
 
 local function deliver_or_sell(path, uid)
-    local tile = StaticFindObject(path)
-    if not util.valid(tile) or not same_guid(tile.ContainerItem.ItemUID, uid) then
-        log.debug("quick sell: the clicked tile is gone or shows another item")
-        return
-    end
-    local item = tile.ContainerItem
-    local owner = tile:GetOwningPlayer()
-    for _, class in ipairs(CONTEXT_CLASSES) do
-        local context = FindFirstOf(class)
-        if not util.valid(context) then error("no " .. class .. " instance") end
-        if context:ShouldAddToContextList(owner, tile, item) and context:IsValidContext(owner, tile, item) then
-            context:Execute(owner, tile, item)
-            log.debug("quick sell: %s executed on %s", class, item_str(item))
-            return
-        end
-    end
-    log.debug("quick sell: neither deliver nor sell offered for %s", item_str(item))
+	local tile = StaticFindObject(path)
+	if not util.valid(tile) or not same_guid(tile.ContainerItem.ItemUID, uid) then
+		log.debug("quick sell: the clicked tile is gone or shows another item")
+		return
+	end
+	local item = tile.ContainerItem
+	local owner = tile:GetOwningPlayer()
+	for _, class in ipairs(CONTEXT_CLASSES) do
+		local context = FindFirstOf(class)
+		if not util.valid(context) then error("no " .. class .. " instance") end
+		if context:ShouldAddToContextList(owner, tile, item) and context:IsValidContext(owner, tile, item) then
+			context:Execute(owner, tile, item)
+			log.debug("quick sell: %s executed on %s", class, item_str(item))
+			return
+		end
+	end
+	log.debug("quick sell: neither deliver nor sell offered for %s", item_str(item))
 end
 
 --- Whether Shift is held, from Slate's current modifier state.
 --- UE4SS won't pass the click's PointerEvent as the InputEvent InputEvent_IsShiftDown takes. The mask's bits are engine-internal, so the library decodes it, from a fresh struct rather than the returned one.
 local function shift_down(input)
-    local mask = input:GetModifierKeysState().ModifierKeysStateMask
-    return input:ModifierKeysState_IsShiftDown({ ModifierKeysStateMask = mask })
+	local mask = input:GetModifierKeysState().ModifierKeysStateMask
+	return input:ModifierKeysState_IsShiftDown({ ModifierKeysStateMask = mask })
 end
 
 -- The mouse event is only readable while the handler runs. The sell or delivery waits a tick, since it removes the clicked tile.
 local function on_mouse_down(context, _, mouse_event)
-    local input = StaticFindObject(INPUT_LIB)
-    if input:PointerEvent_GetEffectingButton(mouse_event:get()).KeyName:ToString() ~= "LeftMouseButton" then return end
-    if not shift_down(input) then return end
+	local input = StaticFindObject(INPUT_LIB)
+	if input:PointerEvent_GetEffectingButton(mouse_event:get()).KeyName:ToString() ~= "LeftMouseButton" then return end
+	if not shift_down(input) then return end
 
-    local tile = context:get()
-    local path = util.path(tile)
-    local id = tile.ContainerItem.ItemUID
-    local uid = { A = id.A, B = id.B, C = id.C, D = id.D }
-    ExecuteInGameThreadWithDelay(1, hooks.guard(function() deliver_or_sell(path, uid) end))
+	local tile = context:get()
+	local path = util.path(tile)
+	local id = tile.ContainerItem.ItemUID
+	local uid = { A = id.A, B = id.B, C = id.C, D = id.D }
+	ExecuteInGameThreadWithDelay(1, hooks.guard(function() deliver_or_sell(path, uid) end))
 end
 
 -- TEMP recon, see SELL_EXECUTE_FN.
 local function on_sell_execute(context, owner)
-    local o = owner:get()
-    log.debug("quick sell recon: Sell executed on %s, owner %s", context:get():GetFullName(), util.valid(o) and o:GetFullName() or "invalid")
+	local o = owner:get()
+	log.debug("quick sell recon: Sell executed on %s, owner %s", context:get():GetFullName(), util.valid(o) and o:GetFullName() or "invalid")
 end
 
 --- Hook the inventory tile's click handler once its Blueprint class is loaded.
 function M.install()
-    hooks.install(HOOK_FN, TILE_CLASS, on_mouse_down)
-    hooks.install(SELL_EXECUTE_FN, "/Game/Blueprints/InventorySystem/Objects/ItemContexts/U_Sell.U_Sell_C", on_sell_execute)
+	hooks.install(HOOK_FN, TILE_CLASS, on_mouse_down)
+	hooks.install(SELL_EXECUTE_FN, "/Game/Blueprints/InventorySystem/Objects/ItemContexts/U_Sell.U_Sell_C", on_sell_execute)
 end
 
 return M

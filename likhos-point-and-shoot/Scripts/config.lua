@@ -7,47 +7,47 @@
 -- action:  a key into the ACTIONS table in actions.lua.
 
 return {
-    -- "error" | "warn" | "info" | "debug"
-    log_level = "info",
+	-- "error" | "warn" | "info" | "debug"
+	log_level = "info",
 
-    -- Master switch. Set false to load the mod inert (useful when bisecting a crash after a game patch).
-    enabled = true,
+	-- Master switch. Set false to load the mod inert (useful when bisecting a crash after a game patch).
+	enabled = true,
 
-    -- How long a hold-or-toggle key may be held and still count as a tap, milliseconds.
-    -- Released inside this window, the light it turned on stays on until the next press. Held past it, the light goes off on release.
-    tap_ms = 250,
+	-- How long a hold-or-toggle key may be held and still count as a tap, milliseconds.
+	-- Released inside this window, the light it turned on stays on until the next press. Held past it, the light goes off on release.
+	tap_ms = 250,
 
-    -- The zoom input folds and unfolds the magnifier on a hybrid sight: scroll forward unfolds, scroll back folds.
-    -- Set false for vanilla zoom.
-    magnifier_zoom = true,
+	-- The zoom input folds and unfolds the magnifier on a hybrid sight: scroll forward unfolds, scroll back folds.
+	-- Set false for vanilla zoom.
+	magnifier_zoom = true,
 
-    -- Low ready is the weapon's resting position: the gun lowers as soon as aiming, sprinting, firing or any other action ends.
-    -- Works only with auto low ready turned on in the gameplay settings. Set false for the game's own auto low ready.
-    low_ready_default = true,
-    -- How long after a run ends the gun lowers, milliseconds. Shorter makes the gun dip as the run ends.
-    low_ready_run_delay_ms = 150,
+	-- Low ready is the weapon's resting position: the gun lowers as soon as aiming, sprinting, firing or any other action ends.
+	-- Works only with auto low ready turned on in the gameplay settings. Set false for the game's own auto low ready.
+	low_ready_default = true,
+	-- How long after a run ends the gun lowers, milliseconds. Shorter makes the gun dip as the run ends.
+	low_ready_run_delay_ms = 150,
 
-    binds = {
-        {
-            id      = "point_aim",
-            enabled = true,
-            mapping = "LikhosPointShootingDirect",   -- Settings > Controls > Point Shooting (Direct)
-            action  = "PointAim",     -- hold to aim straight into point sight
-            block_in_ui = true,
-        },
-        {
-            id      = "flashlight",
-            enabled = true,
-            mapping = "LikhosFlashlight",   -- Settings > Controls > Flashlight (Hold/Toggle)
-            action  = "Flashlight",   -- tap to leave the light on, hold to light it while held
-            block_in_ui = true,
-        },
-        {
-            id      = "quick_use",
-            enabled = true,
-            mapping = "LikhosInteractInstant",   -- Settings > Controls > Interact (Instant)
-            action  = "QuickUse",     -- tap to use what F would, holds completing at once
-            block_in_ui = true,
-        },
-    },
+	binds = {
+		{
+			id      = "point_aim",
+			enabled = true,
+			mapping = "LikhosPointShootingDirect",   -- Settings > Controls > Point Shooting (Direct)
+			action  = "PointAim",     -- hold to aim straight into point sight
+			block_in_ui = true,
+		},
+		{
+			id      = "flashlight",
+			enabled = true,
+			mapping = "LikhosFlashlight",   -- Settings > Controls > Flashlight (Hold/Toggle)
+			action  = "Flashlight",   -- tap to leave the light on, hold to light it while held
+			block_in_ui = true,
+		},
+		{
+			id      = "quick_use",
+			enabled = true,
+			mapping = "LikhosInteractInstant",   -- Settings > Controls > Interact (Instant)
+			action  = "QuickUse",     -- tap to use what F would, holds completing at once
+			block_in_ui = true,
+		},
+	},
 }

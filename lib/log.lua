@@ -8,15 +8,15 @@ M.prefix = ""
 
 --- `mod` names the mod on every log line. Shared by all mods, so the name comes from the caller.
 function M.setup(mod, level)
-    M.prefix = "[" .. mod .. "] "
-    M.level = LEVELS[level] or LEVELS.info
+	M.prefix = "[" .. mod .. "] "
+	M.level = LEVELS[level] or LEVELS.info
 end
 
 local function emit(lvl, name, fmt, ...)
-    if lvl > M.level then return end
-    local ok, msg = pcall(string.format, fmt, ...)
-    if not ok then msg = tostring(fmt) end
-    print(M.prefix .. name .. ": " .. msg .. "\n")
+	if lvl > M.level then return end
+	local ok, msg = pcall(string.format, fmt, ...)
+	if not ok then msg = tostring(fmt) end
+	print(M.prefix .. name .. ": " .. msg .. "\n")
 end
 
 function M.error(fmt, ...) emit(LEVELS.error, "ERROR", fmt, ...) end

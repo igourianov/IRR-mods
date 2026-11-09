@@ -12,19 +12,19 @@ local quick_slots = require("quick_slots")
 local config = require("config")
 
 local function init()
-    log.setup("Backpack", config.log_level)
-    log.info("loading")
+	log.setup("Backpack", config.log_level)
+	log.info("loading")
 
-    if not config.enabled then
-        log.warn("config.enabled is false - loaded inert")
-        return
-    end
+	if not config.enabled then
+		log.warn("config.enabled is false - loaded inert")
+		return
+	end
 
-    if config.whole_uses then whole_uses.install() end
-    if config.quick_sell then quick_sell.install() end
-    if config.quick_slot_refill then quick_slots.install() end
+	if config.whole_uses then whole_uses.install() end
+	if config.quick_sell then quick_sell.install() end
+	if config.quick_slot_refill then quick_slots.install() end
 
-    log.info("ready")
+	log.info("ready")
 end
 
 util.safe("init", init)
