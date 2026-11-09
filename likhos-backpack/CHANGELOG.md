@@ -1,5 +1,5 @@
-# Unreleased
-* quick slots no longer empty out if there is an itemof the sametime in the same container as the one that was just used
+# 1.3.51
+* quick slots no longer empty out if there is an item of the same type in the same container as the one that was just used
 * single use items show total count in the quick slot
 * single use items show no use count in the inventory until used
 * USB hacking devices show their remaining uses as a percentage

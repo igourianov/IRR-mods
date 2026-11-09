@@ -119,7 +119,8 @@ local function uses_left(item)
     return math.huge
 end
 
---- The items of comp with definition path def under root, in container order.
+--- The items of comp with definition path def under root and uses left, in container order.
+--- A spent item can sit at 0 uses: briefly before the game removes it, or for good when saved that way by an older version of this mod.
 local function matching(comp, def, root)
     local found = {}
     local containers = comp.MainContainers
@@ -129,7 +130,7 @@ local function matching(comp, def, root)
         for j = 1, #items do
             local item = items[j]
             local definition = item.ItemDefinition
-            if util.valid(definition) and definition:GetFullName() == def and root_key(comp, item, container) == root then found[#found + 1] = item end
+            if util.valid(definition) and definition:GetFullName() == def and uses_left(item) > 0 and root_key(comp, item, container) == root then found[#found + 1] = item end
         end
     end
     return found
@@ -236,22 +237,30 @@ end
 -- Polls run since load, to pace the tile count.
 local polls = 0
 
---- The quick slot tiles showing their slot's recorded item, by slot index.
+--- The slot index of tile when it is a quick slot tile showing its slot's recorded item, or nil.
 --- A tile's BaseContainerElementRef is the container element it was created for, here the quick slot widget.
 --- Neither the quick slot widget's ItemRef nor its GetContainerItems() gives the tile: the widget overrides AddItem and GetContainerItems, and the call returns an empty array to Lua.
 --- A quick slot bar of an earlier screen may still exist, so a tile counts only while it shows the bound item.
+local function tile_slot(tile)
+    local element = tile.BaseContainerElementRef
+    if not (util.valid(element) and element:GetClass():GetFName():ToString() == SLOT_WIDGET) then return nil end
+    local index = element.QuickSlotIndex
+    local record = records[index]
+    if record and same_guid(tile.ContainerItem.ItemUID, record.uid) then return index end
+    return nil
+end
+
 local function quick_slot_tiles()
     local tiles = {}
     for _, tile in ipairs(FindAllOf(TILE_WIDGET) or {}) do
-        local element = util.valid(tile) and tile.BaseContainerElementRef or nil
-        if util.valid(element) and element:GetClass():GetFName():ToString() == SLOT_WIDGET then
-            local index = element.QuickSlotIndex
-            local record = records[index]
-            if record and same_guid(tile.ContainerItem.ItemUID, record.uid) then tiles[index] = tile end
-        end
+        local index = util.valid(tile) and tile_slot(tile) or nil
+        if index then tiles[index] = tile end
     end
     return tiles
 end
+
+-- slot index -> path of the tile last found by quick_slot_tiles. Once the inventory screen has been opened its widgets stay, so without it every count pass would walk every item tile, stash included.
+local tile_paths = {}
 
 local function poll()
     local pc = FindFirstOf("PlayerController")
@@ -283,8 +292,13 @@ local function poll()
     for index = 0, SLOT_COUNT - 1 do
         local record = records[index]
         if record and record.single and record.root then
-            tiles = tiles or quick_slot_tiles()
-            local tile = tiles[index]
+            local cached = tile_paths[index] and StaticFindObject(tile_paths[index])
+            local tile = util.valid(cached) and tile_slot(cached) == index and cached or nil
+            if not tile then
+                tiles = tiles or quick_slot_tiles()
+                tile = tiles[index]
+                tile_paths[index] = tile and util.path(tile) or nil
+            end
             if tile then show_count(tile, #matching(comp, record.def, record.root)) end
         end
     end
