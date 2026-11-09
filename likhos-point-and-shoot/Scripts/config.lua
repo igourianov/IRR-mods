@@ -56,5 +56,12 @@ return {
 			action  = "ConsumeFoodDrink",     -- use the first usable food or drink item in the inventory
 			block_in_ui = true,
 		},
+		{
+			id      = "painkillers",
+			enabled = true,
+			mapping = "LikhosUsePainkillers",   -- Settings > Controls > Use Morphine/Painkillers
+			action  = "UsePainkillers",     -- take the fastest painkiller anywhere on the player
+			block_in_ui = true,
+		},
 	},
 }

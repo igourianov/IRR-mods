@@ -10,6 +10,7 @@ local util    = require("util")
 local devices = require("devices")
 local quick_use = require("quick_use")
 local consume = require("consume")
+local painkillers = require("painkillers")
 local config  = require("config")
 
 local M = {}
@@ -222,6 +223,10 @@ M.ACTIONS = {
 	-- docs/solutions/eat-food-bind.md
 	["ConsumeFoodDrink"] = {
 		press   = consume.press,
+	},
+	-- docs/solutions/painkillers-bind.md
+	["UsePainkillers"] = {
+		press   = painkillers.press,
 	},
 }
 

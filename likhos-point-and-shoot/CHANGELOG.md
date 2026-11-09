@@ -1,3 +1,6 @@
+# 1.3.141
+* added the Use Morphine/Painkillers keybind: uses the fastest painkiller anywhere in the inventory (Morphine Injector, then MFAK Inject, then Painkiller), only while hurt and no dose is active
+
 # 1.2.132
 * added the Consume Food/Drink keybind: uses the first food or drink item in the inventory, like Quick Heal does for medical items
 

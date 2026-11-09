@@ -33,6 +33,12 @@ New keybind **Interact (Instant)**, that mimics vanilla **Interact** behavior bu
 
 New keybind **Consume Food/Drink**, that works like vanilla **Quick Heal** but for food and drinks. Press it to eat or drink the first food or drink item found in your inventory, without opening it. Medical items are never used.
 
+## Use Morphine/Painkillers
+
+New keybind **Use Morphine/Painkillers**, a quick way to get temporary health when it matters, without the vanilla **Quick Heal** picking a bandage instead. Press it to use the fastest painkiller anywhere in your inventory: Morphine Injector first, then the MFAK's Inject, then Painkiller.
+
+It does nothing while a dose is still active, since a new one would neither stack nor replace it, or while 5 health or less is missing. Bleeding and fractures are left to you.
+
 ## Magnifier binding
 
 The EOTech+Magnifier combo now works using the mouse scroll, same way LPVO does. Old binding still works but unnecessary.

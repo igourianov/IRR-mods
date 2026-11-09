@@ -28,7 +28,7 @@ local KEY_MAPPED     = "PlayerMappedName_60_D667E47C4761808F2AAD738F1F328FEA"
 -- The vanilla row every mod row is cloned from. Its construction triggers the section.
 local SOURCE_MAPPING = "IA_PointShooting"
 local SECTION_TITLE  = "Likho's Actions"
-local MAPPINGS = { "LikhosPointShootingDirect", "LikhosFlashlight", "LikhosInteractInstant", "LikhosConsumeFoodDrink" }
+local MAPPINGS = { "LikhosPointShootingDirect", "LikhosFlashlight", "LikhosInteractInstant", "LikhosConsumeFoodDrink", "LikhosUsePainkillers" }
 
 local function mapped_name(row)
 	local ok, name = pcall(function() return row.Keybindings[1][KEY_MAPPED]:ToString() end)

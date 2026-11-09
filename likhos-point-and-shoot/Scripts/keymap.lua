@@ -20,6 +20,7 @@ M.MAPPINGS = {
 	LikhosFlashlight          = { display = "Flashlight (Hold/Toggle)" },
 	LikhosInteractInstant     = { display = "Interact (Instant)" },
 	LikhosConsumeFoodDrink    = { display = "Consume Food/Drink" },
+	LikhosUsePainkillers      = { display = "Use Morphine/Painkillers" },
 }
 
 local function action_name(mapping)
