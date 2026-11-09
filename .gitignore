@@ -13,8 +13,11 @@ __pycache__/
 # Distribution zips, rebuilt on every build
 dist/
 
-# Tools build.ps1 downloads on first use
-tools/
+# Tools build.ps1 downloads on first use, local tool installs and backups
+tools/repak/
+tools/UAssetGUI/
+tools/UE4SS-Lua-Types/
+tools/ue4ss-*/
 
 # ephemeral bbcode conversion
 *.bbcode

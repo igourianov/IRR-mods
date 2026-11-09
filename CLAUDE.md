@@ -55,6 +55,16 @@ Class names, UFunction names and property paths must come from a UE4SS dump or L
 - Posts the `CHANGELOG.md` sections newer than the live version, up to the published one, as the Nexus changelog. Every heading must be a bare version (`# 1.2.38`).
 - Other switches: `-Category main|optional|miscellaneous`, `-NoArchive` (keep the previous file version unarchived), `-NoBumpModVersion` (do not update the mod page version).
 
+### tools/clear-keybinds.ps1
+
+Use it when a mod key mapping is renamed or removed, or when a saved key mapping needs to go. It edits `EnhancedInputUserSettings.sav` directly and backs it up first. Run it without switches to list first and tell the user what it would remove. The game must be closed. Layout and recon: `docs/solutions/clear-keybinds.md`.
+
+```powershell
+.\tools\clear-keybinds.ps1                        # list saved mappings, mark unused Likhos* ones
+.\tools\clear-keybinds.ps1 -Unused                # remove Likhos* mappings no likhos-*\Scripts\*.lua mentions
+.\tools\clear-keybinds.ps1 -Name LikhosQuickUse   # remove by name, wildcards allowed
+```
+
 In-game console: `kb_status`.
 
 ## Mod version
