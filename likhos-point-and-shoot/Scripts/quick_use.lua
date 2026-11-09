@@ -55,6 +55,17 @@ local function zero_holds(target)
 	override = { target = target:GetFullName(), options = options }
 end
 
+--- The local PlayerController, its pawn's ability component and the SGA_Interact class, or nil while any is missing.
+local function interact_parts()
+	local pc = FindFirstOf("PlayerController")
+	local comp_class = StaticFindObject(ABILITY_COMP)
+	local sga_class = StaticFindObject(SGA_INTERACT)
+	if not (util.valid(pc) and util.valid(pc.Pawn) and util.valid(comp_class) and util.valid(sga_class)) then return nil end
+	local comp = pc.Pawn:GetComponentByClass(comp_class)
+	if not util.valid(comp) then return nil end
+	return pc, comp, sga_class
+end
+
 --- Deactivate the interact ability if it is still active. F's release does this, and a quick use has no release.
 local function release_ability(comp, sga_class)
 	local ability = nil
@@ -68,20 +79,15 @@ end
 local function press()
 	restore()
 
-	local pc = FindFirstOf("PlayerController")
+	local pc, comp, sga_class = interact_parts()
 	local lib = StaticFindObject(LIB_PATH)
-	local comp_class = StaticFindObject(ABILITY_COMP)
-	local sga_class = StaticFindObject(SGA_INTERACT)
-	if not (util.valid(pc) and util.valid(lib) and util.valid(comp_class) and util.valid(sga_class)) then
-		log.debug("QuickUse: interaction classes not loaded")
+	if not (pc and util.valid(lib)) then
+		log.debug("QuickUse: no pawn, ability component or interaction classes")
 		return
 	end
-	local pawn = pc.Pawn
-	if not util.valid(pawn) then return end
-	local comp = pawn:GetComponentByClass(comp_class)
 	local manager = lib:GetLocalInteractionManager(pc)
-	if not (util.valid(comp) and util.valid(manager)) then
-		log.debug("QuickUse: no ability component or interaction manager")
+	if not util.valid(manager) then
+		log.debug("QuickUse: no interaction manager")
 		return
 	end
 	local target = manager.SelectedTarget
@@ -115,12 +121,8 @@ local function on_finish(_, target)
 	if not (util.valid(finished) and finished:GetFullName() == override.target) then return end
 	restore()
 	-- A Wait interaction (key unlock) leaves the ability active after it finishes, which refuses the next start.
-	local pc = FindFirstOf("PlayerController")
-	local comp_class = StaticFindObject(ABILITY_COMP)
-	local sga_class = StaticFindObject(SGA_INTERACT)
-	if not (util.valid(pc) and util.valid(pc.Pawn) and util.valid(comp_class) and util.valid(sga_class)) then return end
-	local comp = pc.Pawn:GetComponentByClass(comp_class)
-	if util.valid(comp) then release_ability(comp, sga_class) end
+	local _, comp, sga_class = interact_parts()
+	if comp then release_ability(comp, sga_class) end
 end
 
 --- The Interact (Instant) key's press. Game thread.
