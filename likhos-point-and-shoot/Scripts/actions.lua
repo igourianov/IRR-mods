@@ -1,6 +1,6 @@
 -- actions.lua : action name -> how to invoke it on the pawn / controller.
 --
--- Every game name here comes from docs/solutions/point-aim-bind.md (Recon). Nothing is guessed from the real game.
+-- Every game name here comes from docs/solutions/point-aim-bind.md (Recon).
 --
 -- Design rule: resolve lazily, per call and never cache a UObject across a level load.
 -- Caching the *name* is fine. Caching the object is what crashes.
@@ -242,7 +242,7 @@ function M.invoke(name, phase)
 	end
 
 	local fn = spec[phase]
-	-- Legitimately nothing to do on a phase without a function.
+	-- A phase without a function is not a failure.
 	if not fn then return true end
 	return util.safe(("action %s:%s"):format(name, phase), fn)
 end

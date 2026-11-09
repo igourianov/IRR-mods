@@ -1,4 +1,4 @@
--- util.lua : small helpers. No UObject access here.
+-- util.lua : small helpers.
 local log = require("log")
 local M = {}
 
