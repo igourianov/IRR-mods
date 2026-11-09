@@ -1,5 +1,5 @@
--- quick_slots.lua : a quick slot whose item is used up rebinds to another item of the same definition from the inventory (docs/solutions/quick-slot-refill.md, docs/solutions/quick-slot-whole-inventory.md).
--- A quick slot naming an item that is no longer in the inventory is cleared (docs/solutions/quick-slot-left-inventory.md).
+-- quick_slots.lua : a quick slot binds an item definition. Once its item leaves the inventory it rebinds to another item of the same definition from the inventory (docs/solutions/quick-slot-refill.md, docs/solutions/quick-slot-whole-inventory.md, docs/solutions/quick-slot-type-bind.md).
+-- A quick slot naming an item that is no longer in the inventory, with none of its definition left, is cleared (docs/solutions/quick-slot-left-inventory.md).
 --
 -- Every game name here comes from those docs.
 -- Items leave the inventory through several paths, some native, and the quick slot widgets exist only in the inventory screen, so the slots are polled rather than hooked.
@@ -11,9 +11,8 @@ local util = require("util")
 local M = {}
 
 local LIBRARY_CDO  = "/Script/Test_C.Default__InventoryFunctionLibrary"
-local ABILITY_COMP = "/Script/Test_C.GameplayAbilityComponent"
 local SLOT_COUNT   = 4
--- A used item sits at 0 uses for about 270 ms before it leaves, which a 250 ms poll sometimes missed.
+-- Short so a slot refills right after its item leaves.
 local POLL_MS      = 50
 -- The tile count walks every item tile, so it runs on every COUNT_EVERY-th poll only.
 local COUNT_EVERY  = 5
@@ -27,16 +26,6 @@ local TILE_WIDGET  = "W_InventoryItem_C"
 local COLLAPSED          = 1
 local HIDDEN             = 2
 local HIT_TEST_INVISIBLE = 3
-
--- Abilities that take an item out of the inventory by using it. A drop, discard or sale runs none of them.
--- They cover items without a uses stat (grenades). A used injector leaves the inventory after its use ability has ended, so items with a uses stat are told used up by reaching 0 uses instead.
-local USE_ABILITIES = {
-	"/Script/Test_C.SimpleGameplayAbility_UseQuickSlot",
-	"/Script/Test_C.SimpleGameplayAbility_UseItem",
-	"/Script/Test_C.SimpleGameplayAbility_ThrowGrenade",
-	"/Script/Test_C.SimpleGameplayAbility_QuickHeal",
-	"/Game/Blueprints/SimpleGameplayAbilitySystem/Abilities/SGA_UseMedic.SGA_UseMedic_C",
-}
 
 local function guid_str(g)
 	return string.format("%08x%08x%08x%08x", g.A & 0xffffffff, g.B & 0xffffffff, g.C & 0xffffffff, g.D & 0xffffffff)
@@ -115,32 +104,7 @@ local function single_use(definition)
 	return not definition.ItemProperties.CanStack
 end
 
---- Whether one of the player's active abilities uses an item.
-local function using_item(pc)
-	local comp = util.component(pc.Pawn, ABILITY_COMP)
-	if not comp then return false end
-	-- The Blueprint class is found only once loaded, and an unloaded class has no instance to match.
-	local classes = {}
-	for _, path in ipairs(USE_ABILITIES) do
-		local class = StaticFindObject(path)
-		if util.valid(class) then classes[#classes + 1] = class end
-	end
-	local using = false
-	comp.ActiveAbilities:ForEach(function(_, elem)
-		local ability = elem:get()
-		if not util.valid(ability) then return end
-		for _, class in ipairs(classes) do
-			if ability:IsA(class) then
-				using = true
-				return true
-			end
-		end
-	end)
-	return using
-end
-
--- slot index -> { uid, def, single, uses }, the last live binding of each slot. single is whether its definition is single use.
--- uses is the item's uses left at the last poll. A used item lingers in the inventory at 0 uses before the game removes it.
+-- slot index -> { uid, def, single }, the last live binding of each slot. single is whether its definition is single use.
 local records = {}
 -- Path of the inventory component the records came from.
 local records_comp = nil
@@ -148,31 +112,27 @@ local records_comp = nil
 -- The item UpdateQuickSlot takes to clear a slot.
 local EMPTY_ITEM = { ItemUID = { A = 0, B = 0, C = 0, D = 0 } }
 
---- Track the live binding of slot index, refill the slot once its recorded item has been used up, or clear it while it names an item outside the inventory.
+--- Track the live binding of slot index, refill the slot once its recorded item has left the inventory, or clear it while it names an item outside the inventory.
 --- uid is the slot's QuickSlots entry, or nil. item is that item from locate, or nil when the entry is stale.
-local function check_slot(pc, comp, index, uid, item)
+local function check_slot(comp, index, uid, item)
 	local record = records[index]
 	if item then
-		local uses = uses_left(item)
-		if record and util.same_guid(record.uid, uid) then
-			record.uses = uses
-			return
-		end
+		if record and util.same_guid(record.uid, uid) then return end
 		local definition = item.ItemDefinition
 		local def = util.valid(definition) and definition:GetFullName() or nil
 		local single = single_use(definition)
-		records[index] = { uid = uid, def = def, single = single, uses = uses }
+		records[index] = { uid = uid, def = def, single = single }
 		log.debug("quick slot %d bound to %s %s, single use %s", index, tostring(def), guid_str(uid), tostring(single))
 		return
 	end
 
 	records[index] = nil
-	-- Used up: left the inventory after a poll saw it at 0 uses, or while a use ran.
-	-- Otherwise the slot was cleared by hand with its item still in the inventory, or the item was dropped, discarded or sold.
-	local used = record and record.def and not holds(comp, record.uid) and (record.uses <= 0 or using_item(pc))
+	-- The recorded item left the inventory: used up, dropped, discarded, sold, stashed or carried out by its container. The game deletes the slot's entry in all but the last case.
+	-- Otherwise the slot was cleared by hand with its item still in the inventory, and stays empty.
+	local left = record and record.def and not holds(comp, record.uid)
 	-- Fewest uses left first, so partly used items are finished before fresh ones. Ties keep container order.
 	local refill, refill_uses
-	if used then
+	if left then
 		for candidate in inventory_items(comp) do
 			if usable_def(candidate) == record.def then
 				local uses = uses_left(candidate)
@@ -183,12 +143,12 @@ local function check_slot(pc, comp, index, uid, item)
 	if refill then
 		local new_uid = util.guid(refill.ItemUID)
 		comp:UpdateQuickSlot(index, refill)
-		records[index] = { uid = new_uid, def = record.def, single = record.single, uses = refill_uses }
+		records[index] = { uid = new_uid, def = record.def, single = record.single }
 		log.debug("quick slot %d refilled with %s %s", index, record.def, guid_str(new_uid))
 		return
 	end
-	if used then log.debug("quick slot %d empty: no %s left", index, record.def) end
-	-- An entry naming an item outside the inventory: the item sat in a container moved to another inventory, like the stash or the floor, and the game leaves the slot bound then.
+	if left then log.debug("quick slot %d empty: no %s left", index, record.def) end
+	-- An entry naming an item outside the inventory, with nothing to refill it: the item sat in a container moved to another inventory, like the stash or the floor, and the game leaves the slot bound then.
 	if not uid then return end
 	comp:UpdateQuickSlot(index, EMPTY_ITEM)
 	log.debug("quick slot %d cleared: %s is not in the inventory", index, guid_str(uid))
@@ -271,7 +231,7 @@ local function poll()
 		if not is_zero(uid) then wanted[slot.Index] = uid end
 	end
 	local found = locate(comp, wanted)
-	for index = 0, SLOT_COUNT - 1 do check_slot(pc, comp, index, wanted[index], found[index]) end
+	for index = 0, SLOT_COUNT - 1 do check_slot(comp, index, wanted[index], found[index]) end
 
 	polls = polls + 1
 	if polls % COUNT_EVERY ~= 0 then return end

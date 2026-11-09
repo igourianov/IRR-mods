@@ -1,5 +1,6 @@
 # Unreleased
 * quick slots refill from and count items of the same type anywhere in the inventory, not only in the equipment the slotted item came from
+* quick slots refill whenever their item leaves the inventory, e.g. dropped, sold or moved to the stash, not only when it is used up
 
 # 1.3.58
 * fixed quick slot staying bound after its item's container is stashed or dropped (vanilla bug)
