@@ -8,9 +8,9 @@ Rules that exist because breaking them causes crashes or silent breakage after a
 
 ```lua
 RegisterKeyBind(Key.F2, function()
-    ExecuteInGameThread(function()
-        -- UObject access is only safe in here
-    end)
+	ExecuteInGameThread(function()
+		-- UObject access is only safe in here
+	end)
 end)
 ```
 
