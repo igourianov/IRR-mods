@@ -1,6 +1,7 @@
 -- quick_slots.lua : a quick slot whose item is used up rebinds to another item of the same definition from the same equipment (docs/solutions/quick-slot-refill.md).
+-- A quick slot naming an item that is no longer in the inventory is cleared (docs/solutions/quick-slot-left-inventory.md).
 --
--- Every game name here comes from docs/solutions/quick-slot-refill.md.
+-- Every game name here comes from those two docs.
 -- Items leave the inventory through several paths, some native, and the quick slot widgets exist only in the inventory screen, so the slots are polled rather than hooked.
 -- Holds no UObject between polls: records keep UIDs and paths only.
 
@@ -172,7 +173,10 @@ local records = {}
 -- Path of the inventory component the records came from.
 local records_comp = nil
 
---- Track the live binding of slot index, or refill the slot once its recorded item has been used up.
+-- The item UpdateQuickSlot takes to clear a slot.
+local EMPTY_ITEM = { ItemUID = { A = 0, B = 0, C = 0, D = 0 } }
+
+--- Track the live binding of slot index, refill the slot once its recorded item has been used up, or clear it while it names an item outside the inventory.
 --- uid is the slot's QuickSlots entry, or nil. found is that item and its main container from locate, or nil when the entry is stale.
 local function check_slot(pc, comp, index, uid, found)
 	local record = records[index]
@@ -190,27 +194,29 @@ local function check_slot(pc, comp, index, uid, found)
 		log.debug("quick slot %d bound to %s %s in %s, single use %s", index, tostring(def), guid_str(uid), tostring(root), tostring(single))
 		return
 	end
-	if not record then return end
 
 	records[index] = nil
-	-- Still in the inventory: the slot was cleared by hand.
-	if find_item(comp, record.uid) then return end
-	-- Left with uses left and no use running: dropped, discarded or sold.
-	if not (record.uses <= 0 or using_item(pc)) then return end
+	-- Used up: left the inventory after a poll saw it at 0 uses, or while a use ran.
+	-- Otherwise the slot was cleared by hand with its item still in the inventory, or the item was dropped, discarded or sold.
+	local used = record and not find_item(comp, record.uid) and (record.uses <= 0 or using_item(pc))
 	-- Fewest uses left first, so partly used items are finished before fresh ones. Ties keep container order.
 	local item, item_uses
-	for _, candidate in ipairs(record.root and record.def and matching(comp, record.def, record.root) or {}) do
+	for _, candidate in ipairs(used and record.root and record.def and matching(comp, record.def, record.root) or {}) do
 		local uses = uses_left(candidate)
 		if not item or uses < item_uses then item, item_uses = candidate, uses end
 	end
-	if not item then
-		log.debug("quick slot %d empty: no %s left in %s", index, tostring(record.def), tostring(record.root))
+	if item then
+		local new_uid = util.guid(item.ItemUID)
+		comp:UpdateQuickSlot(index, item)
+		records[index] = { uid = new_uid, def = record.def, root = record.root, single = record.single, uses = item_uses }
+		log.debug("quick slot %d refilled with %s %s from %s", index, record.def, guid_str(new_uid), record.root)
 		return
 	end
-	local new_uid = util.guid(item.ItemUID)
-	comp:UpdateQuickSlot(index, item)
-	records[index] = { uid = new_uid, def = record.def, root = record.root, single = record.single, uses = item_uses }
-	log.debug("quick slot %d refilled with %s %s from %s", index, record.def, guid_str(new_uid), record.root)
+	if used then log.debug("quick slot %d empty: no %s left in %s", index, tostring(record.def), tostring(record.root)) end
+	-- An entry naming an item outside the inventory: the item sat in a container moved to another inventory, like the stash or the floor, and the game leaves the slot bound then.
+	if not uid then return end
+	comp:UpdateQuickSlot(index, EMPTY_ITEM)
+	log.debug("quick slot %d cleared: %s is not in the inventory", index, guid_str(uid))
 end
 
 --- Show count on a quick slot tile in place of its uses.
@@ -313,8 +319,7 @@ local function poll()
 			if not tile then
 				tiles = tiles or quick_slot_tiles()
 				tile = tiles[index]
-				tile_paths[index] = tile and util.path(tile) or nil
-			end
+				tile_paths[index] = tile and util.path(tile) or nil			end
 			counted[index] = tile
 		end
 	end
