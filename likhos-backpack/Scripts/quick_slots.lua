@@ -142,11 +142,8 @@ end
 
 --- Whether one of the player's active abilities uses an item.
 local function using_item(pc)
-	local comp_class = StaticFindObject(ABILITY_COMP)
-	local pawn = pc.Pawn
-	if not (util.valid(comp_class) and util.valid(pawn)) then return false end
-	local comp = pawn:GetComponentByClass(comp_class)
-	if not util.valid(comp) then return false end
+	local comp = util.component(pc.Pawn, ABILITY_COMP)
+	if not comp then return false end
 	-- The Blueprint class is found only once loaded, and an unloaded class has no instance to match.
 	local classes = {}
 	for _, path in ipairs(USE_ABILITIES) do

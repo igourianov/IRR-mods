@@ -22,6 +22,14 @@ function M.path(obj)
 	return obj:GetFullName():match("^%S+ (.+)$")
 end
 
+--- The component of actor whose class is at class_path, or nil when actor is invalid, the class isn't loaded or actor has none.
+function M.component(actor, class_path)
+	local class = StaticFindObject(class_path)
+	if not (M.valid(actor) and M.valid(class)) then return nil end
+	local comp = actor:GetComponentByClass(class)
+	return M.valid(comp) and comp or nil
+end
+
 --- A plain Lua copy of an FGuid, which stays valid after the struct it was read from is gone.
 function M.guid(g)
 	return { A = g.A, B = g.B, C = g.C, D = g.D }

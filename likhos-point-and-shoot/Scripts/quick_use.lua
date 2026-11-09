@@ -58,11 +58,10 @@ end
 --- The local PlayerController, its pawn's ability component and the SGA_Interact class, or nil while any is missing.
 local function interact_parts()
 	local pc = FindFirstOf("PlayerController")
-	local comp_class = StaticFindObject(ABILITY_COMP)
 	local sga_class = StaticFindObject(SGA_INTERACT)
-	if not (util.valid(pc) and util.valid(pc.Pawn) and util.valid(comp_class) and util.valid(sga_class)) then return nil end
-	local comp = pc.Pawn:GetComponentByClass(comp_class)
-	if not util.valid(comp) then return nil end
+	if not (util.valid(pc) and util.valid(sga_class)) then return nil end
+	local comp = util.component(pc.Pawn, ABILITY_COMP)
+	if not comp then return nil end
 	return pc, comp, sga_class
 end
 

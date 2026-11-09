@@ -35,14 +35,8 @@ end
 --- The equipped weapon's WeaponComponent, or nil.
 local function resolve_weapon_component(pawn)
 	local inv_lib = StaticFindObject("/Script/Test_C.Default__InventoryFunctionLibrary")
-	local wc_cls  = StaticFindObject("/Script/Test_C.WeaponComponent")
-	if not (util.valid(inv_lib) and util.valid(wc_cls)) then return nil end
-
-	local weapon = inv_lib:GetEquippedWeapon(pawn)
-	if not util.valid(weapon) then return nil end
-	local wc = weapon:GetComponentByClass(wc_cls)
-	if util.valid(wc) then return wc end
-	return nil
+	if not util.valid(inv_lib) then return nil end
+	return util.component(inv_lib:GetEquippedWeapon(pawn), "/Script/Test_C.WeaponComponent")
 end
 
 --- The local player's equipped weapon's WeaponComponent, or nil.
