@@ -17,6 +17,7 @@ return {
 	quick_sell = true,
 
 	-- A quick slot whose item leaves the inventory, used up or otherwise, rebinds to another item of the same type from the inventory, partly used ones first.
+	-- A click on a quick slot in the inventory screen clears it.
 	-- A quick slot of a single use item, like an injector or a grenade, shows how many of its type the inventory holds.
 	-- Set false for the vanilla behavior, where the slot empties after one use.
 	quick_slot_refill = true,

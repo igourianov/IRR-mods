@@ -12,11 +12,11 @@ Use counter on inventory tiles of medical items, keys and quest items now shows 
 
 ## Quick slot refill
 
-A quick slot now holds an item type rather than a single item. When the item in a quick slot leaves your inventory, the slot picks the next item of the same type from anywhere in your inventory, e.g. the next Morphine on the chest rig or in the backpack. That covers an item used up, dropped, discarded, sold, moved to the stash or carried out with its container, e.g. a backpack moved to the stash. Partly used items go first. The slot empties once your inventory has none left, or when you clear it by hand.
+A quick slot holds an item type rather than a single item. When its item is used up or leaves your inventory, the slot takes the next one of the same type from anywhere in your inventory, partly used ones first. It empties once none are left.
 
-The vanilla game keeps a slot bound when its item leaves with its container. The mod clears such a slot when nothing of its type is left.
+For single use items, e.g. injectors, bandages or grenades, the slot shows how many your inventory holds.
 
-A quick slot of a single use item, e.g. an injector, bandage or grenade, shows in the inventory screen how many of its type your inventory holds. With 3 injectors on the chest rig and 2 in the backpack the slot shows 5, while each injector's own tile still shows 1/1.
+`Click` a quick slot in the inventory screen to clear it. Its item can no longer be dragged out of the slot.
 
 ## Known issues
 

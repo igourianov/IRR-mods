@@ -1,5 +1,6 @@
 -- quick_slots.lua : a quick slot binds an item definition. Once its item leaves the inventory it rebinds to another item of the same definition from the inventory (docs/solutions/quick-slot-refill.md, docs/solutions/quick-slot-whole-inventory.md, docs/solutions/quick-slot-type-bind.md).
 -- A quick slot naming an item that is no longer in the inventory, with none of its definition left, is cleared (docs/solutions/quick-slot-left-inventory.md).
+-- A bare left click on a quick slot's tile clears the slot (docs/solutions/quick-slot-click-clear.md).
 --
 -- Every game name here comes from those docs.
 -- Items leave the inventory through several paths, some native, and the quick slot widgets exist only in the inventory screen, so the slots are polled rather than hooked.
@@ -7,10 +8,15 @@
 
 local log  = require("log")
 local util = require("util")
+local hook = require("hook")
 
 local M = {}
 
+local hooks = hook.new("quick slot clear", "a click on a quick slot stays vanilla")
+
 local LIBRARY_CDO  = "/Script/Test_C.Default__InventoryFunctionLibrary"
+local INPUT_LIB    = "/Script/Engine.Default__KismetInputLibrary"
+local TILE_CLASS   = "/Game/Blueprints/InventorySystem/Widgets/W_InventoryItem.W_InventoryItem_C"
 local SLOT_COUNT   = 4
 -- Short so a slot refills right after its item leaves.
 local POLL_MS      = 50
@@ -112,6 +118,14 @@ local records_comp = nil
 -- The item UpdateQuickSlot takes to clear a slot.
 local EMPTY_ITEM = { ItemUID = { A = 0, B = 0, C = 0, D = 0 } }
 
+--- The player's inventory component, which holds the quick slots, or nil outside a level with a player.
+local function player_inventory()
+	local pc = FindFirstOf("PlayerController")
+	local library = StaticFindObject(LIBRARY_CDO)
+	local comp = util.valid(pc) and util.valid(library) and library:GetPlayerInventoryComponent(pc) or nil
+	return util.valid(comp) and comp or nil
+end
+
 --- Track the live binding of slot index, refill the slot once its recorded item has left the inventory, or clear it while it names an item outside the inventory.
 --- uid is the slot's QuickSlots entry, or nil. item is that item from locate, or nil when the entry is stale.
 local function check_slot(comp, index, uid, item)
@@ -212,10 +226,8 @@ local function count_matching(comp, slots)
 end
 
 local function poll()
-	local pc = FindFirstOf("PlayerController")
-	local library = StaticFindObject(LIBRARY_CDO)
-	local comp = util.valid(pc) and util.valid(library) and library:GetPlayerInventoryComponent(pc) or nil
-	local path = util.valid(comp) and util.path(comp) or nil
+	local comp = player_inventory()
+	local path = comp and util.path(comp) or nil
 	if path ~= records_comp then
 		records, records_comp = {}, path
 		return
@@ -260,10 +272,43 @@ local function poll()
 	for index, tile in pairs(counted) do show_count(tile, counts[records[index].def]) end
 end
 
+--- Clear slot index of the player's inventory while it still names uid.
+--- The poll then finds the slot empty with its item still in the inventory, and leaves it empty.
+local function clear_clicked(index, uid)
+	local comp = player_inventory()
+	if not comp then return end
+	local slots = comp.QuickSlots
+	for i = 1, #slots do
+		local slot = slots[i]
+		if slot.Index == index and util.same_guid(slot.ItemUID, uid) then
+			comp:UpdateQuickSlot(index, EMPTY_ITEM)
+			log.debug("quick slot %d cleared by click", index)
+			return
+		end
+	end
+end
+
+-- The mouse event is only readable while the handler runs. The clear waits a tick, since it removes the clicked tile.
+-- The press also starts vanilla's drag detection, so a quick slot tile can no longer be dragged out.
+local function on_mouse_down(context, _, mouse_event)
+	local tile = context:get()
+	local element = tile.BaseContainerElementRef
+	if not (util.valid(element) and element:GetClass():GetFName():ToString() == SLOT_WIDGET) then return end
+	local input = StaticFindObject(INPUT_LIB)
+	if input:PointerEvent_GetEffectingButton(mouse_event:get()).KeyName:ToString() ~= "LeftMouseButton" then return end
+	-- Shift+Click sells or drops and Ctrl+Click moves the item, both vanilla. The mask's bits are engine-internal, so the library decodes it, from a fresh struct rather than the returned one (docs/solutions/hideout-quick-sell.md).
+	local keys = { ModifierKeysStateMask = input:GetModifierKeysState().ModifierKeysStateMask }
+	if input:ModifierKeysState_IsShiftDown(keys) or input:ModifierKeysState_IsControlDown(keys) or input:ModifierKeysState_IsAltDown(keys) then return end
+	local index = element.QuickSlotIndex
+	local uid = util.guid(tile.ContainerItem.ItemUID)
+	ExecuteInGameThreadWithDelay(1, hooks.guard(function() clear_clicked(index, uid) end))
+end
+
 local loop_handle = nil
 
---- Start the poll. UE4SS cancels the mod's delayed actions on unload, so a hot reload needs no explicit cancel.
+--- Start the poll and hook the tile click. UE4SS cancels the mod's delayed actions on unload, so a hot reload needs no explicit cancel.
 function M.install()
+	hooks.install(TILE_CLASS .. ":OnMouseButtonDown", TILE_CLASS, on_mouse_down)
 	if loop_handle then return end
 	loop_handle = LoopInGameThreadWithDelay(POLL_MS, function()
 		util.safe("quick slot poll", poll)
