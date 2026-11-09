@@ -10,7 +10,7 @@ local util    = require("util")
 local devices = require("devices")
 local quick_use = require("quick_use")
 local consume = require("consume")
-local painkillers = require("painkillers")
+local combat_heal = require("combat_heal")
 local config  = require("config")
 
 local M = {}
@@ -224,9 +224,13 @@ M.ACTIONS = {
 	["ConsumeFoodDrink"] = {
 		press   = consume.press,
 	},
-	-- docs/solutions/painkillers-bind.md
-	["UsePainkillers"] = {
-		press   = painkillers.press,
+	-- docs/solutions/combat-heal.md
+	["CombatHeal"] = {
+		press   = combat_heal.press,
+	},
+	-- docs/solutions/adrenaline-bind.md
+	["UseAdrenaline"] = {
+		press   = combat_heal.use_adrenaline,
 	},
 }
 

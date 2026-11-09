@@ -57,10 +57,17 @@ return {
 			block_in_ui = true,
 		},
 		{
-			id      = "painkillers",
+			id      = "combat_heal",
 			enabled = true,
-			mapping = "LikhosUsePainkillers",   -- Settings > Controls > Use Morphine/Painkillers
-			action  = "UsePainkillers",     -- take the fastest painkiller anywhere on the player
+			mapping = "LikhosCombatHeal",   -- Settings > Controls > Combat Heal
+			action  = "CombatHeal",     -- painkiller, heavy bleed, bleed, fracture or heal, the fastest item first
+			block_in_ui = true,
+		},
+		{
+			id      = "adrenaline",
+			enabled = true,
+			mapping = "LikhosUseAdrenaline",   -- Settings > Controls > Use Adrenaline
+			action  = "UseAdrenaline",     -- inject an Adrenaline Injector from anywhere in the inventory
 			block_in_ui = true,
 		},
 	},
