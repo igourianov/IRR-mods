@@ -61,6 +61,10 @@ Turn on auto low ready in the gameplay settings. That setting stays your switch 
 
 In `Scripts\config.lua`, `low_ready_run_delay_ms` (default 150) sets how long after a run the gun lowers, and `low_ready_default = false` restores the game's own auto low ready.
 
+## Known issues
+
+* **Consume Food/Drink** skips `Misprinted Condensed Milk`. *This is a vanilla bug.* The game tags it as a barter item rather than a food, although it can be consumed.
+
 ## Requirements
 
 - Incursion Red River, Steam version. Tested on build 26487830.
