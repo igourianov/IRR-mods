@@ -19,5 +19,8 @@ tools/UAssetGUI/
 tools/UE4SS-Lua-Types/
 tools/ue4ss-*/
 
+# Game data gunsmith.ps1 extracts, rebuilt after a game patch
+tools/gunsmith/cache/
+
 # ephemeral bbcode conversion
 *.bbcode

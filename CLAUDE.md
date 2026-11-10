@@ -19,7 +19,7 @@ The load-bearing ones:
 - `likhos-<name>/`: one mod, with `mod.txt`, `Scripts/` and `README.md`. All Lua lives flat in `Scripts/`; plain `require("log")`.
 - `lib/`: Lua modules shared by every Lua mod (`log`, `util`, `hook`). `build.ps1` and `publish.ps1` copy them into each mod's `Scripts/`, so a mod never has its own file with a `lib` name. Each mod names itself for log lines with `log.setup("<Name>", config.log_level)`.
 - A pak mod (`likhos-rearmed`) has `pak=` in `mod.txt` and the JSON edit lists (`reclass`, `clone`, `retarget`, `stats`, `effects`, `loadouts`, `loot`) that `tools\pak\pak.ps1` stages the pak's files from. `build.ps1` packs it with repak into `dist\` and installs it into `Content\Paks\~mods`.
-- `tools/`: one folder per repo tool (`build/`, `publish/`, `pak/`, `clear-keybinds/`), each holding the script and its configs. The scripts resolve paths from their own location, so they run from any directory. The tools `build.ps1` downloads (`repak/`, `UAssetGUI/`) and local backups in `tools/` are gitignored.
+- `tools/`: one folder per repo tool (`build/`, `publish/`, `pak/`, `gunsmith/`, `clear-keybinds/`), each holding the script and its configs. The scripts resolve paths from their own location, so they run from any directory. The tools `build.ps1` downloads (`repak/`, `UAssetGUI/`) and local backups in `tools/` are gitignored.
 - `docs/solutions/`: session level docs, one solution doc per piece of work, holding its design and its own recon. Read another solution doc only when the user points at it.
   A solution doc records what was done at the time and why. Do not update it when later work changes or supersedes that solution.
 
@@ -55,6 +55,24 @@ Class names, UFunction names and property paths must come from a UE4SS dump or L
 - Refuses a version equal to or older than the live Nexus version unless `-Force`.
 - Posts the `CHANGELOG.md` sections newer than the live version, up to the published one, as the Nexus changelog. Every heading must be a bare version (`# 1.2.38`).
 - Other switches: `-Category main|optional|miscellaneous`, `-NoArchive` (keep the previous file version unarchived), `-NoBumpModVersion` (do not update the mod page version).
+
+### tools/gunsmith/gunsmith.ps1
+
+Use it to check weapon and attachment balance: it prints each weapon's lowest-recoil build (loud and suppressed) and best-ergonomics build, with a pak mod's edits applied. Layout and recon: `docs/solutions/gunsmith.md`.
+
+```powershell
+.\tools\gunsmith\gunsmith.ps1                        # every weapon with likhos-rearmed's edits
+.\tools\gunsmith\gunsmith.ps1 -Class Rifle, Smg      # by weapon class, after reclass.json
+.\tools\gunsmith\gunsmith.ps1 '*AK*' -Detail         # the parts of each build
+.\tools\gunsmith\gunsmith.ps1 -Unique Foregrip       # at most one foregrip per build
+.\tools\gunsmith\gunsmith.ps1 'AK-74M' -Trace '*Foregrip*'   # every slot path to matching parts
+.\tools\gunsmith\gunsmith.ps1 -Vanilla               # the game's own values
+```
+
+- Extracts the item definitions and slot classes from the game paks into `tools\gunsmith\cache` (gitignored) on first run, and again when a game pak or the usmap changes or with `-Refresh`. That takes about 2 minutes; later runs take seconds.
+- Needs repak and UAssetGUI in `tools\` (fetched by the first pak build) and the usmap in the UE4SS folder.
+- `gunsmith.json` lists categories left out of the search, required slots, categories capped at one per build and game bugs to ignore.
+- Recoil is the stat sum. For full auto weapons it also shows recoil per second, stat × RPM / 700. `!` marks a build whose parts list each other as conflicting.
 
 ### tools/clear-keybinds/clear-keybinds.ps1
 
