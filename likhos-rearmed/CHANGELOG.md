@@ -1,3 +1,8 @@
+# 1.6.59
+* AK brakes (AK-74M, AK-12, AKS-74U, Jmac RRD-4C, Zenitco DTK-1) reduce recoil about 30% less, so a fully built AK no longer goes below zero recoil
+* AK-12 base recoil 42 -> 46, AK-103 48 -> 56, AK-104 50 -> 58
+* 5.56 rifles that fit no brake recoil less: M4A1 62 -> 50, MCX Virtus 58 -> 47, CQ 68 -> 56, QBZ-97 54 -> 46
+
 # 1.5.56
 * morphine and the MFAK's Inject hide the fracture screen distortion like painkillers
 

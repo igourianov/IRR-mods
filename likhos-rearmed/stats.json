@@ -84,15 +84,15 @@
 		"Recoil": -3
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AK-12_545x39_Muzzle/ID_AK-12_545x39_Muzzle": {
-		"Recoil": -22.5,
+		"Recoil": -15.5,
 		"Ergonomics": -5
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AK-74M_Muzzle_Brake/ID_AK-74M_Muzzle_Brake": {
-		"Recoil": -21.5,
+		"Recoil": -15,
 		"Ergonomics": -5
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AKS-74U_Muzzle/ID_AKS-74U_Muzzle": {
-		"Recoil": -17.5
+		"Recoil": -12
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/DT338_Muzzle_Brake/ID_DT338_Muzzle_Brake": {
 		"Recoil": -22
@@ -109,7 +109,7 @@
 		"Recoil": -17
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Jmac_Customs_RRD-4C_545x39_Muzzle_Brake/ID_Jmac_Customs_RRD-4C_545x39_Muzzle_Brake": {
-		"Recoil": -24.5,
+		"Recoil": -17,
 		"Ergonomics": -4
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/M700_PGW_Timberwolf_Muzzle_Brake/ID_M700_PGW_Timberwolf_Muzzle_Brake": {
@@ -142,7 +142,7 @@
 		"Ergonomics": -6
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Zenitco_DTK-1_545x39_Muzzle_Brake/ID_Zenitco_DTK-1_545x39_Muzzle_Brake": {
-		"Recoil": -25,
+		"Recoil": -17.5,
 		"Ergonomics": -4
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/M14_Smith_Enterprise_SOCOM_16_762x51_Muzzle_Brake/ID_M14_Smith_Enterprise_SOCOM_16_762x51_Muzzle_Brake": {
@@ -304,5 +304,26 @@
 	"/Game/Blueprints/InventorySystem/Items/Medical/Adrenaline_Injector/ID_Adrenaline_Injector": {
 		"RecoverMultiplier": 1.5,
 		"DrainMultiplier": 0.5
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AK-12/ID_AK-12": {
+		"Recoil": 46
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AK-103/ID_AK-103": {
+		"Recoil": 56
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AK-104/ID_AK-104": {
+		"Recoil": 58
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/Colt_M4A1/ID_Colt_M4A1": {
+		"Recoil": 50
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/Sig_Sauer_MCX_Virtus/ID_Sig_Sauer_MCX_Virtus": {
+		"Recoil": 47
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/Norinco_CQ/ID_Norinco_CQ": {
+		"Recoil": 56
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/QBZ-97/ID_QBZ-97": {
+		"Recoil": 46
 	}
 }

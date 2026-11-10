@@ -32,6 +32,15 @@ Most stocks are rescaled by build. Lightweight and skeletonized stocks give the 
 * Removed recoil bonuses from buffer tubes and lowered their ergonomics. Their stats stacked with the stock mounted on them, which made buffer tube + Viper the best pick on every AR.
 * Removed bonuses from the SKS SAGE chassis. Like the M700 chassis, its grip and stock are added separately, so the stats stacked.
 
+## AK and 5.56 rifle recoil
+
+AK brakes pushed a fully built AK below zero recoil, while 5.56 rifles have no brake that fits them. The two are rebalanced so each platform has its edge.
+
+* An AK with a brake recoils somewhat less than an AR with a flash hider. With suppressors on both, the AR comes out ahead.
+* AK brakes reduce recoil less, so a fully built AK no longer goes below zero.
+* 7.62x39 AKs recoil more than 5.45 ones. A brake brings them to about AR level.
+* 5.56 rifles that fit no brake (M4A1, MCX Virtus, CQ, QBZ-97) recoil less.
+
 ## NPC loadouts
 
 Each faction's NPCs now carry weapons that fit the faction. Within each role, pricier weapons spawn less often.
@@ -98,6 +107,7 @@ The mod replaces these game files:
   - MCX stocks: MCX Collapsible, Folding Mini Skeleton, Folding Visor, Folding Skeleton and Folding Collapsible Tube
   - AK stocks: AK SAG ACR, PP-19, AKS-74U, KPYK CRC-5002-9033, RPK-74 Folding and AK-12 Collapsible
   - SKS chassis: SAGE International SKSALCV
+- The item definitions of these weapons (`ID_*` under `Items/Weapons`): AK-12, AK-103, AK-104, M4A1, MCX Virtus, CQ and QBZ-97
 - Eleven NPC loadout presets:
   - `DA_Inventory_AI_Patrol_IGC_A`
   - `DA_Inventory_AI_Guard_IGC`
