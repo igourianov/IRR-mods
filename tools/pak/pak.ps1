@@ -3,7 +3,8 @@
 	Stage the files of a pak mod from the edit lists in its folder.
 
 .DESCRIPTION
-	Extracts the game's own DefaultGameplayTags.ini and moves every weapon listed in reclass.json to its new class.
+	Each stage below runs only when the mod folder has its edit list, so a mod stages only the edits it lists.
+	Reads the game's own DefaultGameplayTags.ini and moves every weapon listed in reclass.json to its new class. The ini is staged only when reclass.json exists.
 	A weapon's class is the parent of its item tag (Inventory.Items.Weapons.<Class>.<Name>), so a move renames the tag.
 	The old tag leaves the tag list and a redirect maps it to the new one. The engine applies redirects when it loads cooked assets and saves, so every item definition, loadout and preset that names the old tag follows.
 	Then stages a renamed copy of every cooked asset listed in clone.json, e.g. a mag well that takes 300 BLK mags instead of 5.56 ones.
@@ -11,13 +12,13 @@
 	Then it extracts every item definition listed in stats.json and sets its stat values, e.g. the 7.62x39 HP round's damage or the adrenaline injector's stamina recovery.
 	Then it extracts every stat config listed in effects.json and sets properties of the effect template its items' effects inherit from, e.g. the tags a painkiller dose grants.
 	Then it extracts every NPC loadout preset listed in loadouts.json and sets the weapon pool it picks from: the part of its faction's weighted pool that the preset selects.
-	Last, it extracts every loot container preset listed in loot.json and sets its loot generation settings, e.g. how many ammo stacks an ammo box holds.
-	Every edit list must exist in the mod folder.
+	Then it extracts every loot container preset listed in loot.json and sets its loot generation settings, e.g. how many ammo stacks an ammo box holds.
+	Last, it extracts every material instance listed in materials.json and sets scalar parameters it overrides, e.g. a scope's chromatic aberration amount.
 	Called by build.ps1, which packs the staged tree.
 #>
 [CmdletBinding()]
 param(
-	# The pak mod's folder, holding reclass.json, clone.json, retarget.json, stats.json, effects.json, loadouts.json and loot.json.
+	# The pak mod's folder, holding any of reclass.json, clone.json, retarget.json, stats.json, effects.json, loadouts.json, loot.json and materials.json.
 	[Parameter(Mandatory)] [string] $ModDir,
 	[Parameter(Mandatory)] [string] $Repak,
 	[Parameter(Mandatory)] [string] $UAssetGUI,
@@ -64,9 +65,20 @@ function Get-AssetPath {
 	"$contentDir/$($Package.Substring(6))"
 }
 
+# A missing edit list reads as an empty one, so its stage edits nothing.
+function Read-EditList {
+	param([string] $Name)
+	$path = Join-Path $ModDir "$Name.json"
+	if (Test-Path $path) { Get-Content $path -Raw | ConvertFrom-Json } else { [pscustomobject]@{} }
+}
+
+$work = Join-Path ([System.IO.Path]::GetTempPath()) "$(Split-Path $ModDir -Leaf).$([System.IO.Path]::GetRandomFileName().Split('.')[0])"
+New-Item -ItemType Directory $work | Out-Null
+
 # ---------------------------------------------------------------- reclass
-Expand-GameFiles $iniPath
-$file = Join-Path $StageDir $iniPath
+# The loadouts stage reads the tag list too, so the ini is read even without reclass.json, but only staged with it.
+Expand-GameFiles $iniPath $work
+$file = Join-Path $work $iniPath
 $bytes = [System.IO.File]::ReadAllBytes($file)
 $bom = $bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF
 $text = [System.IO.File]::ReadAllText($file)
@@ -83,7 +95,7 @@ function Find-Tag {
 	Find-Lines "^\+GameplayTagList=\(Tag=`"$([regex]::Escape($Tag))`","
 }
 
-$reclass = Get-Content (Join-Path $ModDir 'reclass.json') -Raw | ConvertFrom-Json
+$reclass = Read-EditList 'reclass'
 foreach ($entry in $reclass.PSObject.Properties) {
 	$name = ($entry.Name -split '\.', 2)[1]
 	$old = "$weaponsTag.$($entry.Name)"
@@ -108,13 +120,15 @@ foreach ($entry in $reclass.PSObject.Properties) {
 	Write-Host "  $($entry.Name) -> $($entry.Value)"
 }
 
-[System.IO.File]::WriteAllText($file, ($lines -join $eol), [System.Text.UTF8Encoding]::new($bom))
+if (Test-Path (Join-Path $ModDir 'reclass.json')) {
+	$staged = Join-Path $StageDir $iniPath
+	New-Item -ItemType Directory -Force (Split-Path $staged) | Out-Null
+	[System.IO.File]::WriteAllText($staged, ($lines -join $eol), [System.Text.UTF8Encoding]::new($bom))
+}
 
 # ---------------------------------------------------------------- assets
 # Cooked assets are edited as UAssetGUI JSON. Without a usmap their exports stay raw bytes, so only the name map and the import and export tables are touched.
-# With -Parse the usmap turns exports into properties, whose names are no longer name map indexes, so renaming a name map entry would leave them behind. Only the stats stage parses.
-$work = Join-Path ([System.IO.Path]::GetTempPath()) "$(Split-Path $ModDir -Leaf).$([System.IO.Path]::GetRandomFileName().Split('.')[0])"
-New-Item -ItemType Directory $work | Out-Null
+# With -Parse the usmap turns exports into properties, whose names are no longer name map indexes, so renaming a name map entry would leave them behind. Only the clone and retarget stages don't parse.
 
 function Invoke-UAssetGUI {
 	param([hashtable[]] $Calls)
@@ -191,7 +205,7 @@ function Get-AssetNames {
 
 # ---------------------------------------------------------------- clone
 $cloned = [System.Collections.Generic.HashSet[string]]::new()
-$clone = Get-Content (Join-Path $ModDir 'clone.json') -Raw | ConvertFrom-Json
+$clone = Read-EditList 'clone'
 $entries = @($clone.PSObject.Properties)
 $assets = @(Read-Assets $entries.Value.from)
 for ($n = 0; $n -lt $entries.Count; $n++) {
@@ -222,7 +236,7 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 }
 
 # ---------------------------------------------------------------- retarget
-$retarget = Get-Content (Join-Path $ModDir 'retarget.json') -Raw | ConvertFrom-Json
+$retarget = Read-EditList 'retarget'
 $entries = @($retarget.PSObject.Properties)
 $assets = @(Read-Assets $entries.Name)
 for ($n = 0; $n -lt $entries.Count; $n++) {
@@ -294,7 +308,7 @@ function Get-NameValues {
 	elseif ($Property.Value -is [array]) { foreach ($inner in $Property.Value) { Get-NameValues $inner } }
 }
 
-$stats = Get-Content (Join-Path $ModDir 'stats.json') -Raw | ConvertFrom-Json
+$stats = Read-EditList 'stats'
 $entries = @($stats.PSObject.Properties)
 $assets = @(Read-Assets $entries.Name -Parse)
 for ($n = 0; $n -lt $entries.Count; $n++) {
@@ -370,7 +384,7 @@ function New-Property {
 	[pscustomobject] $property
 }
 
-$effects = Get-Content (Join-Path $ModDir 'effects.json') -Raw | ConvertFrom-Json
+$effects = Read-EditList 'effects'
 $entries = @($effects.PSObject.Properties)
 $assets = @(Read-Assets $entries.Name -Parse)
 for ($n = 0; $n -lt $entries.Count; $n++) {
@@ -434,7 +448,7 @@ function Select-Weapons {
 
 # Keyed by preset path, so the loot stage can tell a preset is taken.
 $loadouts = [pscustomobject]@{}
-foreach ($faction in (Get-Content (Join-Path $ModDir 'loadouts.json') -Raw | ConvertFrom-Json).PSObject.Properties) {
+foreach ($faction in (Read-EditList 'loadouts').PSObject.Properties) {
 	$weapons = @($faction.Value.pool.PSObject.Properties)
 	$selected = [System.Collections.Generic.HashSet[string]]::new()
 	foreach ($preset in $faction.Value.presets.PSObject.Properties) {
@@ -489,7 +503,7 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 # A loot container rolls its contents from the loot settings of its one slot. A listed int or bool field is set, a listed map field has the value of each listed key set.
 # An int or bool field at its class default is absent from the asset, so it is written in, typed by its JSON value.
 # Only keys the preset already has are set, since a new key would need its tag added to the name map.
-$loot = Get-Content (Join-Path $ModDir 'loot.json') -Raw | ConvertFrom-Json
+$loot = Read-EditList 'loot'
 $entries = @($loot.PSObject.Properties)
 $assets = @(Read-Assets $entries.Name -Parse)
 for ($n = 0; $n -lt $entries.Count; $n++) {
@@ -549,6 +563,39 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 			}
 			default { Write-Error "$asset's $($field.Name) is not an int, bool or map." }
 		}
+	}
+
+	Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset") -Parse
+}
+
+# ---------------------------------------------------------------- materials
+# A material instance overrides a parent parameter with a ScalarParameterValues entry, matched by the name in its ParameterInfo.
+# Only existing overrides are set. A new one would need a full ParameterInfo and its names added to the name map.
+$materials = Read-EditList 'materials'
+$entries = @($materials.PSObject.Properties)
+$assets = @(Read-Assets $entries.Name -Parse)
+for ($n = 0; $n -lt $entries.Count; $n++) {
+	$entry = $entries[$n]
+	$asset = $entry.Name
+	$name = ($asset -split '/')[-1]
+	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $effects.PSObject.Properties[$asset] -or $loadouts.PSObject.Properties[$asset] -or $loot.PSObject.Properties[$asset]) { Write-Error "$asset is listed in materials.json and another stage." }
+
+	$data = $assets[$n]
+	$instance = @($data.Exports | Where-Object ObjectName -eq $name)
+	if ($instance.Count -ne 1) { Write-Error "$asset has no material instance export." }
+	$scalars = @($instance[0].Data | Where-Object Name -eq 'ScalarParameterValues')
+	if ($scalars.Count -ne 1) { Write-Error "$asset has no ScalarParameterValues." }
+
+	foreach ($parameter in $entry.Value.PSObject.Properties) {
+		$found = @($scalars[0].Value | Where-Object { (($_.Value | Where-Object Name -eq 'ParameterInfo').Value | Where-Object Name -eq 'Name').Value -eq $parameter.Name })
+		if ($found.Count -ne 1) { Write-Error "$asset doesn't override $($parameter.Name)." }
+		$value = $found[0].Value | Where-Object Name -eq 'ParameterValue'
+
+		$old = $value.Value
+		$value.Value = [double] $parameter.Value
+		# An unversioned property flagged zero is left out of the export, as the game's own zero overrides are.
+		$value.IsZero = $parameter.Value -eq 0
+		Write-Host "  ${name}: $($parameter.Name) $old -> $($parameter.Value)"
 	}
 
 	Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset") -Parse

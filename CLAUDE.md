@@ -38,7 +38,7 @@ Class names, UFunction names and property paths must come from a UE4SS dump or L
 ```
 
 - Needs `tools\build\build.config.json` (gitignored, copy of `tools\build\build.config.example.json`) holding the game dir.
-- Bumps the patch number in `mod.txt` when the mod folder has uncommitted changes. For a Lua mod, a change in `lib\` also counts, for a pak mod one in `tools\pak\`. The bumped `mod.txt` keeps the folder dirty, so every build bumps again until committed.
+- Bumps the patch number in `mod.txt` when the mod folder has uncommitted changes. For a Lua mod, a change in `lib\` also counts. A pak mod counts only its own folder, so a `tools\pak\` change bumps no mod. The bumped `mod.txt` keeps the folder dirty, so every build bumps again until committed.
 - Lua mod: copies the mod folder to `ue4ss\Mods\<mod>` and `lib\*.lua` into its `Scripts\`. Fails if `Scripts\` has a file with a `lib` name.
 - Pak mod: runs `tools\pak\pak.ps1` on the mod's edit lists to stage files, packs with repak into `dist\<pak>`, copies it into `Content\Paks\~mods`. Downloads repak and UAssetGUI into `tools\` on first use. Needs a usmap in the UE4SS folder, generated in game with the UE4SS mappings dump key after every game patch.
 

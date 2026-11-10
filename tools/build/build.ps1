@@ -4,7 +4,7 @@
 
 .DESCRIPTION
 	A build bumps the patch segment of the mod's version in mod.txt when the mod folder has uncommitted changes.
-	A Lua mod gets the shared modules in lib\ copied into its Scripts folder, and a change to lib\ counts as a change to every Lua mod. A change to tools\pak\ counts as a change to every pak mod.
+	A Lua mod gets the shared modules in lib\ copied into its Scripts folder, and a change to lib\ counts as a change to every Lua mod. A pak mod counts only its own folder, since a version stands for a change to the mod's own edits.
 	A mod whose mod.txt names a pak is a pak mod. tools\pak\pak.ps1 stages its files from the edit lists in its folder, repak packs them into dist\<pak> and the pak is copied into Content\Paks\~mods.
 	The pinned tools a pak build needs, repak and UAssetGUI, are downloaded into tools\<name> on first use.
 	A pak build also needs the game's usmap, which UE4SS generates in game into its own folder.
@@ -111,7 +111,7 @@ foreach ($m in $Mods) {
 
 	$text = [System.IO.File]::ReadAllText($modTxt)
 	$pakMatch = [regex]::Match($text, '(?m)^\s*pak\s*=\s*"([^"]+)"')
-	$sources = if ($pakMatch.Success) { @($m, 'tools/pak') } else { @($m, 'lib') }
+	$sources = if ($pakMatch.Success) { @($m) } else { @($m, 'lib') }
 	$match = [regex]::Match($text, $versionPattern)
 	$version = $null
 	if ($match.Success) {

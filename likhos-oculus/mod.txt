@@ -1,0 +1,9 @@
+[mod]
+version="1.0.1"
+; Built pak. _P gives its files priority over the game's paks.
+pak="likhos_oculus_P.pak"
+
+[game]
+; Game build ID the pak was last built from. The pak carries that build's whole material instances it edits, so rebuild and republish after every game patch.
+game_build="26487830"
+engine_version="5.6"
