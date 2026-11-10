@@ -1,13 +1,14 @@
 # Likho's Oculus
 
-This mod cleans up the view through magnified and thermal scopes.
+Removes chromatic aberration and thins the lens edge tint in magnified and thermal scopes.
 
-* Removes chromatic aberration, the red and blue color fringing inside the scope while aiming.
-* Keeps the lens edge tint in a thin band at the rim instead of spreading toward the center. The tint colors stay as they are.
+## Chromatic aberration
 
-Thermal scopes lose their aberration too, since a digital display has no lens to split colors.
+Removes the red and blue color fringing inside the scope while aiming. Thermal scopes lose their aberration too, since a digital display has no lens to split colors.
 
-Red dots, holographic sights and iron sights are unchanged.
+## Lens edge tint
+
+Reduces the width of the edge tint. The tint colors are unchanged.
 
 ## Installation
 
@@ -35,4 +36,4 @@ The mod replaces the scope view material of these scopes (`*_PP` material instan
 - SIG Sauer BRAVO4 4x30
 - Trijicon ACOG 4x24, ACOG 6x48 and SkeetIR 1x thermal
 
-It works alongside Likho's Rearmed. It conflicts with any other mod that replaces those files, and it needs an update after every game patch that changes them.
+It conflicts with any other mod that replaces those files, and it needs an update after every game patch that changes them.
