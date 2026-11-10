@@ -1,6 +1,6 @@
 # Likho's Rearmed
 
-This mod rebalances various weapon stats and adjusts faction weapon pools.
+Rebalances weapons and attachments, reworks NPC loadouts and in-raid loot, and tweaks adrenaline and painkillers.
 
 ## Classification
 
@@ -26,7 +26,7 @@ Each type of muzzle device now has its own role instead of suppressors being the
 
 ## Stocks rebalance
 
-Most stocks are rescaled by build. Lightweight and skeletonized stocks give the most ergonomics and the least recoil reduction. Heavy, well padded stocks give the least ergonomics and the most recoil reduction.
+Most stocks are rescaled by build. Lightweight and skeletonized stocks give the most ergonomics and the least recoil reduction. Heavy, well-padded stocks give the least ergonomics and the most recoil reduction.
 
 * Rescaled AR, MCX/MPX and AK stocks along that scale. MCX and MPX stocks follow the AR scale, since the MCX mounts AR stocks through an adapter.
 * Removed recoil bonuses from buffer tubes and lowered their ergonomics. Their stats stacked with the stock mounted on them, which made buffer tube + Viper the best pick on every AR.
@@ -36,27 +36,32 @@ Most stocks are rescaled by build. Lightweight and skeletonized stocks give the 
 
 Each faction's NPCs now carry weapons that fit the faction. Within each role, pricier weapons spawn less often.
 
-* IGC: mostly 5.45x39 platform with some Vityaz and Saiga. Snipers: SVD and VSS.
-* UICS: mostly M4 and the MP5 family + low chance of exotic NATO weapons. Snipers: M14, RFB and SCAR-H.
-* VLF: 7.62x39 rifles and Chinese 5.56 rifles. Snipers: M305 and FAL.
+Guards are the heavier tier. They carry only full rifles and LMGs. Patrols carry lighter weapons such as SMGs and shotguns, and some UICS and VLF patrols carry only a pistol.
 
-Guards are the heavier tier. They carry only full rifles and LMGs, no SMGs or shotguns. Patrols carry the lighter weapons, and some UICS and VLF patrols carry only a pistol.
-
-* IGC patrols: AKS-74U, Vityaz and Saiga. Guards: AK rifles, AS Val and RPK.
-* UICS patrols: MP5 family, MPX, P90, Vector and shotguns. Guards: M4A1, AUG, SCAR-L, MCX Virtus and KAC LAMG.
-* VLF patrols: QBZ-97 and CQ. Guards: STV-380, SKS, AK-103 and AK-104.
+* IGC: mostly 5.45x39 platform.
+  * Patrols: AKS-74U, Vityaz and Saiga.
+  * Guards: AK rifles, AS Val and RPK.
+  * Snipers: SVD and VSS.
+* UICS: mostly M4 and the MP5 family, low chance of exotic NATO weapons.
+  * Patrols: MP5 family, MPX, P90, Vector and shotguns.
+  * Guards: M4A1, AUG, SCAR-L, MCX Virtus and KAC LAMG.
+  * Snipers: M14, RFB and SCAR-H.
+* VLF: 7.62x39 rifles and Chinese 5.56 rifles.
+  * Patrols: QBZ-97 and CQ.
+  * Guards: STV-380, SKS, AK-103 and AK-104.
+  * Snipers: M305 and FAL.
 
 ## Ammo boxes
 
-In-raid ammo boxes hold more ammo and lean towards better rounds.
+In-raid ammo boxes now make it easier to find the ammo type your equipped gun uses. They hold more ammo and lean towards better rounds.
 
 * 2-5 stacks per box instead of 1-3.
-* 30-90 rounds per stack instead of 10-40.
+* 30-90 rounds per stack instead of 10-40. Stacks cap at 60, so any roll above 60 gives a full stack.
 * Tier 1 rounds (5.56 FMJ, 9x19 PSO, 5.45 PS, 12ga buckshot, 7.62x39 HP) roll about a third less often, effectively making higher tiers more common.
 
 ## Med boxes
 
-In-raid med boxes hold only medical items. Nylon and polyester fabric no longer spawn in them.
+In-raid med boxes now hold only medical items. Nylon and polyester fabric no longer take up loot slots, so more medical items spawn.
 
 ## Adrenaline injector
 
@@ -64,7 +69,7 @@ Stamina boost raised from 10% to 50%: stamina recovers 50% faster and drains 50%
 
 ## Painkillers
 
-Morphine and the MFAK's Inject now hide the fracture screen distortion, the same as painkillers. The fracture itself stays until splinted.
+Fixed a vanilla inconsistency: Morphine and the MFAK's Inject now hide the fracture screen distortion, the same as Painkillers do.
 
 ## Installation
 
@@ -89,10 +94,10 @@ The mod replaces these game files:
 - The item definitions of every muzzle device except the AUG RAT Worx adapter, the M14 National Match brake and the AS VAL and VSS integral suppressors (`ID_*` under `Items/Attachments/Muzzle`)
 - The item definitions of these stocks (`ID_*` under `Items/Attachments/Stock`):
   - Buffer tubes: AR-15 PWS Enhanced, AK SAG, AR-15 Colt A2, FAL Folding and AR-15 Strike SI AR Advanced
-  - AR-15 ACE Ultra Lite, AR-15 CMMG Ripstock, AR-15 Odin Works Zulu 2, AR-15 Strike Industries Viper Mod 1, AR-15 Magpul UBR, AR-15 Daniel Defense, AR-15 BCM Gunfighter Mod 0 and AR-15 VLTOR IMOD
-  - MCX Collapsible, Folding Mini Skeleton, Folding Visor, Folding Skeleton and Folding Collapsible Tube
-  - AK SAG ACR, PP-19, AKS-74U, KPYK CRC-5002-9033, RPK-74 Folding and AK-12 Collapsible
-  - SKS SAGE International SKSALCV chassis
+  - AR stocks: AR-15 ACE Ultra Lite, AR-15 CMMG Ripstock, AR-15 Odin Works Zulu 2, AR-15 Strike Industries Viper Mod 1, AR-15 Magpul UBR, AR-15 Daniel Defense, AR-15 BCM Gunfighter Mod 0 and AR-15 VLTOR IMOD
+  - MCX stocks: MCX Collapsible, Folding Mini Skeleton, Folding Visor, Folding Skeleton and Folding Collapsible Tube
+  - AK stocks: AK SAG ACR, PP-19, AKS-74U, KPYK CRC-5002-9033, RPK-74 Folding and AK-12 Collapsible
+  - SKS chassis: SAGE International SKSALCV
 - Eleven NPC loadout presets:
   - `DA_Inventory_AI_Patrol_IGC_A`
   - `DA_Inventory_AI_Guard_IGC`
@@ -111,6 +116,6 @@ It conflicts with any other mod that replaces those files, and it needs an updat
 
 ## Known issues
 
-* Vendor/Gunsmith screen shows Rattler as 0/30 ammo. Run `ResetVendor` console command to fix.
+* Vendor/Gunsmith screen shows Rattler as 0/30 ammo. Run the `ResetVendor` console command to fix.
 * Some devices are misnamed in the vanilla game. E.g. `P90 flash hider` is actually a muzzle brake / compensator. This mod only changes stats, not names.
-* Vanilla does a simple sum of ergos and recoil stats when multiple muzzle devices equipped (e.g. a suppressor over a muzzle brake). This is not a realistic behavior, but it is hardcoded and I can't easily fix this.
+* Vanilla does a simple sum of ergonomics and recoil stats when multiple muzzle devices are equipped (e.g. a suppressor over a muzzle brake). This is unrealistic, but it is hardcoded and I can't easily fix it.
