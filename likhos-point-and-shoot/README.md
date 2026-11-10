@@ -1,18 +1,18 @@
 # Likho's Point and Shoot
 
-This mod reworks Point Shooting, tactical device use, and adds QoL and consumables key bindings.
+Tactical shortcuts for point shooting, lasers, lights, healing and consumables, all usable without opening the inventory or menus.
 
 ## Point Shooting
 
-It is meant for close range engagement. Its advantage over gun sights is speed, which is sadly defeated by the vanilla's awkward control scheme.
+Point shooting is meant for close range engagement. Its advantage over gun sights is speed, which vanilla's awkward control scheme defeats.
 
-This mod decouples point shooting from aiming. Adds a new keybind **Point Shooting + Laser (Hold)** that allows the user to go directly into point shooting pose bypassing regular aim.
+This mod decouples point shooting from aiming. It adds a new keybind **Point Shooting + Laser (Hold)** that allows the user to go directly into point shooting pose, bypassing regular aim.
 
 Hold mode only (no toggle). Recommended to bind the new key to a mouse side button for quick access.
 
 ## Laser activation
 
-**Point Shooting + Laser (Hold)** additionally activates first laser module it finds equipped on the gun.
+**Point Shooting + Laser (Hold)** additionally activates the first laser module it finds equipped on the gun.
 
 Contextual to NVG:
 
@@ -21,21 +21,21 @@ Contextual to NVG:
 
 ## Flashlight (Hold/Toggle)
 
-New keybind to quickly access avilable light without opening the radial menu or cycling through activation modes.
+New keybind to turn on your weapon light without opening the radial menu or cycling through activation modes.
 
-Works as both momentary switch and toggle. Contextual to NVG same way the laser is.
+Works as both momentary switch and toggle. Follows the same NVG rules as the laser.
 
 ## Interact (Instant)
 
-New keybind **Interact (Instant)**, that mimics vanilla **Interact** behavior but without hold delay. Tap it to open containers instantly. Locked containers will still use unlock delay, but do not require to hold the key. Old binding is unaffected.
+New keybind **Interact (Instant)** that mimics vanilla **Interact** behavior but without hold delay. Tap it to open containers instantly. Locked containers will still use unlock delay, but do not require holding the key. The vanilla binding is unaffected.
 
 ## Consume Food/Drink
 
-New keybind **Consume Food/Drink**, that works like vanilla **Quick Heal** but for food and drinks. Press it to eat or drink the first food or drink item found in your inventory, without opening it. Medical items are never used.
+New keybind **Consume Food/Drink** that works like vanilla **Quick Heal** but for food and drinks. Press it to eat or drink the first food or drink item found in your inventory, without opening it. Medical items are never used.
 
 ## Combat Heal
 
-New keybind **Combat Heal**, a smarter alternative for vanilla's **Quick Heal**. Quick Heal tends to get you killed in a firefight: it starts a 14 second IV when what you need is a 2 second morphine shot. Combat Heal treats whatever matters most right now, with items from anywhere in your inventory. Each press does one thing, the first of these that applies:
+New keybind **Combat Heal**, a smarter alternative for vanilla's **Quick Heal**. Quick Heal tends to get you killed in a firefight: it starts a 14-second IV when what you need is a 2-second morphine shot. Combat Heal treats whatever matters most right now, with items from anywhere in your inventory. Each press does one thing, the first of these that applies:
 
 1. Below 90% health with no painkiller/morphine dose active: takes it.
 2. Heavy bleed: stops it.
@@ -43,7 +43,7 @@ New keybind **Combat Heal**, a smarter alternative for vanilla's **Quick Heal**.
 4. Fracture: splints it.
 5. Any health missing: heals it.
 
-For each it uses the fastest item that treats it. Among equally fast ones it picks the least wasteful: the item that treats the fewest other things, and for healing, the one that heals all missing health with the least overheal. Press again to move on to the next problem.
+For each it uses the fastest item that treats it. Among equally fast ones it picks the least wasteful: the item that treats the fewest other things. For healing, that is the one that heals all missing health with the least overheal. Press again to move on to the next problem.
 
 ## Use Adrenaline
 
@@ -51,15 +51,15 @@ New keybind **Use Adrenaline**. Press it to inject an Adrenaline Injector from a
 
 ## Magnifier binding
 
-The EOTech+Magnifier combo now works using the mouse scroll, same way LPVO does. Old binding still works but unnecessary.
+The EOTech+Magnifier combo now works using the mouse scroll, the same way an LPVO does. The old binding still works but is no longer needed.
 
 ## Low ready by default
 
 Low ready is the resting position of the gun. As soon as aiming, sprinting, firing or any other action ends, the gun goes straight back to low ready, standing or moving, instead of after 10 seconds of idle. Reloading and interacting keep it in low ready. Holstering and drawing work as in vanilla.
 
-Turn on auto low ready in the gameplay settings. That setting stays your switch for this feature. Your saved settings are not changed. With it on, the **Low Ready** keybind does nothing useful, since the gun lowers again right away.
+Turn on auto low ready in the gameplay settings. That setting stays your switch for this feature. Your saved settings are not changed. With it on, the **Low Ready** keybind has no effect, since the gun lowers again right away.
 
-In `Scripts\config.lua`, `low_ready_run_delay_ms` sets how long after a run the gun lowers, and `low_ready_default = false` restores the game's own auto low ready.
+In `Scripts\config.lua`, `low_ready_run_delay_ms` (default 150) sets how long after a run the gun lowers, and `low_ready_default = false` restores the game's own auto low ready.
 
 ## Requirements
 
@@ -68,7 +68,7 @@ In `Scripts\config.lua`, `low_ready_run_delay_ms` sets how long after a run the 
 
 ## Installation
 
-1. Download the `UE4SS_v3.0.1-*.zip` file from `https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest` and extract it into `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\`. You should end up with `dwmapi.dll` and a `ue4ss` folder there.
+1. Download the `UE4SS_v3.0.1-*.zip` file from the [UE4SS experimental release](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) and extract it into `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\`. You should end up with `dwmapi.dll` and a `ue4ss` folder there.
 2. In `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS-settings.ini` set the engine version. The game crashes on the first tick without it:
 
    ```ini
