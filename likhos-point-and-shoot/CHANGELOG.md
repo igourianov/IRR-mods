@@ -1,3 +1,6 @@
+# 1.5.161
+* the marker on a quest placement spot, where a bomb or bug is planted, is drawn in bright blue so it stands out and stays clearly visible while out of reach. Other interaction markers stay vanilla
+
 # 1.4.144
 * added the `Use Adrenaline` keybind: injects an Adrenaline Injector from anywhere in the inventory
 * added the `Combat Heal` keybind that intelligently picks a medical item to use

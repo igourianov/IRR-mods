@@ -61,6 +61,12 @@ Turn on auto low ready in the gameplay settings. That setting stays your switch 
 
 In `Scripts\config.lua`, `low_ready_run_delay_ms` (default 150) sets how long after a run the gun lowers, and `low_ready_default = false` restores the game's own auto low ready.
 
+## Plant spot marker
+
+The marker on a quest placement spot, where you plant a bomb, bug or similar item, is drawn in bright blue, a color rare in the game's world and UI. In vanilla it is a pale grey ring that blends into bark and foliage and stays faint at 20% opacity until you are close enough to plant, so you had to use the map to find it. With the mod it shows at 40% from the moment it appears. Its size, the distance where it appears and the range you can plant from are unchanged. Container, door and every other interaction marker stay vanilla.
+
+In `Scripts\config.lua`, `plant_marker_color` (default `#33B5FF`) sets the color, `plant_marker_min_opacity` (default 0.4, 0 for vanilla) sets the opacity out of reach and `plant_marker = false` restores the vanilla marker.
+
 ## Known issues
 
 * **Consume Food/Drink** skips `Misprinted Condensed Milk`. *This is a vanilla bug.* The game tags it as a barter item rather than a food, although it can be consumed.

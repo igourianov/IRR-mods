@@ -1,5 +1,5 @@
 [mod]
-version="1.4.144"
+version="1.5.161"
 
 [ue4ss]
 ; UE4SS version this mod was developed and tested against.

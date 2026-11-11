@@ -13,6 +13,7 @@ local menu     = require("menu")
 local magnifier = require("magnifier")
 local quick_use = require("quick_use")
 local low_ready = require("low_ready")
+local plant_marker = require("plant_marker")
 
 local config = require("config")
 
@@ -45,6 +46,7 @@ local function start_tick_loop()
 			input.poll(config.binds)
 			triggers.tick(config.binds)
 		end)
+		if config.plant_marker then plant_marker.tick() end
 	end)
 	log.debug("tick loop started, every frame")
 end
@@ -63,6 +65,7 @@ local function init()
 	input.watch_player_controller(function()
 		actions.reset()
 		magnifier.reset()
+		plant_marker.reset()
 		-- This callback runs inside the PlayerController's construction. Build and register the mod's input objects a tick later.
 		-- A hot reload needs no call: the registration lives in the engine's user settings, not in Lua.
 		ExecuteInGameThreadWithDelay(1, function() util.safe("keymap register", keymap.register) end)
@@ -71,9 +74,10 @@ local function init()
 	if config.magnifier_zoom then magnifier.install() end
 	quick_use.install()
 	if config.low_ready_default then low_ready.install() end
+	if config.plant_marker then plant_marker.install() end
 
 	-- The tick loop runs Lua every frame. Skip it when nothing can use it.
-	if register_binds() > 0 then start_tick_loop() end
+	if register_binds() > 0 or config.plant_marker then start_tick_loop() end
 
 	RegisterConsoleCommandHandler("kb_status", function()
 		log.info("player controller: %s", input.get_player_controller() and "acquired" or "none")

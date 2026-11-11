@@ -27,6 +27,14 @@ return {
 	-- How long after a run ends the gun lowers, milliseconds. Shorter makes the gun dip as the run ends.
 	low_ready_run_delay_ms = 150,
 
+	-- The marker on a quest placement spot, where a bomb or bug is planted, is drawn in bright blue, a color rare in the game, so it stands out.
+	-- Set false for the vanilla pale marker.
+	plant_marker = true,
+	-- The marker's color, "#RRGGBB" as in an image editor.
+	plant_marker_color = "#33B5FF",
+	-- Opacity of the marker while you are out of reach, from 0 to 1. Vanilla is 0.2. 0 keeps vanilla.
+	plant_marker_min_opacity = 0.4,
+
 	binds = {
 		{
 			id      = "point_aim",
