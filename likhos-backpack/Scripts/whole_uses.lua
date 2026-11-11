@@ -78,13 +78,29 @@ local function rewrite_tile(path, format)
 	end
 end
 
+-- Tile path to format, for the tiles waiting for the next flush.
+local pending = {}
+-- os.clock() when the pending flush was scheduled, nil when none is.
+local flush_at = nil
+
+local function flush()
+	flush_at = nil
+	local batch = pending
+	pending = {}
+	for path, format in pairs(batch) do hooks.guard(rewrite_tile)(path, format) end
+end
+
 -- ItemWidget writes the count texts after it sends this event, so they are rewritten a tick later. The tile is passed by path, not held.
+-- UE4SS sometimes runs one of several callbacks delayed in the same frame twice and drops another, so a single flush serves every tile updated in the frame.
+-- A flush still pending after half a second was dropped the same way and is scheduled again.
 local function on_update(context)
 	local tile = context:get()
 	local format = uses_format(tile)
 	if not format then return end
-	local path = util.path(tile)
-	ExecuteInGameThreadWithDelay(1, hooks.guard(function() rewrite_tile(path, format) end))
+	pending[util.path(tile)] = format
+	if flush_at and os.clock() - flush_at < 0.5 then return end
+	flush_at = os.clock()
+	ExecuteInGameThreadWithDelay(1, hooks.guard(flush))
 end
 
 --- Hook the inventory tile once its Blueprint class is loaded.

@@ -1,3 +1,6 @@
+# 1.4.71
+* fixed one or two inventory tiles sometimes showing a decimal use count, or a count on an unused single use item, when many are on screen
+
 # 1.4.65
 * quick slots hold an item type and refill from anywhere in the inventory until none is left
 * click a quick slot to clear it
