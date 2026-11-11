@@ -41,17 +41,19 @@ New keybind **Consume Food/Drink** that works like vanilla **Quick Heal** but fo
 
 ## Combat Heal
 
-New keybind **Combat Heal (Tap/Hold)**, a smarter alternative for vanilla's **Quick Heal**. Quick Heal tends to get you killed in a firefight: it starts a 14-second IV when what you need is a 2-second morphine shot. Combat Heal treats whatever matters most right now, with items from anywhere in your inventory. Each tap does one thing, the first of these that applies:
+New keybind **Combat Heal (Tap/Hold)**, a smarter alternative for vanilla's **Quick Heal**, which tends to start a 14-second IV when you need a 2-second morphine shot. Uses items from anywhere in your inventory.
 
-1. Below 90% health with no painkiller/morphine dose active: takes it.
-2. Heavy bleed: stops it.
-3. Bleed: stops it.
-4. Fracture: splints it.
-5. Any health missing with no painkiller/morphine dose active: takes it.
+**Tap** treats one thing, the first that applies, with the fastest item for it:
 
-For each it uses the fastest item that treats it. Among equally fast ones it picks the least wasteful: the item that treats the fewest other things. Tap again to move on to the next problem. A tap never heals and never starts an IV.
+1. Below 90% health: painkiller/morphine.
+2. Heavy bleed.
+3. Bleed.
+4. Fracture.
+5. Any health missing: painkiller/morphine.
 
-Hold the key to start an IV. It starts as soon as the key has been held for a quarter second, without waiting for release, and uses the IV that heals all missing health with the least overheal. With full health or no IV carried, a hold does nothing. In `Scripts\config.lua`, `tap_ms` (default 250) sets how long a press may last and still count as a tap.
+Painkiller steps are skipped while a dose is active. Tap again for the next problem.
+
+**Hold** starts the IV that best covers missing health.
 
 ## Use Adrenaline
 

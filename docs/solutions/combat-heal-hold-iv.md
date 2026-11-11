@@ -64,7 +64,7 @@ The `tap_ms` comment describes the window for both keys: for the flashlight, a l
 
 ### `mod.txt`, `README.md` and `CHANGELOG.md`
 
-`mod.txt` has the minor version bumped. The README's Combat Heal section names the key `Combat Heal (Tap/Hold)`, lists the tap's steps with the closing painkiller at any missing health, and says that holding the key starts an IV, the one that covers missing health with least overheal, and that a hold with full health or no IV does nothing. The changelog entry, under the version of the build, says Combat Heal no longer heals or starts an IV on a press, that holding the key starts an IV and that a tap with nothing else to treat takes a painkiller at any missing health.
+`mod.txt` has the minor version bumped. The README's Combat Heal section names the key `Combat Heal (Tap/Hold)`, briefly lists the tap's steps with the closing painkiller at any missing health, and says that holding the key starts the IV that best covers missing health. The changelog entry, under the version of the build, says Combat Heal no longer heals or starts an IV on a press, that holding the key starts an IV and that a tap with nothing else to treat takes a painkiller at any missing health.
 
 ### Result
 
