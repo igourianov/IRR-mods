@@ -22,23 +22,25 @@ From UAssetGUI JSON of the cooked assets, game build 26487830, read with the usm
   - An `InventorySupportedItems` export with no data, and a container with no `SupportedItems`, keep the container class's default: `Default__U_<Slot>_C.SupportedItems` in `Objects/ItemContainers`, then its parent class's.
 - `ItemRelations.ConflictingItemsQuery` tags (e.g. on `ID_AK_Zenitco_B-13_Rail`) name items that can't be fitted together with the item. They are not supported items.
 - Fire modes are the `Weapon.FireMode.Auto`, `.Semi` and `.Burst` tags in the definition's name map (`U_FireModes_C`).
-- The slot data lets a Magpul M-LOK rail on every M-LOK side position of a handguard take a foregrip (`ID_Magpul_M-LOK_4x1_Inch_Rail` slot `U_TacticalDevices_EverySize_C` lists `UISI_Foregrip_All_C`). Whether the game allows several foregrips at once is unchecked in game.
+- The slot data lets a Magpul M-LOK rail on every M-LOK side position of a handguard take a foregrip (`ID_Magpul_M-LOK_4x1_Inch_Rail` slot `U_TacticalDevices_EverySize_C` lists `UISI_Foregrip_All_C`). Per the user, the game allows only one foregrip, so `unique` defaults to Foregrip.
 
 ## Solution
 
 `tools/gunsmith/gunsmith.ps1` with `gunsmith.json`:
 
-- Extracts every `ID_*` under `Items/Weapons` and `Items/Attachments`, `UISI_*` under `Objects/InventorySupportedItems` and `U_*` under `Objects/ItemContainers` (677 assets), converts them in parallel like `pak.ps1` and keeps only a compact index in `tools/gunsmith/cache/index.json`. A stamp of the game paks and the usmap decides when to rebuild.
-- Applies `clone.json` (a renamed copy of a class, with its tags renamed), `retarget.json` (slot classes renamed), `stats.json` (`Recoil`, `Ergonomics`) and `reclass.json` (weapon class) unless `-Vanilla`.
+- Extracts every `ID_*` under `Items/Weapons` and `Items/Attachments`, `UISI_*` under `Objects/InventorySupportedItems` and `U_*` under `Objects/ItemContainers` (677 assets), converts them in parallel like `pak.ps1` and keeps only a compact index in `tools/gunsmith/cache/index.json`, with each slot's export name, container class and lists. A stamp of the game paks and the usmap decides when to rebuild.
+- Applies `clone.json` (a renamed copy of a class, with its tags renamed), `retarget.json` (slot classes renamed), `stats.json` (`Recoil`, `Ergonomics`), `supported.json` (slot and list tags, the way `pak.ps1` applies it, see `docs/solutions/lamg-muzzle-fix.md`) and `reclass.json` (weapon class) unless `-Vanilla`.
 - Search: each slot holds at most one item it accepts. `Find-Best` combines slots one at a time over states of how much of the suppressor need (exactly one in a suppressed build, none in a loud one) and of the one-per-category allowance each slot took. Lower score wins: the ranked stat × 1000, the other stat breaking ties.
-- `gunsmith.json`: `skip` categories (Sight, Tactical, Mag), `required` categories (Barrel), `unique` categories capped at one per build (empty by default, `-Unique` overrides), `ignore` for game bugs (the KAC QDC eliminator taking a second flash hider).
+- Per the user the game refuses parts that conflict. `Find-Valid` searches again with each clashing part banned in turn (up to 4 deep) and keeps the best build without a conflict. `!` marks a build it couldn't clear.
+- `gunsmith.json`: `skip` categories (Sight, Tactical, Mag), `required` categories (Barrel), `requiredSlots` per weapon (the AS VAL and VSS don't fire without their integral suppressor, so they have only suppressed builds), `unique` categories capped at one per build (Foregrip, the game allows one; `-Unique ''` lifts it), `ignore` for game bugs (the KAC QDC eliminator taking a second flash hider, which likhos-rearmed fixes, so it matters only with `-Vanilla`).
 - `-Trace` prints slot paths to matching parts.
 
 Docs: `CLAUDE.md` (layout, commands), `.gitignore` (cache).
 
 ## Tradeoffs and open
 
-- Conflicts are only flagged (`!`), not avoided. Avoiding them would need the search to track every chosen tag.
+- Conflict avoidance reruns the search, so a build may miss a better one that needs more than 4 bans. None seen.
 - A required category is a guess per category, not read from the game. Only Barrel is listed.
 - Suppressor detection is by name (`Suppressor`, `Silencer`) in the Muzzle folder.
-- Against the scratchpad script, the AKs come out about 3 worse (the WASR handguard can't hold a grip), the MPX 3 worse (its flash hider doesn't fit the 14" barrel), and the M14 and M305 much better (Troy SASS chassis stacking).
+- Against the scratchpad script, the AKs came out about 3 worse (the WASR handguard can't hold a grip), the MPX 3 worse (its flash hider doesn't fit the 14" barrel), and the M14 and M305 much better (Troy SASS chassis stacking).
+- Per the user the AK bases were lowered back to the targets from `ak-rpm-recoil-balance.md` and `suppressor-recoil.md`, whole numbers rounded up: AK-74M and AK-105 58 -> 55, AKS-74 58 -> 54, AK-12 56 -> 52, AK-101 and AK-102 57 -> 54, AK-103 and AK-104 64 -> 61. Full builds: 9 to 10 loud, 25.5 to 27 suppressed (7.62x39: 16 and 33), against the M4A1's 15.4 and 20 per second.

@@ -3,10 +3,15 @@
 	"skip": ["Sight", "Tactical", "Mag"],
 	"//2": "A slot holding one of these categories can't stay empty.",
 	"required": ["Barrel"],
-	"//5": "Categories a build holds at most one of. The slot data lets a foregrip sit on every M-LOK side rail, unchecked in game.",
-	"unique": [],
+	"//6": "Per weapon, categories its own slots can't leave empty. The AS VAL and VSS don't work without their integral suppressor.",
+	"requiredSlots": {
+		"ID_AS_Val": ["Muzzle"],
+		"ID_VSS_Vintorez": ["Muzzle"]
+	},
+	"//5": "Categories a build holds at most one of. The slot data lets a foregrip sit on every M-LOK side rail, but the game allows only one.",
+	"unique": ["Foregrip"],
 	"//3": "Game bugs left out of the search: item -> tags its slots accept by mistake. Wildcards allowed.",
-	"//4": "The KAC QDC eliminator takes the whole 5.56 muzzle list, so a second flash hider stacks on the first.",
+	"//4": "The KAC QDC eliminator takes the whole 5.56 muzzle list, so a second flash hider stacks on the first. likhos-rearmed fixes it in supported.json, so this matters only with -Vanilla.",
 	"ignore": {
 		"ID_KAC_QDC_3-Prong_Eliminator_556x45_Muzzle_Device": ["Inventory.Items.Attachments.Muzzle.*Flash Hider"]
 	}

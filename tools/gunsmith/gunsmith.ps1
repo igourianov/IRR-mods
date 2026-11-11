@@ -4,7 +4,7 @@
 
 .DESCRIPTION
 	Reads every weapon and attachment definition and every slot and supported-items class from the game's own paks, and caches them as an index in tools\gunsmith\cache. The cache is rebuilt when a game pak or the usmap changes, or with -Refresh.
-	Applies a pak mod's edit lists on top (stats, retarget, clone, reclass), unless -Vanilla.
+	Applies a pak mod's edit lists on top (stats, supported, retarget, clone, reclass), unless -Vanilla.
 	A build is a tree: each slot holds at most one item that the slot accepts, and that item brings its own slots. The search picks the best item for every slot, so stacked parts (a chassis with its own stock slot, a suppressor on a flash hider) count as the game sums them.
 	A loud build has no suppressor anywhere. A suppressed build has one in its muzzle chain.
 	Recoil is the definition stat. A weapon with full auto also shows recoil per second of fire, stat × RPM / 700, so weapons at different fire rates compare.
@@ -186,7 +186,7 @@ function Update-Index {
 			$container = $j.Exports[$ref - 1]
 			$prop = @($container.Data | Where-Object Name -eq 'SupportedItems')
 			$supported = if ($prop.Count) { Read-Supported $j $prop[0] } else { @{ Tags = @(); Lists = @(); Inherit = $true } }
-			[ordered]@{ Container = (Get-RefClass $j $ref); Own = -not $supported.Inherit; Tags = $supported.Tags; Lists = $supported.Lists }
+			[ordered]@{ Export = $container.ObjectName; Container = (Get-RefClass $j $ref); Own = -not $supported.Inherit; Tags = $supported.Tags; Lists = $supported.Lists }
 		}
 		$category = if ($package -match '/Items/Attachments/([^/]+)/') { $Matches[1] } else { 'Weapon' }
 		$items[$base] = [ordered]@{
@@ -220,7 +220,7 @@ foreach ($p in $index.Items.PSObject.Properties) {
 		Id = $p.Name; Name = $p.Name.Substring(3); Path = $v.Path; Tag = $v.Tag; Category = $v.Category
 		Recoil = [double] $v.Recoil; Ergo = [double] $v.Ergo; Rpm = [double] $v.Rpm
 		Modes = @($v.Modes); Conflicts = @($v.Conflicts)
-		Slots = @($v.Slots | ForEach-Object { [pscustomobject]@{ Container = $_.Container; Own = $_.Own; Tags = @($_.Tags); Lists = @($_.Lists) } })
+		Slots = @($v.Slots | ForEach-Object { [pscustomobject]@{ Export = $_.Export; Container = $_.Container; Own = $_.Own; Tags = @($_.Tags); Lists = @($_.Lists) } })
 		Suppressor = $v.Category -eq 'Muzzle' -and $p.Name -match 'Suppressor|Silencer'
 		Class = $null
 	}
@@ -285,23 +285,58 @@ function Get-ClassTags {
 	foreach ($l in $c.Lists) { Get-ClassTags $l $Seen }
 }
 
+# A slot that sets no SupportedItems takes its container class's.
+function Get-SlotTags {
+	param($Slot)
+	$seen = [System.Collections.Generic.HashSet[string]]::new()
+	if ($Slot.Own) { @($Slot.Tags) + @($Slot.Lists | ForEach-Object { Get-ClassTags $_ $seen }) } else { @(Get-ClassTags $Slot.Container $seen) }
+}
+
+# supported.json, the way pak.ps1 applies it: every result comes from the game's lists, so all are worked out before any is set.
+$changes = foreach ($e in (Read-EditList 'supported').PSObject.Properties) {
+	foreach ($edit in $e.Value.PSObject.Properties) {
+		$listClass = $null; $slot = $null
+		if ($edit.Name -like 'Default__*') { $listClass = $edit.Name.Substring(9); $current = @(Get-ClassTags $listClass ([System.Collections.Generic.HashSet[string]]::new())) }
+		else {
+			$it = $byPath[$e.Name]
+			if (-not $it) { continue }
+			$slot = @($it.Slots | Where-Object Export -eq $edit.Name)[0]
+			if (-not $slot) { Write-Warning "$($e.Name) has no slot $($edit.Name)."; continue }
+			if ($edit.Value.unlink) {
+				$drop = @($edit.Value.unlink | ForEach-Object { "$_`_C" })
+				$slot.Lists = @($slot.Lists | Where-Object { $_ -notin $drop })
+				continue
+			}
+			$current = @(Get-SlotTags $slot)
+		}
+		$tags = if ($edit.Value.from) { @(Get-ClassTags (Get-ClassName $edit.Value.from) ([System.Collections.Generic.HashSet[string]]::new())) } else { $current }
+		if ($edit.Value.keep) { $tags = @($tags | Where-Object { $t = $_; @($edit.Value.keep | Where-Object { $t -like $_ }).Count }) }
+		if ($edit.Value.remove) { $tags = @($tags | Where-Object { $t = $_; -not @($edit.Value.remove | Where-Object { $t -like $_ }).Count }) }
+		$tags = @(@($tags) + @($edit.Value.add | Where-Object { $_ }) | Select-Object -Unique)
+		[pscustomobject]@{ Class = $listClass; Slot = $slot; Tags = $tags }
+	}
+}
+foreach ($c in $changes) {
+	if ($c.Class) { $classes[$c.Class] = [pscustomobject]@{ Parent = $null; Has = $true; Tags = $c.Tags; Lists = @() } }
+	else { $c.Slot.Own = $true; $c.Slot.Tags = $c.Tags; $c.Slot.Lists = @() }
+}
+
 $ignore = @{}
 foreach ($p in $cfg.ignore.PSObject.Properties) { $ignore[$p.Name] = @($p.Value) }
 $skip = @($cfg.skip)
 $required = @($cfg.required)
 $unique = if ($PSBoundParameters.ContainsKey('Unique')) { @($Unique | Where-Object { $_ }) } else { @($cfg.unique) }
 
-# A slot that sets no SupportedItems takes its container class's.
 foreach ($it in $items.Values) {
 	foreach ($s in $it.Slots) {
-		$seen = [System.Collections.Generic.HashSet[string]]::new()
-		$tags = if ($s.Own) { @($s.Tags) + @($s.Lists | ForEach-Object { Get-ClassTags $_ $seen }) } else { @(Get-ClassTags $s.Container $seen) }
+		$tags = Get-SlotTags $s
 		$blocked = @($ignore[$it.Id])
 		$children = @($tags | Select-Object -Unique | Where-Object { $_ -ne $it.Tag -and $_ -notin $it.Conflicts } | Where-Object {
 			$t = $_; -not @($blocked | Where-Object { $t -like $_ }).Count
 		} | ForEach-Object { $byTag[$_] } | Where-Object { $_ -and $_.Category -ne 'Weapon' -and $_.Category -notin $skip })
 		$s | Add-Member Children $children
-		$s | Add-Member Required ([bool] @($children | Where-Object Category -in $required).Count)
+		$mustFill = @($required) + @($cfg.requiredSlots.($it.Id))
+		$s | Add-Member Required ([bool] @($children | Where-Object Category -in $mustFill).Count)
 	}
 }
 
@@ -369,6 +404,7 @@ function Find-Slot {
 	param($Slot, [int] $Sup, [int] $Allow)
 	$best = if ($Sup -eq 0 -and -not $Slot.Required) { [pscustomobject]@{ Score = 0.0; Parts = @() } } else { $null }
 	foreach ($c in $Slot.Children) {
+		if ($banned.Contains($c.Id)) { continue }
 		$r = Find-Best $c $Sup $Allow
 		if ($r -and (-not $best -or $r.Score -lt $best.Score)) { $best = $r }
 	}
@@ -401,6 +437,33 @@ if ($Trace) {
 	return
 }
 
+# Parts that list another part of the same build as conflicting, and those other parts.
+function Get-Clashes {
+	param($Parts)
+	$tags = @{}; foreach ($p in $Parts) { if ($p.Tag) { $tags[$p.Tag] = $p } }
+	$clash = @{}
+	foreach ($p in $Parts) { foreach ($t in $p.Conflicts) { if ($tags[$t]) { $clash[$p.Id] = $p; $clash[$tags[$t].Id] = $tags[$t] } } }
+	@($clash.Values | Where-Object Category -ne 'Weapon')
+}
+
+# The game refuses parts that conflict, so a build with a conflict is searched again with each of its clashing parts banned in turn.
+function Find-Valid {
+	param($Weapon, [int] $Sup, [string[]] $Ban, [int] $Depth)
+	$banned = [System.Collections.Generic.HashSet[string]]::new([string[]] @($Ban | Where-Object { $_ }))
+	$memo = @{}; $stack = [System.Collections.Generic.HashSet[string]]::new()
+	$build = Find-Best $Weapon $Sup $allUnique
+	if (-not $build) { return $null }
+	$clashes = @(Get-Clashes $build.Parts)
+	if (-not $clashes.Count) { return $build }
+	if ($Depth -ge 4) { return $null }
+	$best = $null
+	foreach ($c in $clashes) {
+		$r = Find-Valid $Weapon $Sup (@($Ban) + $c.Id) ($Depth + 1)
+		if ($r -and (-not $best -or $r.Score -lt $best.Score)) { $best = $r }
+	}
+	$best
+}
+
 function Get-Total {
 	param($Build, $Weapon)
 	if (-not $Build) { return $null }
@@ -420,9 +483,8 @@ $rows = foreach ($w in $selected) {
 	$builds = @{}
 	foreach ($mode in 'Recoil', 'Ergo') {
 		$score = $scoreOf[$mode]
-		$memo = @{}; $stack = [System.Collections.Generic.HashSet[string]]::new()
-		$builds["$mode|Loud"] = Get-Total (Find-Best $w 0 $allUnique) $w
-		$builds["$mode|Sup"] = Get-Total (Find-Best $w 1 $allUnique) $w
+		$builds["$mode|Loud"] = Get-Total (Find-Valid $w 0 @() 0) $w
+		$builds["$mode|Sup"] = Get-Total (Find-Valid $w 1 @() 0) $w
 	}
 	$mark = { param($t) if (-not $t) { '-' } elseif ($t.Clash) { "$($t.Text)!" } else { $t.Text } }
 	$ergo = { param($t) if (-not $t) { '-' } else { '{0:0.#}' -f $t.Ergo } }
@@ -432,13 +494,15 @@ $rows = foreach ($w in $selected) {
 		Base = '{0:0.#} / {1:0.#}' -f $w.Recoil, $w.Ergo
 		'Loud' = & $mark $builds['Recoil|Loud']; 'Loud ergo' = & $ergo $builds['Recoil|Loud']
 		'Sup' = & $mark $builds['Recoil|Sup']; 'Sup ergo' = & $ergo $builds['Recoil|Sup']
-		'Best ergo' = & $ergo $builds['Ergo|Loud']; 'Its recoil' = & $mark $builds['Ergo|Loud']
+		# A weapon that can't fire without its suppressor has only suppressed builds.
+		'Best ergo' = & $ergo $(if ($builds['Ergo|Loud']) { $builds['Ergo|Loud'] } else { $builds['Ergo|Sup'] })
+		'Its recoil' = & $mark $(if ($builds['Ergo|Loud']) { $builds['Ergo|Loud'] } else { $builds['Ergo|Sup'] })
 		_Builds = $builds
 	}
 }
 
 $label = if ($Vanilla) { 'vanilla' } else { $Mod }
-Write-Host "Lowest-recoil builds (Loud, Sup) and best-ergonomics build, $label. ! marks a build with parts that conflict." -ForegroundColor Cyan
+Write-Host "Lowest-recoil builds (Loud, Sup) and best-ergonomics build, $label. Builds avoid parts that conflict; ! marks one that couldn't." -ForegroundColor Cyan
 $rows | Select-Object * -ExcludeProperty _Builds | Format-Table -AutoSize | Out-String -Width 300 | Write-Host
 
 if ($Detail) {
