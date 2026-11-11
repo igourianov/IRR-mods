@@ -1,3 +1,7 @@
+# Unreleased
+* Stark SE3 foregrip ergonomics +4 -> +1, so it no longer has both the most recoil reduction and near-top ergonomics
+* Troy Modular Combat Grip recoil -7 -> -6, so it no longer beats the Magpul MVG and Daniel Defense M-LOK grips on every stat
+
 # 2.0.91
 * AK brakes reduce recoil about 30% less, so a fully built AK no longer goes below zero recoil
 * AKs recoil more per shot, so an AK with a brake leads an AR with a flash hider by as much as a suppressed AR leads a suppressed AK

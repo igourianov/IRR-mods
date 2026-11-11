@@ -35,6 +35,11 @@ Most stocks are rescaled by build. Lightweight and skeletonized stocks give the 
 * Moved the FAL Series X and Folding Para stocks onto the AR scale. The aftermarket Series X beats an AR stock on the FAL buffer tube, the factory Para trails one.
 * Removed the recoil bonus from the QBZ-97 cheek rest. A cheek rest helps aiming, not recoil control, so it keeps only its ergonomics.
 
+## Foregrips
+
+* Stark SE3 ergonomics +4 -> +1. It keeps the most recoil reduction of any foregrip but no longer also handles among the best.
+* Troy Modular Combat Grip recoil -7 -> -6, so the Magpul MVG and Daniel Defense M-LOK grips are no longer beaten on every stat by a grip that fits any rail.
+
 ## AK and 5.56 rifle recoil
 
 AK brakes pushed a fully built AK below zero recoil, while 5.56 rifles have no brake that fits them. The two are rebalanced so each platform has its edge.
@@ -135,6 +140,7 @@ The mod replaces these game files:
   - Chassis: SKS SAGE International SKSALCV and M14 Troy SASS
   - FAL stocks: Series X and Folding Para
   - QBZ-97 cheek rest
+- The item definitions of the Stark SE3 and Troy Modular Combat Grip foregrips (`ID_Stark_SE3_Foregrip`, `ID_Troy_Modular_Combat_Grip`)
 - The item definitions of these weapons (`ID_*` under `Items/Weapons`): AK-74M, AK-12, AK-105, AK-101, AK-102, AKS-74, AK-103, AK-104, M4A1, MCX Virtus, CQ, QBZ-97, AUG A3, SCAR-L, STV-380, MK-47, SKS, FAL, M14, SCAR-H, SR-25, Galil ACE, M305, RFB, SVDS, AKS-74U, PP-19 Vityaz, P90, MPX, Vector, MP5, MP5K, MP5SD, Honey Badger, KAC LAMG, RPK-74, RIA VR80, AS VAL and VSS
 - Eleven NPC loadout presets:
   - `DA_Inventory_AI_Patrol_IGC_A`

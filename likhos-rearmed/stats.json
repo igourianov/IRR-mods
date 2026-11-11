@@ -205,6 +205,12 @@
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/M14_22_Inch_762x51_Muzzle_Adapter/ID_M14_22_Inch_762x51_Muzzle_Adapter": {
 		"Recoil": 0
 	},
+	"/Game/Blueprints/InventorySystem/Items/Attachments/Foregrip/Stark_SE3_Foregrip/ID_Stark_SE3_Foregrip": {
+		"Ergonomics": 1
+	},
+	"/Game/Blueprints/InventorySystem/Items/Attachments/Foregrip/Troy_Modular_Combat_Grip/ID_Troy_Modular_Combat_Grip": {
+		"Recoil": -6
+	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Stock/AR-15_PWS_Enhanced_Buffertube/ID_AR-15_PWS_Enhanced_Buffertube": {
 		"Recoil": 0,
 		"Ergonomics": 0
