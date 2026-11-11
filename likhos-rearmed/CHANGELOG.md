@@ -1,4 +1,4 @@
-# Unreleased
+# 2.0.91
 * AK brakes reduce recoil about 30% less, so a fully built AK no longer goes below zero recoil
 * AKs recoil more per shot, so an AK with a brake leads an AR with a flash hider by as much as a suppressed AR leads a suppressed AK
 * AK base recoil: AK-74M 50 -> 55, AK-12 42 -> 52, AK-105 46 -> 55, AK-101 47 -> 54, AK-102 51 -> 54, AKS-74 52 -> 54, AK-103 48 -> 61, AK-104 50 -> 61
@@ -21,6 +21,7 @@
   * recoil: AKS-74U 56 -> 65.5, PP-19 Vityaz 62 -> 57, P90 42 -> 40, MPX 52 -> 61, Vector 48 -> 47.5, MP5 55 -> 49, MP5K 58 -> 51, MP5SD 40 -> 38, Honey Badger 52 -> 66.5, Rattler 56 -> 55
   * ergonomics: AKS-74U 58 -> 67, PP-19 Vityaz 58 -> 65, P90 70 -> 93, MP5 68 -> 85, MP5K 70 -> 84, MP5SD 62.5 -> 83, Honey Badger 55 -> 63, Rattler 45 -> 61
   * SMG-only brakes reduce recoil less: PP-19 muzzle -22.5 -> -10, P90 flash hider -22 -> -8
+
 # 1.5.56
 * morphine and the MFAK's Inject hide the fracture screen distortion like painkillers
 
