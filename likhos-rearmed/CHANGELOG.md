@@ -1,4 +1,4 @@
-# Unreleased
+# 2.1.95
 * Morphine is the emergency dose: Morphine and the MFAK's Inject give +60 temporary health for 1 minute instead of +50 for 3 minutes (MFAK 6 minutes 20 seconds)
 * Painkillers are the lasting dose: +20 temporary health for 5 minutes instead of 1 minute 40 seconds
 * Stark SE3 foregrip ergonomics +4 -> +1, so it no longer has both the most recoil reduction and near-top ergonomics
