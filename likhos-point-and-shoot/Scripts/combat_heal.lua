@@ -1,7 +1,9 @@
--- combat_heal.lua : the Combat Heal key treats the most pressing problem with the fastest item carried (docs/solutions/combat-heal.md).
+-- combat_heal.lua : a Combat Heal tap treats the most pressing problem with the fastest item carried (docs/solutions/combat-heal.md).
+-- A hold starts the IV that best covers missing health (docs/solutions/combat-heal-hold-iv.md).
 -- The Use Adrenaline key shares its item search with a single stamina step (docs/solutions/adrenaline-bind.md).
 --
--- Steps in order: painkiller below 90% with no dose active, heavy bleed, bleed, fracture, heal below max.
+-- Tap steps in order: painkiller below 90% with no dose active, heavy bleed, bleed, fracture, painkiller at 90% or above with health missing and no dose active.
+-- A tap never heals: the Health Injector, the only instant heal, is deprecated.
 -- An item treats a step through a use context whose actions carry the step's stat tag, so the tag decides, not the item's name.
 -- Every game name here comes from docs/solutions/combat-heal.md (Recon).
 -- Only reads game state to pick the item. The one call that changes anything is the item's own use.
@@ -19,19 +21,18 @@ local USE_TIME_TAG  = "Inventory.Stats.Usage Time"
 local DOSE_BUFF     = "Character.Buffs.Medic.Painkiller"
 local PAINKILLER_AT = 0.9
 
---- Action stat tag -> the treatment it gives. Both heal tags are one treatment.
+--- Action stat tag -> the treatment it gives. Heals over time (IVs) serve a hold only.
 local TREATMENTS = {
 	["Inventory.Stats.Pain Debuff"]      = "painkiller",
 	["Inventory.Stats.Stop Heavy Wound"] = "heavy_bleed",
 	["Inventory.Stats.Stop Wound"]       = "bleed",
 	["Inventory.Stats.Stop Fracture"]    = "fracture",
-	["Inventory.Stats.Heal Instant"]     = "heal",
 	["Inventory.Stats.Heal Over Time"]   = "heal",
 	-- Use Adrenaline only (docs/solutions/adrenaline-bind.md). Food carries it too but is never a candidate.
 	["Inventory.Stats.Stamina Boost"]    = "stamina",
 }
 
---- Condition steps, in order, between the painkiller and heal steps: the pawn's owned tag that makes the step apply.
+--- Condition steps, in order, between the two painkiller steps: the pawn's owned tag that makes the step apply.
 local CONDITIONS = {
 	{ treatment = "heavy_bleed", tag = "Character.Effects.Heavy Wounded" },
 	{ treatment = "bleed",       tag = "Character.Effects.Wounded" },
@@ -120,6 +121,23 @@ local function by_treatments(candidate)
 	return { candidate.count }
 end
 
+--- The heal rank for this much missing health.
+--- A heal covering all missing health beats one falling short. Least overheal among covering heals, least shortfall among short ones.
+local function by_coverage(missing)
+	return function(candidate, entry)
+		local heal = stat(candidate.item, entry.tag) or 0
+		if heal >= missing then return { 0, heal - missing } end
+		return { 1, missing - heal }
+	end
+end
+
+--- The pawn's health attribute, or nil.
+local function resolve_health(pawn)
+	local health_comp = pawn:GetHealthComponent()
+	local health = util.valid(health_comp) and health_comp.Health or nil
+	return util.valid(health) and health or nil
+end
+
 --- The pawn and the player's inventory component, or nil. bind names the bind in log lines.
 local function resolve(bind)
 	local pc = FindFirstOf("PlayerController")
@@ -172,44 +190,54 @@ local function run(bind, steps, candidates, pawn)
 	log.debug("%s: nothing to treat", bind)
 end
 
---- The Combat Heal key's press. Game thread.
-function M.press()
+--- The Combat Heal key's tap. Game thread.
+function M.tap()
 	local pawn, comp = resolve("CombatHeal")
 	if not pawn then return end
-	local health_comp = pawn:GetHealthComponent()
-	local health = util.valid(health_comp) and health_comp.Health or nil
+	local health = resolve_health(pawn)
 	local ability = pawn:GetAbilityComponent()
 	local tags_comp = util.valid(ability) and ability.GameplayTagsComponent or nil
-	if not (util.valid(health) and util.valid(tags_comp)) then
+	if not (health and util.valid(tags_comp)) then
 		log.debug("CombatHeal: no health attribute or tags component")
 		return
 	end
 
 	local real, max = health:GetBaseValue(), health:GetCurrentMaxValue()
-	local missing = max - real
 	local active = dose_active(health)
 	local owned = tag_set(tags_comp.OwnedGameplayTags)
 	local names = {}
 	for name in pairs(owned) do names[#names + 1] = name end
 	log.debug("CombatHeal: real %.1f max %.1f, dose %s, tags [%s]", real, max, tostring(active), table.concat(names, ", "))
 
+	-- Below 90% the painkiller goes first. Above it, it closes the list, so a tap still acts when only health is missing.
+	local painkiller = not active and real < max and { treatment = "painkiller", rank = by_treatments } or nil
+	local painkiller_first = real < max * PAINKILLER_AT
 	local steps = {}
-	if real < max * PAINKILLER_AT and not active then
-		steps[#steps + 1] = { treatment = "painkiller", rank = by_treatments }
-	end
+	if painkiller and painkiller_first then steps[#steps + 1] = painkiller end
 	for _, condition in ipairs(CONDITIONS) do
 		if owned[condition.tag] then steps[#steps + 1] = { treatment = condition.treatment, rank = by_treatments } end
 	end
-	if missing > 0 then
-		-- A heal covering all missing health beats one falling short. Least overheal among covering heals, least shortfall among short ones.
-		steps[#steps + 1] = { treatment = "heal", rank = function(candidate, entry)
-			local heal = stat(candidate.item, entry.tag) or 0
-			if heal >= missing then return { 0, heal - missing } end
-			return { 1, missing - heal }
-		end }
-	end
+	if painkiller and not painkiller_first then steps[#steps + 1] = painkiller end
 
 	run("CombatHeal", steps, collect(comp), pawn)
+end
+
+--- The Combat Heal key's hold: the IV only, whatever else needs treating. Game thread.
+function M.hold()
+	local pawn, comp = resolve("CombatHealHold")
+	if not pawn then return end
+	local health = resolve_health(pawn)
+	if not health then
+		log.debug("CombatHealHold: no health attribute")
+		return
+	end
+
+	local missing = health:GetCurrentMaxValue() - health:GetBaseValue()
+	if missing <= 0 then
+		log.debug("CombatHealHold: no health missing")
+		return
+	end
+	run("CombatHealHold", { { treatment = "heal", rank = by_coverage(missing) } }, collect(comp), pawn)
 end
 
 --- The Use Adrenaline key's press. Game thread.

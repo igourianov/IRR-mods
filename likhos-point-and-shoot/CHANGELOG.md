@@ -1,3 +1,8 @@
+# 1.6.164
+* Combat Heal no longer heals or starts an IV on a press. Hold the key to start an IV. The keybind is renamed to Combat Heal (Tap/Hold) and a key already set on it is kept
+* Combat Heal takes a painkiller at any missing health when there is nothing else to treat and no dose is active
+* the vanilla Hold Breath key also works as hold: keep it down and releasing it lets the breath out. A tap still toggles
+
 # 1.5.161
 * the marker on a quest placement spot, where a bomb or bug is planted, is drawn in bright blue so it stands out and stays clearly visible while out of reach. Other interaction markers stay vanilla
 

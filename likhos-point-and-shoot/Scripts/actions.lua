@@ -15,7 +15,7 @@ local config  = require("config")
 
 local M = {}
 
---- A press released within this window is a tap, which leaves the device it turned on alone.
+--- A press released within this window is a tap. Flashlight leaves the light on, CombatHeal treats instead of starting an IV, HoldBreath keeps the vanilla toggle.
 local TAP_MS = config.tap_ms or 250
 
 --------------------------------------------------------------------------
@@ -203,6 +203,73 @@ local function flashlight_release()
 end
 
 --------------------------------------------------------------------------
+-- CombatHeal: tap to treat, hold to start an IV (docs/solutions/combat-heal-hold-iv.md)
+--------------------------------------------------------------------------
+
+-- Non-nil while a CombatHeal press is live. Plain values only, no UObjects.
+--   at    : os.clock() at press, to tell a tap from a hold
+--   fired : the hold has run, so release does nothing
+local combat_heal_press = nil
+
+local function combat_heal_down()
+	combat_heal_press = { at = os.clock(), fired = false }
+end
+
+--- The hold fires as the tap window passes, so the IV starts without waiting for release.
+local function combat_heal_held()
+	local state = combat_heal_press
+	if not state or state.fired or elapsed_ms(state.at) < TAP_MS then return end
+	state.fired = true
+	combat_heal.hold()
+end
+
+local function combat_heal_up()
+	local state = combat_heal_press
+	combat_heal_press = nil
+	if state and not state.fired then combat_heal.tap() end
+end
+
+--------------------------------------------------------------------------
+-- HoldBreath: the vanilla Hold Breath key toggles on a tap and holds breath only while held on a hold (docs/solutions/hold-breath-hold.md)
+--------------------------------------------------------------------------
+
+-- The vanilla key toggles the ability on its own press, so the mod acts only on a release past the tap window.
+local IA_HOLD_BREATH = "/Game/Blueprints/InputSystem/InputActions/IA_HoldBreath.IA_HoldBreath"
+local SGA_HOLD_BREATH = "/Game/Blueprints/SimpleGameplayAbilitySystem/Abilities/SGA_HoldBreath.SGA_HoldBreath_C"
+
+local function hold_breath_active(pawn)
+	local comp = pawn:GetAbilityComponent()
+	local cls = StaticFindObject(SGA_HOLD_BREATH)
+	if not (util.valid(comp) and util.valid(cls)) then return false end
+	local active = false
+	comp.ActiveAbilities:ForEach(function(_, elem)
+		local ability = elem:get()
+		if util.valid(ability) and ability:IsA(cls) then
+			active = true
+			return true
+		end
+	end)
+	return active
+end
+
+-- os.clock() at the key's press, nil when no press is pending.
+local hold_breath_at = nil
+
+local function hold_breath_press()
+	hold_breath_at = os.clock()
+end
+
+local function hold_breath_release()
+	local at = hold_breath_at
+	hold_breath_at = nil
+	if not at or elapsed_ms(at) < TAP_MS then return end
+	local pawn = resolve_pawn()
+	-- Ended by itself (stamina, an interrupting ability), toggled off by the press or never started: the injected press would toggle a new one on.
+	if not (pawn and hold_breath_active(pawn)) then return end
+	M.inject_press(IA_HOLD_BREATH)
+end
+
+--------------------------------------------------------------------------
 
 --- Each entry describes one logical action. press, held and release are Lua functions.
 --- held runs every tick while a hold bind is down.
@@ -216,6 +283,10 @@ M.ACTIONS = {
 		press   = flashlight_press,
 		release = flashlight_release,
 	},
+	["HoldBreath"] = {
+		press   = hold_breath_press,
+		release = hold_breath_release,
+	},
 	-- docs/solutions/tap-to-use.md
 	["QuickUse"] = {
 		press   = quick_use.press,
@@ -224,9 +295,11 @@ M.ACTIONS = {
 	["ConsumeFoodDrink"] = {
 		press   = consume.press,
 	},
-	-- docs/solutions/combat-heal.md
+	-- docs/solutions/combat-heal.md, docs/solutions/combat-heal-hold-iv.md
 	["CombatHeal"] = {
-		press   = combat_heal.press,
+		press   = combat_heal_down,
+		held    = combat_heal_held,
+		release = combat_heal_up,
 	},
 	-- docs/solutions/adrenaline-bind.md
 	["UseAdrenaline"] = {
@@ -260,6 +333,8 @@ function M.reset()
 	disabled = {}
 	point_aim = nil
 	flashlight = nil
+	combat_heal_press = nil
+	hold_breath_at = nil
 	quick_use.reset()
 end
 

@@ -1,9 +1,9 @@
 -- config.lua : USER-EDITABLE. Hot-reloadable (Ctrl+R in the UE4SS console).
 --
--- The key is set in the game's controls menu under the mapping's name (keymap.lua) and polled every tick, so the action gets a real press and release.
+-- The key is set in the game's controls menu on the mapping's row, the mod's own or a vanilla one, and polled every tick, so the action gets a real press and release.
 -- What the action does with them is its own: PointAim runs from press until release, Flashlight tells a tap from a hold.
 --
--- mapping: a player-mappable key name from keymap.lua.
+-- mapping: a key profile row name, one of the mod's own from keymap.lua or a vanilla one.
 -- action:  a key into the ACTIONS table in actions.lua.
 
 return {
@@ -13,8 +13,10 @@ return {
 	-- Master switch. Set false to load the mod inert (useful when bisecting a crash after a game patch).
 	enabled = true,
 
-	-- How long a hold-or-toggle key may be held and still count as a tap, milliseconds.
-	-- Released inside this window, the light it turned on stays on until the next press. Held past it, the light goes off on release.
+	-- How long a tap/hold key may be held and still count as a tap, milliseconds.
+	-- Flashlight: released inside this window, the light it turned on stays on until the next press. Held past it, the light goes off on release.
+	-- Combat Heal: released inside this window, it treats the most pressing problem. Held past it, it starts an IV at once.
+	-- Hold Breath: released inside this window, the breath stays held until the next press. Held past it, breath is let out on release.
 	tap_ms = 250,
 
 	-- The zoom input folds and unfolds the magnifier on a hybrid sight: scroll forward unfolds, scroll back folds.
@@ -51,6 +53,14 @@ return {
 			block_in_ui = true,
 		},
 		{
+			-- Set enabled = false for the vanilla toggle.
+			id      = "hold_breath",
+			enabled = true,
+			mapping = "IA_HoldBreath",   -- Settings > Controls > Hold Breath (vanilla key)
+			action  = "HoldBreath",   -- tap to toggle as in vanilla, hold to hold breath only while held
+			block_in_ui = true,
+		},
+		{
 			id      = "quick_use",
 			enabled = true,
 			mapping = "LikhosInteractInstant",   -- Settings > Controls > Interact (Instant)
@@ -67,8 +77,8 @@ return {
 		{
 			id      = "combat_heal",
 			enabled = true,
-			mapping = "LikhosCombatHeal",   -- Settings > Controls > Combat Heal
-			action  = "CombatHeal",     -- painkiller, heavy bleed, bleed, fracture or heal, the fastest item first
+			mapping = "LikhosCombatHeal",   -- Settings > Controls > Combat Heal (Tap/Hold)
+			action  = "CombatHeal",     -- tap: painkiller, heavy bleed, bleed or fracture, the fastest item first. Hold: an IV
 			block_in_ui = true,
 		},
 		{
