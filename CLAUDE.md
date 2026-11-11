@@ -95,6 +95,11 @@ In-game console: `kb_status`.
 - A new feature bumps minor by 1 by hand in `mod.txt`, keeping the patch number as is: `1.1.32` becomes `1.2.32`. Fixes and tweaks leave minor alone.
 - Major changes only when the user asks.
 
+## Changelog
+
+- New entries go under a `# Unreleased` heading at the top of the mod's `CHANGELOG.md`, never under a version number. Every debug build bumps the patch, so a number written during work goes stale.
+- Before publishing, rename `# Unreleased` to the version in `mod.txt` after the last build. `publish.ps1` refuses a heading that is not a bare version, so an unrenamed `# Unreleased` stops the publish.
+
 ## Log level
 
 A mod's `Scripts/config.lua` is committed with `log_level = "info"`. Setting `"debug"` for a test in game is fine, but set it back to `"info"` before committing unless the user asks to commit another level.
