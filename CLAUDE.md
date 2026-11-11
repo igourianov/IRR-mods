@@ -17,8 +17,9 @@ The load-bearing ones:
 ## Layout
 
 - `likhos-<name>/`: one mod, with `mod.txt`, `Scripts/` and `README.md`. All Lua lives flat in `Scripts/`; plain `require("log")`.
+  A mod's `README.bbcode` (gitignored) is regenerated from `README.md` before publishing. Never edit it; edit `README.md` only.
 - `lib/`: Lua modules shared by every Lua mod (`log`, `util`, `hook`). `build.ps1` and `publish.ps1` copy them into each mod's `Scripts/`, so a mod never has its own file with a `lib` name. Each mod names itself for log lines with `log.setup("<Name>", config.log_level)`.
-- A pak mod (`likhos-rearmed`) has `pak=` in `mod.txt` and the JSON edit lists (`reclass`, `clone`, `retarget`, `stats`, `effects`, `loadouts`, `loot`) that `tools\pak\pak.ps1` stages the pak's files from. `build.ps1` packs it with repak into `dist\` and installs it into `Content\Paks\~mods`.
+- A pak mod (`likhos-rearmed`) has `pak=` in `mod.txt` and the JSON edit lists (`reclass`, `clone`, `retarget`, `stats`, `supported`, `effects`, `loadouts`, `loot`) that `tools\pak\pak.ps1` stages the pak's files from. `build.ps1` packs it with repak into `dist\` and installs it into `Content\Paks\~mods`.
 - `tools/`: one folder per repo tool (`build/`, `publish/`, `pak/`, `gunsmith/`, `clear-keybinds/`), each holding the script and its configs. The scripts resolve paths from their own location, so they run from any directory. The tools `build.ps1` downloads (`repak/`, `UAssetGUI/`) and local backups in `tools/` are gitignored.
 - `docs/solutions/`: session level docs, one solution doc per piece of work, holding its design and its own recon. Read another solution doc only when the user points at it.
   A solution doc records what was done at the time and why. Do not update it when later work changes or supersedes that solution.
@@ -64,7 +65,7 @@ Use it to check weapon and attachment balance: it prints each weapon's lowest-re
 .\tools\gunsmith\gunsmith.ps1                        # every weapon with likhos-rearmed's edits
 .\tools\gunsmith\gunsmith.ps1 -Class Rifle, Smg      # by weapon class, after reclass.json
 .\tools\gunsmith\gunsmith.ps1 '*AK*' -Detail         # the parts of each build
-.\tools\gunsmith\gunsmith.ps1 -Unique Foregrip       # at most one foregrip per build
+.\tools\gunsmith\gunsmith.ps1 -Unique ''             # lift gunsmith.json's one-per-build caps
 .\tools\gunsmith\gunsmith.ps1 'AK-74M' -Trace '*Foregrip*'   # every slot path to matching parts
 .\tools\gunsmith\gunsmith.ps1 -Vanilla               # the game's own values
 ```
