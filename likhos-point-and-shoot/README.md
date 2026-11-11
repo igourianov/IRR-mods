@@ -1,14 +1,12 @@
 # Likho's Point and Shoot
 
-Tactical shortcuts for point shooting, lasers, lights, healing and consumables, all usable without opening the inventory or menus.
+Tactical shortcuts and control tweaks, all usable without opening the inventory or menus.
 
 ## Point Shooting
 
-Point shooting is meant for close range engagement. Its advantage over gun sights is speed, which vanilla's awkward control scheme defeats.
+Point shooting is faster than gun sights at close range, but vanilla's controls make it slow to enter.
 
-This mod decouples point shooting from aiming. It adds a new keybind **Point Shooting + Laser (Hold)** that allows the user to go directly into point shooting pose, bypassing regular aim.
-
-Hold mode only (no toggle). Recommended to bind the new key to a mouse side button for quick access.
+Adds **Point Shooting + Laser (Hold)** keybind, which goes straight into the point shooting pose without aiming. Hold only. Binding it to a mouse side button works well.
 
 ## Laser activation
 
@@ -28,8 +26,6 @@ Works as both momentary switch and toggle. Follows the same NVG rules as the las
 ## Hold Breath
 
 Vanilla **Hold Breath** is toggle only. The mod adds hold: keep the key down and releasing it lets the breath out. A tap still toggles.
-
-In `Scripts\config.lua`, set `enabled = false` on the `hold_breath` bind to restore the vanilla toggle.
 
 ## Interact (Instant)
 
@@ -57,7 +53,7 @@ Painkiller steps are skipped while a dose is active. Tap again for the next prob
 
 ## Use Adrenaline
 
-New keybind **Use Adrenaline**. Press it to inject an Adrenaline Injector from anywhere in your inventory, without opening it. A press while a boost is still running restarts it, so the rest of the previous dose is lost.
+New keybind **Use Adrenaline**. Press it to inject an Adrenaline Injector from anywhere in your inventory, without opening it. Pressing during an active boost restarts it.
 
 ## Magnifier binding
 
@@ -65,17 +61,24 @@ The EOTech+Magnifier combo now works using the mouse scroll, the same way an LPV
 
 ## Low ready by default
 
-Low ready is the resting position of the gun. As soon as aiming, sprinting, firing or any other action ends, the gun goes straight back to low ready, standing or moving, instead of after 10 seconds of idle. Reloading and interacting keep it in low ready. Holstering and drawing work as in vanilla.
+Vanilla auto low ready waits 10 seconds after aiming or running before lowering the gun, so it rarely engages. The mod removes that delay: the gun lowers as soon as aiming, sprinting, firing or any other action ends. Reloading and interacting keeps it lowered.
 
-Turn on auto low ready in the gameplay settings. That setting stays your switch for this feature. Your saved settings are not changed. With it on, the **Low Ready** keybind has no effect, since the gun lowers again right away.
-
-In `Scripts\config.lua`, `low_ready_run_delay_ms` (default 150) sets how long after a run the gun lowers, and `low_ready_default = false` restores the game's own auto low ready.
+Turn on auto low ready in the gameplay settings. That setting stays your switch for this feature, and your saved settings are not changed. With it on, the **Low Ready** keybind has no effect, since the gun lowers again right away.
 
 ## Plant spot marker
 
-The marker on a quest placement spot, where you plant a bomb, bug or similar item, is drawn in bright blue, a color rare in the game's world and UI. In vanilla it is a pale grey ring that blends into bark and foliage and stays faint at 20% opacity until you are close enough to plant, so you had to use the map to find it. With the mod it shows at 40% from the moment it appears. Its size, the distance where it appears and the range you can plant from are unchanged. Container, door and every other interaction marker stay vanilla.
+Quest placement spots, where you plant a bomb, bug or similar item, are marked with a bright blue icon instead of vanilla's pale grey one, which blends into foliage and stays faint until you are close. You no longer need the map to find the spot. Other interaction markers stay vanilla.
 
-In `Scripts\config.lua`, `plant_marker_color` (default `#33B5FF`) sets the color, `plant_marker_min_opacity` (default 0.4, 0 for vanilla) sets the opacity out of reach and `plant_marker = false` restores the vanilla marker.
+## Configuration
+
+Options are in `Scripts\config.lua`.
+
+- `hold_breath`: set `enabled = false` to restore the vanilla toggle.
+- `low_ready_default`: `false` restores the game's own auto low ready.
+- `low_ready_run_delay_ms`: how long after a run the gun lowers. Default 150.
+- `plant_marker`: `false` restores the vanilla marker.
+- `plant_marker_color`: marker color. Default `#33B5FF`.
+- `plant_marker_min_opacity`: marker opacity out of reach. Default 0.4, 0 for vanilla.
 
 ## Known issues
 
