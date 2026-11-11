@@ -1,6 +1,9 @@
 # Unreleased
+* Morphine is the emergency dose: Morphine and the MFAK's Inject give +60 temporary health for 1 minute instead of +50 for 3 minutes (MFAK 6 minutes 20 seconds)
+* Painkillers are the lasting dose: +20 temporary health for 5 minutes instead of 1 minute 40 seconds
 * Stark SE3 foregrip ergonomics +4 -> +1, so it no longer has both the most recoil reduction and near-top ergonomics
 * Troy Modular Combat Grip recoil -7 -> -6, so it no longer beats the Magpul MVG and Daniel Defense M-LOK grips on every stat
+* rebuilt for game patch 26596277
 
 # 2.0.91
 * AK brakes reduce recoil about 30% less, so a fully built AK no longer goes below zero recoil

@@ -313,6 +313,28 @@ function Find-StatEffect {
 	$exports[$effect - 1]
 }
 
+# An effect that keeps its template's value has none in the asset. A struct override replaces the whole inherited struct, so the template's property is copied in first.
+function Get-EffectProperty {
+	param($Effect, [string] $Stat, [string] $Name)
+	$property = @($Effect.Data | Where-Object Name -eq $Name)
+	if ($property.Count) { return $property[0] }
+	if ($Effect.TemplateIndex -ge 0) { Write-Error "$asset's $Stat effect has no imported template." }
+	# The template is the effect's counterpart under an object of another package, e.g. the stat class's default object.
+	$import = $data.Imports[-1 - $Effect.TemplateIndex]
+	$owner = $data.Imports[-1 - $import.OuterIndex]
+	$package = $owner
+	while ($package.OuterIndex) { $package = $data.Imports[-1 - $package.OuterIndex] }
+	$source = @(Read-Assets $package.ObjectName -Parse)[0]
+	$template = @($source.Exports | Where-Object { $_.ObjectName -eq $import.ObjectName -and $_.OuterIndex -gt 0 -and $source.Exports[$_.OuterIndex - 1].ObjectName -eq $owner.ObjectName })
+	if ($template.Count -ne 1) { Write-Error "$($package.ObjectName) has no $($owner.ObjectName).$($import.ObjectName)." }
+	$property = @($template[0].Data | Where-Object Name -eq $Name)
+	if ($property.Count -ne 1) { Write-Error "$asset's $Stat effect inherits no $Name from $($package.ObjectName)." }
+	# UAssetAPI writes unversioned properties in schema order, so appending is safe.
+	$Effect.Data = @($Effect.Data) + $property
+	foreach ($name in Get-NameValues $property[0]) { if ($data.NameMap -notcontains $name) { $data.NameMap += $name } }
+	$property[0]
+}
+
 # Unversioned exports serialize property names by schema position, but FName values by name map index.
 function Get-NameValues {
 	param($Property)
@@ -414,26 +436,15 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 			$property = @((Find-StatEffect 'ChanceToWound').Data | Where-Object Name -eq 'BleedingChance')
 		} elseif ($stat.Name -in 'RecoverMultiplier', 'DrainMultiplier') {
 			# Stamina multipliers live in the Influence struct of the StaminaBoost stat's effect.
-			# An effect that keeps its template's Influence has none in the asset. A struct override replaces the whole inherited struct, so the template's one is copied in first.
-			$effect = Find-StatEffect 'StaminaBoost'
-			$influence = @($effect.Data | Where-Object Name -eq 'Influence')
-			if (-not $influence.Count) {
-				if ($effect.TemplateIndex -ge 0) { Write-Error "$asset's StaminaBoost effect has no imported template." }
-				# The template is the effect's counterpart under an object of another package, e.g. the stat class's default object.
-				$import = $data.Imports[-1 - $effect.TemplateIndex]
-				$owner = $data.Imports[-1 - $import.OuterIndex]
-				$package = $owner
-				while ($package.OuterIndex) { $package = $data.Imports[-1 - $package.OuterIndex] }
-				$source = @(Read-Assets $package.ObjectName -Parse)[0]
-				$template = @($source.Exports | Where-Object { $_.ObjectName -eq $import.ObjectName -and $_.OuterIndex -gt 0 -and $source.Exports[$_.OuterIndex - 1].ObjectName -eq $owner.ObjectName })
-				if ($template.Count -ne 1) { Write-Error "$($package.ObjectName) has no $($owner.ObjectName).$($import.ObjectName)." }
-				$influence = @($template[0].Data | Where-Object Name -eq 'Influence')
-				if ($influence.Count -ne 1) { Write-Error "$asset's StaminaBoost effect inherits no Influence from $($package.ObjectName)." }
-				# UAssetAPI writes unversioned properties in schema order, so appending is safe.
-				$effect.Data = @($effect.Data) + $influence
-				foreach ($name in Get-NameValues $influence[0]) { if ($data.NameMap -notcontains $name) { $data.NameMap += $name } }
-			}
-			$property = @($influence[0].Value | Where-Object Name -eq $stat.Name)
+			$influence = Get-EffectProperty (Find-StatEffect 'StaminaBoost') 'StaminaBoost' 'Influence'
+			$property = @($influence.Value | Where-Object Name -eq $stat.Name)
+		} elseif ($stat.Name -eq 'BaseValue') {
+			# A painkiller dose's temporary health lives in the Data struct of the PainDebuff stat's effect.
+			$struct = Get-EffectProperty (Find-StatEffect 'PainDebuff') 'PainDebuff' 'Data'
+			$property = @($struct.Value | Where-Object Name -eq 'BaseValue')
+		} elseif ($stat.Name -eq 'DurationMagnitude') {
+			# Only a painkiller dose's duration so far, on the PainDebuff stat's effect.
+			$property = @(Get-EffectProperty (Find-StatEffect 'PainDebuff') 'PainDebuff' 'DurationMagnitude')
 		} else {
 			$property = @((Find-Stat $stat.Name).Value | Where-Object Name -eq 'Value')
 		}

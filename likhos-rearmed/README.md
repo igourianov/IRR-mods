@@ -109,7 +109,12 @@ Stamina boost raised from 10% to 50%: stamina recovers 50% faster and drains 50%
 
 ## Painkillers
 
-Fixed a vanilla inconsistency: Morphine and the MFAK's Inject now hide the fracture screen distortion, the same as Painkillers do.
+Morphine is the emergency dose and Painkillers the one that lasts:
+
+* Morphine and the MFAK's Inject: +60 temporary health for 1 minute (vanilla +50 for 3 minutes, MFAK for 6 minutes 20 seconds).
+* Painkillers: +20 temporary health for 5 minutes (vanilla 1 minute 40 seconds).
+
+Fixed a vanilla inconsistency: the MFAK's Inject now hides the fracture screen distortion, the same as Morphine and Painkillers do.
 
 ## Installation
 
@@ -130,6 +135,7 @@ The mod replaces these game files:
 - The Rattler's preset (`DA_Sig_Sauer_MCX_Rattler`)
 - The 7.62x39 HP round's item definition (`ID_762x39_HP`)
 - The adrenaline injector's item definition (`ID_Adrenaline_Injector`)
+- The item definitions of Morphine, the MFAK and Painkillers (`ID_Morphine_Injector`, `ID_MFAK`, `ID_Painkiller`)
 - The painkiller effect's stat config (`U_PainDebuff`)
 - The item definitions of every muzzle device except the AUG RAT Worx adapter, the M14 National Match brake and the AS VAL and VSS integral suppressors (`ID_*` under `Items/Attachments/Muzzle`)
 - The item definitions of these stocks (`ID_*` under `Items/Attachments/Stock`):
