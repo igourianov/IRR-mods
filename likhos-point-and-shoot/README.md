@@ -80,10 +80,6 @@ Options are in `Scripts\config.lua`.
 - `plant_marker_color`: marker color. Default `#33B5FF`.
 - `plant_marker_min_opacity`: marker opacity out of reach. Default 0.4, 0 for vanilla.
 
-## Known issues
-
-* **Consume Food/Drink** skips `Misprinted Condensed Milk`. *This is a vanilla bug.* The game tags it as a barter item rather than a food, although it can be consumed.
-
 ## Requirements
 
 - Incursion Red River, Steam version. Tested on build 26487830.
