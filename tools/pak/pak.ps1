@@ -9,7 +9,8 @@
 	The old tag leaves the tag list and a redirect maps it to the new one. The engine applies redirects when it loads cooked assets and saves, so every item definition, loadout and preset that names the old tag follows.
 	Then stages a renamed copy of every cooked asset listed in clone.json, e.g. a mag well that takes 300 BLK mags instead of 5.56 ones.
 	Then it extracts every cooked asset listed in retarget.json and points its references to one asset at another, e.g. a weapon's chamber from the 5.56 ammo set to the 300 BLK one.
-	Then it extracts every item definition listed in stats.json and sets its stat values, e.g. the 7.62x39 HP round's damage or the adrenaline injector's stamina recovery.
+	Then it extracts every item definition listed in stats.json and sets its stat values, e.g. the 7.62x39 HP round's damage or the adrenaline injector's stamina recovery. A definition also listed in retarget.json gets its retarget here, since both stages write the same file.
+	Then it extracts every asset listed in supported.json and sets the tags a slot or supported-items list accepts, e.g. which muzzle devices a 5.56 barrel takes. An asset also listed in stats.json gets them in the stats stage.
 	Then it extracts every stat config listed in effects.json and sets properties of the effect template its items' effects inherit from, e.g. the tags a painkiller dose grants.
 	Then it extracts every NPC loadout preset listed in loadouts.json and sets the weapon pool it picks from: the part of its faction's weighted pool that the preset selects.
 	Then it extracts every loot container preset listed in loot.json and sets its loot generation settings, e.g. how many ammo stacks an ammo box holds.
@@ -18,7 +19,7 @@
 #>
 [CmdletBinding()]
 param(
-	# The pak mod's folder, holding any of reclass.json, clone.json, retarget.json, stats.json, effects.json, loadouts.json, loot.json and materials.json.
+	# The pak mod's folder, holding any of reclass.json, clone.json, retarget.json, stats.json, supported.json, effects.json, loadouts.json, loot.json and materials.json.
 	[Parameter(Mandatory)] [string] $ModDir,
 	[Parameter(Mandatory)] [string] $Repak,
 	[Parameter(Mandatory)] [string] $UAssetGUI,
@@ -54,9 +55,15 @@ function Expand-GameFiles {
 	# Without an include, repak extracts everything.
 	if (-not $Paths) { return }
 	$Paths = @($Paths | Select-Object -Unique)
-	$gamePaks = @($Paths | ForEach-Object { Find-GamePak $_ } | Select-Object -Unique)
-	& $Repak unpack -q -f @($Paths | ForEach-Object { '-i'; $_ }) -o $To @gamePaks
-	if ($LASTEXITCODE) { Write-Error "repak failed to extract $($Paths -join ', ') from $(($gamePaks | Split-Path -Leaf) -join ', ')." }
+	# Batched by pak and count: one call with every path overruns the Windows command line limit, which PowerShell reports as a StandardOutputEncoding error.
+	foreach ($group in $Paths | Group-Object { Find-GamePak $_ }) {
+		$list = @($group.Group)
+		for ($i = 0; $i -lt $list.Count; $i += 100) {
+			$batch = $list[$i..([math]::Min($i + 99, $list.Count - 1))]
+			& $Repak unpack -q -f @($batch | ForEach-Object { '-i'; $_ }) -o $To $group.Name
+			if ($LASTEXITCODE) { Write-Error "repak failed to extract $($batch -join ', ') from $(Split-Path $group.Name -Leaf)." }
+		}
+	}
 }
 
 function Get-AssetPath {
@@ -128,7 +135,7 @@ if (Test-Path (Join-Path $ModDir 'reclass.json')) {
 
 # ---------------------------------------------------------------- assets
 # Cooked assets are edited as UAssetGUI JSON. Without a usmap their exports stay raw bytes, so only the name map and the import and export tables are touched.
-# With -Parse the usmap turns exports into properties, whose names are no longer name map indexes, so renaming a name map entry would leave them behind. Only the clone and retarget stages don't parse.
+# With -Parse the usmap turns exports into properties, whose names are no longer name map indexes, so renaming a name map entry would leave them behind. Only the clone and retarget stages don't parse. Retarget only adds names, so the stats stage can also retarget its parsed copy.
 
 function Invoke-UAssetGUI {
 	param([hashtable[]] $Calls)
@@ -237,20 +244,19 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 
 # ---------------------------------------------------------------- retarget
 $retarget = Read-EditList 'retarget'
-$entries = @($retarget.PSObject.Properties)
-$assets = @(Read-Assets $entries.Name)
-for ($n = 0; $n -lt $entries.Count; $n++) {
-	$entry = $entries[$n]
-	$asset = $entry.Name
-	$data = $assets[$n]
-	$imports = $data.Imports
-	foreach ($ref in $entry.Value.PSObject.Properties) {
+$stats = Read-EditList 'stats'
+
+# Only the import table and the name map change, so it works on an asset read with or without the usmap.
+function Set-Retarget {
+	param($Data, [string] $Asset, $Refs)
+	$imports = $Data.Imports
+	foreach ($ref in $Refs.PSObject.Properties) {
 		$old = $ref.Name
 		$new = $ref.Value
 		if (-not $cloned.Contains($new)) { Find-GamePak "$(Get-AssetPath $new).uasset" | Out-Null }
 
 		$at = @(for ($i = 0; $i -lt $imports.Count; $i++) { if ($imports[$i].ClassName -eq 'Package' -and $imports[$i].ObjectName -eq $old) { $i } })
-		if ($at.Count -ne 1) { Write-Error "$asset doesn't import $old." }
+		if ($at.Count -ne 1) { Write-Error "$Asset doesn't import $old." }
 		$outer = -1 - $at[0]
 
 		$names = Get-AssetNames $old $new
@@ -260,23 +266,29 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 		foreach ($import in $imports) {
 			if ($import.OuterIndex -eq $outer) {
 				$name = $names[$import.ObjectName]
-				if (-not $name) { Write-Error "$asset imports $($import.ObjectName) from $old, which has no counterpart in $new." }
+				if (-not $name) { Write-Error "$Asset imports $($import.ObjectName) from $old, which has no counterpart in $new." }
 				$import.ObjectName = $name
 				$used.Add($name)
 			}
 			if ($import.ClassPackage -eq $old) {
 				$name = $names[$import.ClassName]
-				if (-not $name) { Write-Error "$asset imports an object of class $($import.ClassName) from $old, which has no counterpart in $new." }
+				if (-not $name) { Write-Error "$Asset imports an object of class $($import.ClassName) from $old, which has no counterpart in $new." }
 				$import.ClassPackage = $new
 				$import.ClassName = $name
 			}
 		}
 
-		foreach ($name in $used) { if ($data.NameMap -notcontains $name) { $data.NameMap += $name } }
-		Write-Host "  $(($asset -split '/')[-1]): $(($old -split '/')[-1]) -> $(($new -split '/')[-1])"
+		foreach ($name in $used) { if ($Data.NameMap -notcontains $name) { $Data.NameMap += $name } }
+		Write-Host "  $(($Asset -split '/')[-1]): $(($old -split '/')[-1]) -> $(($new -split '/')[-1])"
 	}
+}
 
-	Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset")
+# Every stage writes the same staged file, so an asset that also has stats or supported edits is retargeted in that stage instead.
+$entries = @($retarget.PSObject.Properties | Where-Object { -not $stats.PSObject.Properties[$_.Name] -and -not (Read-EditList 'supported').PSObject.Properties[$_.Name] })
+$assets = @(Read-Assets $entries.Name)
+for ($n = 0; $n -lt $entries.Count; $n++) {
+	Set-Retarget $assets[$n] $entries[$n].Name $entries[$n].Value
+	Save-Asset $assets[$n] (Join-Path $StageDir "$(Get-AssetPath $entries[$n].Name).uasset")
 }
 
 # ---------------------------------------------------------------- stats
@@ -308,16 +320,89 @@ function Get-NameValues {
 	elseif ($Property.Value -is [array]) { foreach ($inner in $Property.Value) { Get-NameValues $inner } }
 }
 
-$stats = Read-EditList 'stats'
+# ---------------------------------------------------------------- supported
+$supported = Read-EditList 'supported'
+
+# The tags a list class's default object holds in the game's copy.
+function Get-ListTags {
+	param([string] $Package)
+	$source = @(Read-Assets $Package -Parse)[0]
+	$name = "Default__$(($Package -split '/')[-1])_C"
+	$property = @(@($source.Exports | Where-Object ObjectName -eq $name).Data | Where-Object Name -eq 'SupportedItems')
+	if ($property.Count -ne 1) { Write-Error "$Package has no SupportedItems on $name." }
+	@(@($property[0].Value | Where-Object '$type' -like 'UAssetAPI.PropertyTypes.Structs.GameplayTagContainerPropertyData,*').Value)
+}
+
+# Changes the tags a supported-items object holds. An edit names either that object (a list class's default object, e.g. Default__UISI_Muzzle_556_C) or a slot (e.g. U_Muzzle_C_0), whose SupportedItems references the object.
+# The edit starts from the object's current tags, or from another list class's with from, then applies keep, remove (both take wildcards) and add, so a game patch that changes a list still reaches the result.
+function Set-Supported {
+	param($Data, [string] $Asset, $Edits)
+	$exports = $Data.Exports
+	foreach ($edit in $Edits.PSObject.Properties) {
+		$keys = @($edit.Value.PSObject.Properties.Name)
+		$unknown = @($keys | Where-Object { $_ -notin 'unlink', 'from', 'keep', 'remove', 'add' })
+		if ($unknown.Count) { Write-Error "$Asset's $($edit.Name) edit has unknown keys: $($unknown -join ', '). Expected unlink, or from, keep, remove and add." }
+		if ('unlink' -in $keys -and $keys.Count -gt 1) { Write-Error "$Asset's $($edit.Name) edit combines unlink with tag edits." }
+		$at = @(for ($i = 0; $i -lt $exports.Count; $i++) { if ($exports[$i].ObjectName -eq $edit.Name) { $i } })
+		if ($at.Count -ne 1) { Write-Error "$Asset has $($at.Count) exports named $($edit.Name), expected one." }
+		$target = $exports[$at[0]]
+		$property = @($target.Data | Where-Object Name -eq 'SupportedItems')
+
+		# unlink drops a slot's references to supported-items objects of the named list classes, e.g. UISI_Muzzle_556.
+		if ($edit.Value.unlink) {
+			if (-not $property.Count -or $property[0].'$type' -notlike 'UAssetAPI.PropertyTypes.Objects.ArrayPropertyData,*') { Write-Error "$Asset's $($edit.Name) is not a slot with its own SupportedItems." }
+			$drop = @($edit.Value.unlink | ForEach-Object { "$_`_C" })
+			$before = @($property[0].Value)
+			$kept = @($before | Where-Object { $ref = [int] $_.Value; $class = if ($ref -gt 0) { $Data.Imports[-1 - $exports[$ref - 1].ClassIndex].ObjectName } else { $Data.Imports[-1 - $ref].ObjectName -replace '^Default__', '' }; $class -notin $drop })
+			if ($kept.Count -eq $before.Count) { Write-Error "$Asset's $($edit.Name) references none of $($edit.Value.unlink -join ', ')." }
+			# Array elements are named by index.
+			for ($i = 0; $i -lt $kept.Count; $i++) { $kept[$i].Name = "$i" }
+			$property[0].Value = $kept
+			Write-Host "  $(($Asset -split '/')[-1]).$($edit.Name): unlinked $($edit.Value.unlink -join ', ')"
+			continue
+		}
+		if ($property.Count -and $property[0].'$type' -like 'UAssetAPI.PropertyTypes.Objects.ArrayPropertyData,*') {
+			$refs = @($property[0].Value | ForEach-Object Value)
+			if ($refs.Count -ne 1 -or $refs[0] -le 0) { Write-Error "$Asset's $($edit.Name) references $($refs.Count) supported-items objects, expected one of its own." }
+			$target = $exports[$refs[0] - 1]
+			$property = @($target.Data | Where-Object Name -eq 'SupportedItems')
+		}
+		if (-not $property.Count) {
+			# An object that keeps its class's list has no SupportedItems, so the class default object's is copied in first.
+			$class = $Data.Imports[-1 - $target.ClassIndex]
+			$package = $Data.Imports[-1 - $class.OuterIndex].ObjectName
+			$source = @(Read-Assets $package -Parse)[0]
+			$template = @(@($source.Exports | Where-Object ObjectName -eq "Default__$($class.ObjectName)").Data | Where-Object Name -eq 'SupportedItems')
+			if ($template.Count -ne 1) { Write-Error "$package has no SupportedItems on Default__$($class.ObjectName)." }
+			$property = @($template[0] | ConvertTo-Json -Depth 20 | ConvertFrom-Json)
+			# UAssetAPI writes unversioned properties in schema order, so appending is safe.
+			$target.Data = @($target.Data) + $property
+		}
+		$container = @($property[0].Value | Where-Object '$type' -like 'UAssetAPI.PropertyTypes.Structs.GameplayTagContainerPropertyData,*')
+		if ($container.Count -ne 1) { Write-Error "$Asset's $($edit.Name) has no tag container." }
+		$old = @($container[0].Value)
+		$tags = if ($edit.Value.from) { Get-ListTags $edit.Value.from } else { $old }
+		if ($edit.Value.keep) { $tags = @($tags | Where-Object { $t = $_; @($edit.Value.keep | Where-Object { $t -like $_ }).Count }) }
+		if ($edit.Value.remove) { $tags = @($tags | Where-Object { $t = $_; -not @($edit.Value.remove | Where-Object { $t -like $_ }).Count }) }
+		$tags = @(@($tags) + @($edit.Value.add | Where-Object { $_ }) | Select-Object -Unique)
+		if (-not $tags.Count) { Write-Error "$Asset's $($edit.Name) edit leaves no tags. Use unlink to empty a slot." }
+		$container[0].Value = $tags
+		foreach ($tag in $tags) { if ($Data.NameMap -notcontains $tag) { $Data.NameMap += $tag } }
+		$short = { param($list) (@($list | ForEach-Object { ($_ -split '\.')[-1] }) -join ', ') }
+		Write-Host "  $(($Asset -split '/')[-1]).$($edit.Name): [$(& $short $old)] -> [$(& $short $tags)]"
+	}
+}
+
+# ---------------------------------------------------------------- stats (and supported on the same assets)
+# Both stages write the same staged file, so an asset in both gets its supported edits here.
 $entries = @($stats.PSObject.Properties)
 $assets = @(Read-Assets $entries.Name -Parse)
 for ($n = 0; $n -lt $entries.Count; $n++) {
 	$entry = $entries[$n]
 	$asset = $entry.Name
-	# Both stages start from the game's copy, so the second write would drop the first one's edits.
-	if ($retarget.PSObject.Properties[$asset]) { Write-Error "$asset is listed in both retarget.json and stats.json." }
-
 	$data = $assets[$n]
+	if ($retarget.PSObject.Properties[$asset]) { Set-Retarget $data $asset $retarget.$asset }
+	if ($supported.PSObject.Properties[$asset]) { Set-Supported $data $asset $supported.$asset }
 	$exports = $data.Exports
 	$definition = @($exports | Where-Object ObjectName -eq ($asset -split '/')[-1])
 	if ($definition.Count -ne 1) { Write-Error "$asset has no item definition export." }
@@ -364,6 +449,14 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 	Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset") -Parse
 }
 
+$entries = @($supported.PSObject.Properties | Where-Object { -not $stats.PSObject.Properties[$_.Name] })
+$assets = @(Read-Assets $entries.Name -Parse)
+for ($n = 0; $n -lt $entries.Count; $n++) {
+	if ($retarget.PSObject.Properties[$entries[$n].Name]) { Set-Retarget $assets[$n] $entries[$n].Name $retarget.($entries[$n].Name) }
+	Set-Supported $assets[$n] $entries[$n].Name $entries[$n].Value
+	Save-Asset $assets[$n] (Join-Path $StageDir "$(Get-AssetPath $entries[$n].Name).uasset") -Parse
+}
+
 # ---------------------------------------------------------------- effects
 # A stat config's default object points through StatEffect at the effect every item's effect of that stat takes as its template, exported by the same asset.
 # An item effect inherits every value it doesn't set, so a template edit reaches every item that leaves the value alone.
@@ -391,7 +484,7 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 	$entry = $entries[$n]
 	$asset = $entry.Name
 	$name = ($asset -split '/')[-1]
-	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset]) { Write-Error "$asset is listed in effects.json and another stage." }
+	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $supported.PSObject.Properties[$asset]) { Write-Error "$asset is listed in effects.json and another stage." }
 
 	$data = $assets[$n]
 	$default = @($data.Exports | Where-Object ObjectName -eq "Default__${name}_C")
@@ -469,7 +562,7 @@ $assets = @(Read-Assets $entries.Name -Parse)
 for ($n = 0; $n -lt $entries.Count; $n++) {
 	$entry = $entries[$n]
 	$asset = $entry.Name
-	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $effects.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loadouts.json and another stage." }
+	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $supported.PSObject.Properties[$asset] -or $effects.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loadouts.json and another stage." }
 
 	$data = $assets[$n]
 	$pools = @(foreach ($settings in Get-SlotSettings $data $asset) {
@@ -510,7 +603,7 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 	$entry = $entries[$n]
 	$asset = $entry.Name
 	$name = ($asset -split '/')[-1]
-	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $effects.PSObject.Properties[$asset] -or $loadouts.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loot.json and another stage." }
+	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $supported.PSObject.Properties[$asset] -or $effects.PSObject.Properties[$asset] -or $loadouts.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loot.json and another stage." }
 
 	$data = $assets[$n]
 	$settings = @(Get-SlotSettings $data $asset)
@@ -578,7 +671,7 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 	$entry = $entries[$n]
 	$asset = $entry.Name
 	$name = ($asset -split '/')[-1]
-	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $effects.PSObject.Properties[$asset] -or $loadouts.PSObject.Properties[$asset] -or $loot.PSObject.Properties[$asset]) { Write-Error "$asset is listed in materials.json and another stage." }
+	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $supported.PSObject.Properties[$asset] -or $effects.PSObject.Properties[$asset] -or $loadouts.PSObject.Properties[$asset] -or $loot.PSObject.Properties[$asset]) { Write-Error "$asset is listed in materials.json and another stage." }
 
 	$data = $assets[$n]
 	$instance = @($data.Exports | Where-Object ObjectName -eq $name)

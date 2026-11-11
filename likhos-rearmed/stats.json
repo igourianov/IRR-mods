@@ -3,85 +3,85 @@
 		"BleedingChance": 40
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AAC_762-SDN-6_Suppressor/ID_AAC_762-SDN-6_Suppressor": {
-		"Recoil": -3
+		"Recoil": 2
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AK-74_Steel_PATRIOT_Silencer/ID_AK-74_Steel_PATRIOT_Silencer": {
-		"Recoil": -4.5
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AR-15_Griffin_Armament_M4SD_II_Silencer/ID_AR-15_Griffin_Armament_M4SD_II_Silencer": {
-		"Recoil": -4.5
+		"Recoil": 4
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AUG_Ase_Utra_S_Series_SL7i_Suppressor/ID_AUG_Ase_Utra_S_Series_SL7i_Suppressor": {
-		"Recoil": -3
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/DT338_Suppressor/ID_DT338_Suppressor": {
-		"Recoil": -5.5
+		"Recoil": 22
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Honey_Badger_Standard_Suppressor/ID_Honey_Badger_Standard_Suppressor": {
-		"Recoil": -4.5
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Honey_Badger_Trash_PANDA_Suppressor/ID_Honey_Badger_Trash_PANDA_Suppressor": {
-		"Recoil": -5.5
+		"Recoil": 17
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/KVP_XL_45ACP_Suppressor/ID_KVP_XL_45ACP_Suppressor": {
-		"Recoil": -2.5
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/M700_PGW_Timberwolf_Suppressor/ID_M700_PGW_Timberwolf_Suppressor": {
-		"Recoil": -4
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/MP5_PDW_Suppressor/ID_MP5_PDW_Suppressor": {
-		"Recoil": -3.5
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/MPX_Ronin_12_Inch_9x19_Suppressor/ID_MPX_Ronin_12_Inch_9x19_Suppressor": {
-		"Recoil": -6
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/MPX_Ronin_8_Inch_9x19_Suppressor/ID_MPX_Ronin_8_Inch_9x19_Suppressor": {
-		"Recoil": -5
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/PBS-4_545x39_Suppressor/ID_PBS-4_545x39_Suppressor": {
-		"Recoil": -3.5
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/QBZ-97_556x45_Suppressor/ID_QBZ-97_556x45_Suppressor": {
-		"Recoil": -4
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/RS_Putnik_Multi-Caliber_Suppressor/ID_RS_Putnik_Multi-Caliber_Suppressor": {
-		"Recoil": -4
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Sig_Sauer_SRD762_Suppressor/ID_Sig_Sauer_SRD762_Suppressor": {
-		"Recoil": -4
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SilencerCo_Hybrid_46_Suppressor/ID_SilencerCo_Hybrid_46_Suppressor": {
-		"Recoil": -4
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SilencerCo_Omega_45k_Suppressor/ID_SilencerCo_Omega_45k_Suppressor": {
-		"Recoil": -3
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SilencerCo_Osprey_45K_Suppressor/ID_SilencerCo_Osprey_45K_Suppressor": {
-		"Recoil": -4
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SilencerCo_Salvo12_Suppressor/ID_SilencerCo_Salvo12_Suppressor": {
-		"Recoil": -4
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SKS_OSS_HX-QD_762_Suppressor/ID_SKS_OSS_HX-QD_762_Suppressor": {
-		"Recoil": -4
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Surefire_Ryder_9M_TI_Suppressor/ID_Surefire_Ryder_9M_TI_Suppressor": {
-		"Recoil": -3
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Surefire_SOCOM338-TI_Suppressor/ID_Surefire_SOCOM338-TI_Suppressor": {
-		"Recoil": -5
+		"Recoil": 22.5
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Surefire_SOCOM556-MONSTER_Suppressor/ID_Surefire_SOCOM556-MONSTER_Suppressor": {
-		"Recoil": -5
+		"Recoil": 1
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/SVD_Rotor43_762x54_Suppressor/ID_SVD_Rotor43_762x54_Suppressor": {
-		"Recoil": -4
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/TGP-A_545x39_Suppressor/ID_TGP-A_545x39_Suppressor": {
-		"Recoil": -4
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Rugged_Obsidian_9mm_Suppressor/ID_Rugged_Obsidian_9mm_Suppressor": {
-		"Recoil": -3
+		"Recoil": 0
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/AK-12_545x39_Muzzle/ID_AK-12_545x39_Muzzle": {
 		"Recoil": -15.5,
@@ -124,10 +124,10 @@
 		"Ergonomics": -2
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/P90_Flash_Hider/ID_P90_Flash_Hider": {
-		"Recoil": -22
+		"Recoil": -8
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/PP-19_Muzzle/ID_PP-19_Muzzle": {
-		"Recoil": -22.5
+		"Recoil": -10
 	},
 	"/Game/Blueprints/InventorySystem/Items/Attachments/Muzzle/Saiga_12K_GK-02_12ga_Muzzle_Device/ID_Saiga_12K_GK-02_12ga_Muzzle_Device": {
 		"Recoil": -26,
@@ -301,18 +301,48 @@
 		"Recoil": 0,
 		"Ergonomics": 0
 	},
+	"/Game/Blueprints/InventorySystem/Items/Attachments/Stock/M14_Troy_SASS_Chassis/ID_M14_Troy_SASS_Chassis": {
+		"Recoil": 0,
+		"Ergonomics": 0
+	},
+	"/Game/Blueprints/InventorySystem/Items/Attachments/Stock/FAL_Series_X_Stock/ID_FAL_Series_X_Stock": {
+		"Recoil": -16,
+		"Ergonomics": 8
+	},
+	"/Game/Blueprints/InventorySystem/Items/Attachments/Stock/FAL_Folding_Para_Stock/ID_FAL_Folding_Para_Stock": {
+		"Recoil": -9,
+		"Ergonomics": 16
+	},
+	"/Game/Blueprints/InventorySystem/Items/Attachments/Stock/QBZ-97_Cheek_Rest/ID_QBZ-97_Cheek_Rest": {
+		"Recoil": 0
+	},
 	"/Game/Blueprints/InventorySystem/Items/Medical/Adrenaline_Injector/ID_Adrenaline_Injector": {
 		"RecoverMultiplier": 1.5,
 		"DrainMultiplier": 0.5
 	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AK-74M/ID_AK-74M": {
+		"Recoil": 55
+	},
 	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AK-12/ID_AK-12": {
-		"Recoil": 46
+		"Recoil": 52
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AK-105/ID_AK-105": {
+		"Recoil": 55
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AK-101/ID_AK-101": {
+		"Recoil": 54
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AK-102/ID_AK-102": {
+		"Recoil": 54
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AKS-74/ID_AKS-74": {
+		"Recoil": 54
 	},
 	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AK-103/ID_AK-103": {
-		"Recoil": 56
+		"Recoil": 61
 	},
 	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AK-104/ID_AK-104": {
-		"Recoil": 58
+		"Recoil": 61
 	},
 	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/Colt_M4A1/ID_Colt_M4A1": {
 		"Recoil": 50
@@ -324,6 +354,110 @@
 		"Recoil": 56
 	},
 	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/QBZ-97/ID_QBZ-97": {
-		"Recoil": 46
+		"Recoil": 34,
+		"Ergonomics": 80
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AUG/A3/ID_AUG_A3": {
+		"Ergonomics": 85
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/FN_SCAR-L/ID_FN_SCAR-L": {
+		"Ergonomics": 70
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/STV-380/ID_STV-380": {
+		"Recoil": 40,
+		"Ergonomics": 70
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/DMR/SR-25/ID_SR-25": {
+		"Recoil": 78,
+		"Ergonomics": 36
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/DMR/Galil_Ace/ID_Galil_Ace": {
+		"Recoil": 69,
+		"Ergonomics": 40
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/DMR/SVDS/ID_SVDS": {
+		"Recoil": 58,
+		"Ergonomics": 30
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/FN_FAL/ID_FN_FAL": {
+		"Recoil": 76.5,
+		"Ergonomics": 38
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/DMR/Norinco_M305/ID_Norinco_M305": {
+		"Recoil": 74,
+		"Ergonomics": 40
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/DMR/M14/ID_M14": {
+		"Recoil": 73,
+		"Ergonomics": 40
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/DMR/Kel_Tec_RFB/ID_Kel_Tec_RFB": {
+		"Recoil": 58,
+		"Ergonomics": 83
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/DMR/FN_SCAR-H/ID_FN_SCAR-H": {
+		"Recoil": 58
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/MK-47/ID_MK-47": {
+		"Recoil": 50,
+		"Ergonomics": 56
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/SniperRifle/Simonov_SKS/ID_Simonov_SKS": {
+		"Ergonomics": 35
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AKS-74U/ID_AKS-74U": {
+		"Recoil": 65.5,
+		"Ergonomics": 67
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/SMG/PP-19_Vitayz/ID_PP-19_Vitayz": {
+		"Recoil": 57,
+		"Ergonomics": 65
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/SMG/FN_P90/ID_FN_P90": {
+		"Recoil": 40,
+		"Ergonomics": 93
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/SMG/MPX/ID_MPX": {
+		"Recoil": 61
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/SMG/KRISS_Vector_45ACP/ID_KRISS_Vector_45ACP": {
+		"Recoil": 47.5
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/SMG/MP5/ID_MP5": {
+		"Recoil": 49,
+		"Ergonomics": 85
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/SMG/MP5K/ID_MP5K": {
+		"Recoil": 51,
+		"Ergonomics": 84
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/SMG/MP5SD/ID_MP5SD": {
+		"Recoil": 38,
+		"Ergonomics": 83
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/Sig_Sauer_MCX_Rattler/ID_Sig_Sauer_MCX_Rattler": {
+		"Recoil": 55,
+		"Ergonomics": 61
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/Honey_Badger/ID_Honey_Badger": {
+		"Recoil": 66.5,
+		"Ergonomics": 63
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Lmg/KAC_LAMG/ID_KAC_LAMG": {
+		"Recoil": 48
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Lmg/RPK-74/ID_RPK-74": {
+		"Recoil": 53,
+		"Ergonomics": 36
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Shotgun/RIA_VR80/ID_RIA_VR80": {
+		"Ergonomics": 39
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AS_Val/ID_AS_Val": {
+		"Recoil": 65.5
+	},
+	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/VSS_Vintorez/ID_VSS_Vintorez": {
+		"Recoil": 67,
+		"Ergonomics": 66
 	}
 }
