@@ -1,3 +1,7 @@
+# Unreleased
+* the blue objective marker also marks mission phones, quest items to pick up and mission boxes, and shows from at least 10 m away (`plant_marker_range`)
+* the objective marker's gear icon stays white and out of reach it fades as in vanilla. Only the ring is blue. `plant_marker_min_opacity` is removed
+
 # 1.6.164
 * Combat Heal no longer heals or starts an IV on a press. Hold the key to start an IV. The keybind is renamed to Combat Heal (Tap/Hold) and a key already set on it is kept
 * Combat Heal takes a painkiller at any missing health when there is nothing else to treat and no dose is active

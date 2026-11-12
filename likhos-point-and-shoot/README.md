@@ -65,9 +65,16 @@ Vanilla auto low ready waits 10 seconds after aiming or running before lowering 
 
 Turn on auto low ready in the gameplay settings. That setting stays your switch for this feature, and your saved settings are not changed. With it on, the **Low Ready** keybind has no effect, since the gun lowers again right away.
 
-## Plant spot marker
+## Objective markers
 
-Quest placement spots, where you plant a bomb, bug or similar item, are marked with a bright blue icon instead of vanilla's pale grey one, which blends into foliage and stays faint until you are close. You no longer need the map to find the spot. Other interaction markers stay vanilla.
+Quest objectives are marked with a bright blue ring instead of vanilla's pale grey one, which blends into foliage. Their marker shows from at least 10 m away, where vanilla shows some only within 3.5 m. You no longer need the map to find them. Marked:
+
+- Placement spots, where you plant a bomb, bug or similar item.
+- Mission phones.
+- Quest items to pick up, such as documents, USB drives and key cards.
+- Mission boxes, which hold a mission's items.
+
+Other interaction markers stay vanilla.
 
 ## Configuration
 
@@ -76,9 +83,9 @@ Options are in `Scripts\config.lua`.
 - `hold_breath`: set `enabled = false` to restore the vanilla toggle.
 - `low_ready_default`: `false` restores the game's own auto low ready.
 - `low_ready_run_delay_ms`: how long after a run the gun lowers. Default 150.
-- `plant_marker`: `false` restores the vanilla marker.
-- `plant_marker_color`: marker color. Default `#33B5FF`.
-- `plant_marker_min_opacity`: marker opacity out of reach. Default 0.4, 0 for vanilla.
+- `plant_marker`: `false` restores the vanilla objective markers.
+- `plant_marker_color`: ring color. Default `#33B5FF`.
+- `plant_marker_range`: distance in meters where an objective marker first shows. Default 10, 0 for vanilla.
 
 ## Requirements
 

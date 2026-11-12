@@ -1,7 +1,8 @@
--- plant_marker.lua : the interaction marker on a quest placement spot is drawn in a color that stands out and is less transparent while out of reach (docs/solutions/plant-spot-marker.md).
+-- plant_marker.lua : the markers of quest objectives (placement spots, mission phones, quest item pickups and mission boxes) have a ring in a color that stands out and show from farther away.
+-- Design: docs/solutions/plant-spot-marker.md, reworked for quest pickups and range by docs/solutions/objective-marker-range.md.
 --
--- Every game name here comes from docs/solutions/plant-spot-marker.md.
--- Holds no UObject between calls. Plant spot markers are tracked by path for the per-frame opacity floor.
+-- Every game name here comes from those two docs.
+-- Holds no UObject between calls. Targets are passed by path.
 
 local log    = require("log")
 local util   = require("util")
@@ -10,23 +11,27 @@ local config = require("config")
 
 local M = {}
 
-local hooks = hook.new("plant marker", "plant spot markers stay vanilla")
+local hooks = hook.new("objective marker", "objective markers stay vanilla")
 
-local MARKER_CLASS = "/Game/Blueprints/InteractionSystem/Widgets/W_InteractionTargetMarker.W_InteractionTargetMarker_C"
-local UPDATE_FN    = MARKER_CLASS .. ":UpdateTargetMarker"
-local PLANT_ICON   = "T_IRR_Interaction_ItemInteractionIcon"
+local TARGET_CLASS = "/Script/Test_C.InteractionTarget"
+local PICKUP_CLASS = "/Script/Test_C.PickUpActor"
 
--- Background is the ring and the dark fill inside it, one material image tinted with the setting's BorderColor.
-local BACKGROUND, ICON = "Background", "Icon"
+-- The gear icon of placement spots and mission phones.
+local PLANT_ICON  = "T_IRR_Interaction_ItemInteractionIcon"
+local QUEST_ITEM  = "Inventory.Items.Quest."
+-- Spawned by a mission with its items inside. Its icon is the one every loot container shows, so it is told apart by class.
+local MISSION_BOX = "BP_MissionBox_C"
+-- Every display setting of an option, so the ring keeps the color while held, repeated or waiting.
+local DISPLAY_SETTINGS = { "DefaultDisplaySetting", "HoldDisplaySetting", "RepeatDisplaySetting", "WaitDisplaySetting" }
 
--- Linear color parsed from config.plant_marker_color by install().
-local tint = nil
+-- A target is constructed before its owner sets it up, and a pickup gets its item after it spawns. Read 2 s later, both are in place.
+local CLASSIFY_DELAY_MS = 2000
 
--- config.plant_marker_min_opacity, set by install().
-local min_opacity = 0
+-- Linear color parsed from config.plant_marker_color and outer radius in cm from config.plant_marker_range, set by install().
+local tint, range = nil, 0
 
--- Paths of the plant spot markers decorated this level, for tick(). Paths of destroyed markers drop out on the next tick.
-local plant_markers = {}
+-- The spawn watch is registered once. A hot reload only rescans.
+local watching = false
 
 local function srgb_to_linear(byte)
 	local c = byte / 255
@@ -40,70 +45,81 @@ local function parse_color(hex)
 	return { R = srgb_to_linear(tonumber(r, 16)), G = srgb_to_linear(tonumber(g, 16)), B = srgb_to_linear(tonumber(b, 16)) }
 end
 
--- Absolute colors, so a repeated update gives the same result whether or not vanilla reset the image in between. The alpha stays whatever vanilla left.
-local function set_tint(image)
-	image:SetColorAndOpacity({ R = tint.R, G = tint.G, B = tint.B, A = image.ColorAndOpacity.A })
+local function shows_plant_icon(options)
+	for i = 1, #options do
+		local option = options[i]
+		if util.valid(option) then
+			local texture = option.DefaultDisplaySetting.MarkerSetting.Texture
+			if util.valid(texture) and texture:GetFName():ToString() == PLANT_ICON then return true end
+		end
+	end
+	return false
 end
 
+local function is_objective(target)
+	if shows_plant_icon(target.InteractionOptions) then return true end
+	local owner = target:GetOwner()
+	if not util.valid(owner) then return false end
+	if owner:GetClass():GetFName():ToString() == MISSION_BOX then return true end
+	local pickup_class = StaticFindObject(PICKUP_CLASS)
+	if not (util.valid(pickup_class) and owner:IsA(pickup_class)) then return false end
+	local inventory = owner.InventoryComponent
+	local definition = util.valid(inventory) and inventory.PickUpContainerItem.ContainerItem.ItemDefinition or nil
+	return util.valid(definition) and definition.ItemIdentifier.TagName:ToString():sub(1, #QUEST_ITEM) == QUEST_ITEM
+end
+
+-- Options are per-target subobjects (probed 2026-11-11), so the color reaches this target's marker only. Vanilla tints the ring with BorderColor on every marker update.
 local function decorate(path)
-	local marker = StaticFindObject(path)
-	if not util.valid(marker) then return end
-	local background = marker[BACKGROUND]
-	-- Vanilla tints the ring grey with the setting's BorderColor, which would dim the configured color multiplied over it.
-	background:SetBrushTintColor({ SpecifiedColor = { R = 1, G = 1, B = 1, A = 1 }, ColorUseRule = 0 })
-	set_tint(background)
-	set_tint(marker[ICON])
-	plant_markers[path] = true
+	local target = StaticFindObject(path)
+	if not (util.valid(target) and is_objective(target)) then return end
+	if target.OuterInteractionRadius < range then target.OuterInteractionRadius = range end
+	-- Some targets have no sphere of their own, and the outer radius alone sets the distance.
+	local sphere = target.SphereComponent
+	if util.valid(sphere) and sphere.SphereRadius < range then sphere:SetSphereRadius(range, true) end
+	local options = target.InteractionOptions
+	for i = 1, #options do
+		local option = options[i]
+		if util.valid(option) then
+			for _, name in ipairs(DISPLAY_SETTINGS) do
+				local marker_setting = option[name].MarkerSetting
+				marker_setting.BorderColor = { SpecifiedColor = { R = tint.R, G = tint.G, B = tint.B, A = marker_setting.BorderColor.SpecifiedColor.A }, ColorUseRule = 0 }
+			end
+		end
+	end
+	log.debug("objective marker: decorated %s, outer %.0f", path, target.OuterInteractionRadius)
 end
 
--- UE4SS runs a single callback for a Blueprint function hook, never a post callback, so the marker is changed a tick later, after the vanilla body has run.
--- The setting is read here, where the parameter is valid. The marker is passed by path, not held.
--- Any other icon is left to vanilla, which sets the marker's colors on each update.
-local function on_update(context, setting)
-	local texture = setting:get().Texture
-	local icon = util.valid(texture) and texture:GetFName():ToString() or "none"
-	local path = util.path(context:get())
-	log.debug("plant marker: %s shows %s", path, icon)
-	if icon ~= PLANT_ICON then return end
-	ExecuteInGameThreadWithDelay(1, hooks.guard(function() decorate(path) end))
-end
-
--- The native fade sets OpacityAlpha to 0 beyond the outer radius, 0.2 out of reach and 1 within it, and eases ContentBox's render opacity toward it.
--- Both are raised: the target so the easing doesn't pull back, the box so the marker doesn't fade up to it over several frames.
-local function hold_opacity()
-	if min_opacity <= 0 then return end
-	for path in pairs(plant_markers) do
-		local marker = StaticFindObject(path)
-		if not util.valid(marker) then
-			plant_markers[path] = nil
-		else
-			local alpha = marker.OpacityAlpha
-			if alpha > 0 and alpha < min_opacity then
-				marker.OpacityAlpha = min_opacity
-				local box = marker.ContentBox
-				if box:GetRenderOpacity() < min_opacity then box:SetRenderOpacity(min_opacity) end
+local function scan()
+	-- FindAllOf may match the exact class only, so both the native class and its Blueprint subclass are listed.
+	local seen = {}
+	for _, class_name in ipairs({ "InteractionTarget", "BP_InteractionTarget_C" }) do
+		for _, target in ipairs(FindAllOf(class_name) or {}) do
+			local path = util.path(target)
+			if not seen[path] then
+				seen[path] = true
+				decorate(path)
 			end
 		end
 	end
 end
 
---- Hold every plant spot marker that is showing at the configured minimum opacity. Called every frame, so a failure logs once.
-M.tick = hooks.guard(hold_opacity)
-
---- Forget the tracked markers. Called on level load, when every marker widget is replaced.
-function M.reset()
-	plant_markers = {}
-end
-
---- Hook the marker widget once its Blueprint class is loaded.
+--- Decorate objective targets as they spawn, and the ones already there for a hot reload.
 function M.install()
 	tint = parse_color(config.plant_marker_color)
 	if not tint then
-		log.error("plant marker: plant_marker_color '%s' is not a #RRGGBB color, plant spot markers stay vanilla", tostring(config.plant_marker_color))
+		log.error("objective marker: plant_marker_color '%s' is not a #RRGGBB color, objective markers stay vanilla", tostring(config.plant_marker_color))
 		return
 	end
-	min_opacity = tonumber(config.plant_marker_min_opacity) or 0
-	hooks.install(UPDATE_FN, MARKER_CLASS, on_update)
+	range = (tonumber(config.plant_marker_range) or 0) * 100
+	if not watching then
+		watching = true
+		NotifyOnNewObject(TARGET_CLASS, function(target)
+			local path = util.path(target)
+			ExecuteInGameThreadWithDelay(CLASSIFY_DELAY_MS, hooks.guard(function() decorate(path) end))
+		end)
+		log.info("objective marker: watching %s", TARGET_CLASS)
+	end
+	ExecuteInGameThread(hooks.guard(scan))
 end
 
 return M
