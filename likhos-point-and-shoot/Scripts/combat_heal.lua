@@ -9,8 +9,9 @@
 -- Only reads game state to pick the item. The one call that changes anything is the item's own use.
 -- Holds no UObject between calls.
 
-local log  = require("log")
-local util = require("util")
+local log       = require("log")
+local util      = require("util")
+local inventory = require("inventory")
 
 local M = {}
 
@@ -142,7 +143,8 @@ local function collect(comp)
 	local candidates = {}
 	local containers = comp.MainContainers
 	for i = 1, #containers do
-		local items = containers[i].ContainerItems
+		-- In grid order: a full tie in pick goes to the first candidate collected.
+		local items = inventory.grid_order(containers[i])
 		for j = 1, #items do
 			local item = items[j]
 			local definition = item.ItemDefinition

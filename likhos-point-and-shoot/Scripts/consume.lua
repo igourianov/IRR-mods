@@ -4,8 +4,9 @@
 -- Only reads game state to pick the item. The one call that changes anything is the item's own use.
 -- Holds no UObject between calls.
 
-local log  = require("log")
-local util = require("util")
+local log       = require("log")
+local util      = require("util")
+local inventory = require("inventory")
 
 local M = {}
 
@@ -60,7 +61,7 @@ function M.press()
 	-- Items are passed to the context as read from the MainContainers property. A ContainerItem returned by one UFunction crashes the game when passed to another.
 	local containers = comp.MainContainers
 	for i = 1, #containers do
-		local items = containers[i].ContainerItems
+		local items = inventory.grid_order(containers[i])
 		for j = 1, #items do
 			local item = items[j]
 			local definition = item.ItemDefinition
