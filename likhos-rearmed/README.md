@@ -72,7 +72,6 @@ In-raid ammo boxes now make it easier to find the ammo type your equipped gun us
 * Adrenaline injector: stamina boost raised from 10% to 50%. Stamina recovers 50% faster and drains 50% slower for the 3 minutes the effect lasts. Food and drinks keep their vanilla stamina boosts.
 * Morphine and the MFAK's Inject are the emergency dose: +60 temporary health for 1 minute (vanilla +50 for 3 minutes, MFAK for 6 minutes 20 seconds).
 * Painkillers are the lasting dose: +20 temporary health for 5 minutes (vanilla 1 minute 40 seconds).
-* Fixed a vanilla inconsistency: the MFAK's Inject now hides the fracture screen distortion, the same as Morphine and Painkillers do.
 * In-raid med boxes hold only medical items. Nylon and polyester fabric no longer take up loot slots, so more medical items spawn.
 
 ## Installation
@@ -91,7 +90,7 @@ The mod replaces these game files:
 
 - `DefaultGameplayTags.ini`
 - The Rattler's item definition and preset (`ID_Sig_Sauer_MCX_Rattler`, `DA_Sig_Sauer_MCX_Rattler`)
-- The item definitions of the 7.62x39 HP round, the adrenaline injector, Morphine, the MFAK and Painkillers (`ID_762x39_HP`, `ID_Adrenaline_Injector`, `ID_Morphine_Injector`, `ID_MFAK`, `ID_Painkiller`) and the painkiller effect's stat config (`U_PainDebuff`)
+- The item definitions of the 7.62x39 HP round, the adrenaline injector, Morphine, the MFAK and Painkillers (`ID_762x39_HP`, `ID_Adrenaline_Injector`, `ID_Morphine_Injector`, `ID_MFAK`, `ID_Painkiller`)
 - The item definitions (`ID_*` under `Items/Attachments`) of:
   - Every muzzle device except the AUG RAT Worx adapter, the M14 National Match brake and the AS VAL and VSS integral suppressors
   - Buffer tubes, AR, MCX, AK and FAL stocks, the SKS SAGE and M14 Troy SASS chassis and the QBZ-97 cheek rest

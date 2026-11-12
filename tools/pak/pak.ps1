@@ -11,7 +11,6 @@
 	Then it extracts every cooked asset listed in retarget.json and points its references to one asset at another, e.g. a weapon's chamber from the 5.56 ammo set to the 300 BLK one.
 	Then it extracts every item definition listed in stats.json and sets its stat values, e.g. the 7.62x39 HP round's damage or the adrenaline injector's stamina recovery. A definition also listed in retarget.json gets its retarget here, since both stages write the same file.
 	Then it extracts every asset listed in supported.json and sets the tags a slot or supported-items list accepts, e.g. which muzzle devices a 5.56 barrel takes. An asset also listed in stats.json gets them in the stats stage.
-	Then it extracts every stat config listed in effects.json and sets properties of the effect template its items' effects inherit from, e.g. the tags a painkiller dose grants.
 	Then it extracts every NPC loadout preset listed in loadouts.json and sets the weapon pool it picks from: the part of its faction's weighted pool that the preset selects.
 	Then it extracts every loot container preset listed in loot.json and sets its loot generation settings, e.g. how many ammo stacks an ammo box holds.
 	Last, it extracts every material instance listed in materials.json and sets scalar parameters it overrides, e.g. a scope's chromatic aberration amount.
@@ -19,7 +18,7 @@
 #>
 [CmdletBinding()]
 param(
-	# The pak mod's folder, holding any of reclass.json, clone.json, retarget.json, stats.json, supported.json, effects.json, loadouts.json, loot.json and materials.json.
+	# The pak mod's folder, holding any of reclass.json, clone.json, retarget.json, stats.json, supported.json, loadouts.json, loot.json and materials.json.
 	[Parameter(Mandatory)] [string] $ModDir,
 	[Parameter(Mandatory)] [string] $Repak,
 	[Parameter(Mandatory)] [string] $UAssetGUI,
@@ -468,67 +467,6 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 	Save-Asset $assets[$n] (Join-Path $StageDir "$(Get-AssetPath $entries[$n].Name).uasset") -Parse
 }
 
-# ---------------------------------------------------------------- effects
-# A stat config's default object points through StatEffect at the effect every item's effect of that stat takes as its template, exported by the same asset.
-# An item effect inherits every value it doesn't set, so a template edit reaches every item that leaves the value alone.
-# A value of the form Enum::Member sets an enum property, an array of strings a gameplay tag container. A property the template doesn't set yet is added.
-function New-Property {
-	param([string] $Type, [string] $Name, [System.Collections.Specialized.OrderedDictionary] $Fields, $Value)
-	# UAssetGUI reads $type only as the first key, so the fields keep the order the game's own assets have.
-	$property = [ordered]@{ '$type' = "UAssetAPI.PropertyTypes.$Type, UAssetAPI" }
-	foreach ($key in $Fields.Keys) { $property[$key] = $Fields[$key] }
-	$property.Name = $Name
-	$property.ArrayIndex = 0
-	$property.PropertyGuid = $null
-	$property.IsZero = $false
-	$property.PropertyTagFlags = 'None'
-	$property.PropertyTypeName = $null
-	$property.PropertyTagExtensions = 'NoExtension'
-	$property.Value = $Value
-	[pscustomobject] $property
-}
-
-$effects = Read-EditList 'effects'
-$entries = @($effects.PSObject.Properties)
-$assets = @(Read-Assets $entries.Name -Parse)
-for ($n = 0; $n -lt $entries.Count; $n++) {
-	$entry = $entries[$n]
-	$asset = $entry.Name
-	$name = ($asset -split '/')[-1]
-	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $supported.PSObject.Properties[$asset]) { Write-Error "$asset is listed in effects.json and another stage." }
-
-	$data = $assets[$n]
-	$default = @($data.Exports | Where-Object ObjectName -eq "Default__${name}_C")
-	if ($default.Count -ne 1) { Write-Error "$asset has no Default__${name}_C export." }
-	$pointer = @($default[0].Data | Where-Object Name -eq 'StatEffect')
-	if ($pointer.Count -ne 1 -or $pointer[0].Value -le 0) { Write-Error "$asset's default object has no StatEffect in the asset." }
-	$effect = $data.Exports[$pointer[0].Value - 1]
-
-	foreach ($field in $entry.Value.PSObject.Properties) {
-		if ($field.Value -is [string] -and $field.Value -match '^(\w+)::(\w+)$') {
-			$property = New-Property 'Objects.EnumPropertyData' $field.Name ([ordered]@{ EnumType = $Matches[1]; InnerType = 'ByteProperty' }) $Matches[2]
-			$names = @($Matches[1], $Matches[2], 'ByteProperty', 'EnumProperty')
-			$shown = $Matches[2]
-		} elseif ($field.Value -is [array] -and -not @($field.Value | Where-Object { $_ -isnot [string] }).Count) {
-			$inner = New-Property 'Structs.GameplayTagContainerPropertyData' $field.Name ([ordered]@{}) @($field.Value)
-			$property = New-Property 'Structs.StructPropertyData' $field.Name ([ordered]@{ StructType = 'GameplayTagContainer'; SerializeNone = $true; StructGUID = '{00000000-0000-0000-0000-000000000000}'; SerializationControl = 'NoExtension'; Operation = 'None' }) @($inner)
-			$names = @('GameplayTagContainer', 'StructProperty') + @($field.Value)
-			$shown = "[$($field.Value -join ', ')]"
-		} else {
-			Write-Error "$($field.Name) in effects.json for $asset is neither Enum::Member nor an array of tags."
-		}
-
-		# UAssetAPI writes unversioned properties in schema order, so a property added at the end lands in place.
-		$old = @($effect.Data | Where-Object Name -eq $field.Name)
-		$was = if ($old.Count) { ($old[0].Value | ConvertTo-Json -Compress -Depth 10) } else { 'inherited' }
-		$effect.Data = @(@($effect.Data | Where-Object Name -ne $field.Name) + $property)
-		foreach ($needed in $names) { if ($data.NameMap -notcontains $needed) { $data.NameMap += $needed } }
-		Write-Host "  ${name}: $($field.Name) $was -> $shown"
-	}
-
-	Save-Asset $data (Join-Path $StageDir "$(Get-AssetPath $asset).uasset") -Parse
-}
-
 # ---------------------------------------------------------------- presets
 # A loadout or loot container preset fills each of its ContainerSlots from the LootGenerationSettings object the slot references, exported by the same asset.
 function Get-SlotSettings {
@@ -573,7 +511,7 @@ $assets = @(Read-Assets $entries.Name -Parse)
 for ($n = 0; $n -lt $entries.Count; $n++) {
 	$entry = $entries[$n]
 	$asset = $entry.Name
-	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $supported.PSObject.Properties[$asset] -or $effects.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loadouts.json and another stage." }
+	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $supported.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loadouts.json and another stage." }
 
 	$data = $assets[$n]
 	$pools = @(foreach ($settings in Get-SlotSettings $data $asset) {
@@ -614,7 +552,7 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 	$entry = $entries[$n]
 	$asset = $entry.Name
 	$name = ($asset -split '/')[-1]
-	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $supported.PSObject.Properties[$asset] -or $effects.PSObject.Properties[$asset] -or $loadouts.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loot.json and another stage." }
+	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $supported.PSObject.Properties[$asset] -or $loadouts.PSObject.Properties[$asset]) { Write-Error "$asset is listed in loot.json and another stage." }
 
 	$data = $assets[$n]
 	$settings = @(Get-SlotSettings $data $asset)
@@ -682,7 +620,7 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 	$entry = $entries[$n]
 	$asset = $entry.Name
 	$name = ($asset -split '/')[-1]
-	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $supported.PSObject.Properties[$asset] -or $effects.PSObject.Properties[$asset] -or $loadouts.PSObject.Properties[$asset] -or $loot.PSObject.Properties[$asset]) { Write-Error "$asset is listed in materials.json and another stage." }
+	if ($retarget.PSObject.Properties[$asset] -or $stats.PSObject.Properties[$asset] -or $supported.PSObject.Properties[$asset] -or $loadouts.PSObject.Properties[$asset] -or $loot.PSObject.Properties[$asset]) { Write-Error "$asset is listed in materials.json and another stage." }
 
 	$data = $assets[$n]
 	$instance = @($data.Exports | Where-Object ObjectName -eq $name)
