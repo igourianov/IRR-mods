@@ -15,7 +15,7 @@ local config  = require("config")
 
 local M = {}
 
---- A press released within this window is a tap. Flashlight leaves the light on, CombatHeal treats instead of starting an IV, HoldBreath keeps the vanilla toggle.
+--- A press released within this window is a tap. Flashlight leaves the light on, CombatHeal takes a painkiller instead of treating a condition or starting an IV, HoldBreath keeps the vanilla toggle.
 local TAP_MS = config.tap_ms or 250
 
 --------------------------------------------------------------------------
@@ -203,7 +203,7 @@ local function flashlight_release()
 end
 
 --------------------------------------------------------------------------
--- CombatHeal: tap to treat, hold to start an IV (docs/solutions/combat-heal-hold-iv.md)
+-- CombatHeal: tap for a painkiller, hold to treat a condition or start an IV (docs/solutions/medical-rework.md)
 --------------------------------------------------------------------------
 
 -- Non-nil while a CombatHeal press is live. Plain values only, no UObjects.
@@ -215,7 +215,7 @@ local function combat_heal_down()
 	combat_heal_press = { at = os.clock(), fired = false }
 end
 
---- The hold fires as the tap window passes, so the IV starts without waiting for release.
+--- The hold fires as the tap window passes, so its item starts without waiting for release.
 local function combat_heal_held()
 	local state = combat_heal_press
 	if not state or state.fired or elapsed_ms(state.at) < TAP_MS then return end

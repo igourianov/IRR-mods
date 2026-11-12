@@ -20,7 +20,7 @@ M.MAPPINGS = {
 	LikhosFlashlight          = { display = "Flashlight (Hold/Toggle)" },
 	LikhosInteractInstant     = { display = "Interact (Instant)" },
 	LikhosConsumeFoodDrink    = { display = "Consume Food/Drink" },
-	LikhosCombatHeal          = { display = "Use Medical (Tap/Hold)" },
+	LikhosCombatHeal          = { display = "Smart Heal (Tap/Hold)" },
 	LikhosUseAdrenaline       = { display = "Use Adrenaline" },
 }
 

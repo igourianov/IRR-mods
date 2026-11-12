@@ -1,3 +1,9 @@
+# Unreleased
+* updated for game version 1.4.0.3
+* renamed the Use Medical (Tap/Hold) keybind to Smart Heal (Tap/Hold). A key already set on it is kept
+* tapping Smart Heal takes the fastest painkiller at any health, even with a dose active, since the game now refreshes the dose
+* holding Smart Heal treats a heavy bleed, bleed or fracture, then starts an IV. It uses the fastest item and no longer takes Painkillers
+
 # 1.6.172
 * renamed the Combat Heal (Tap/Hold) keybind to Use Medical (Tap/Hold). A key already set on it is kept
 * holding Use Medical with no IV and no active dose takes Painkillers. Morphine and the MFAK are left for a tap

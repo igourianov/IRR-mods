@@ -437,13 +437,6 @@ for ($n = 0; $n -lt $entries.Count; $n++) {
 			# Stamina multipliers live in the Influence struct of the StaminaBoost stat's effect.
 			$influence = Get-EffectProperty (Find-StatEffect 'StaminaBoost') 'StaminaBoost' 'Influence'
 			$property = @($influence.Value | Where-Object Name -eq $stat.Name)
-		} elseif ($stat.Name -eq 'BaseValue') {
-			# A painkiller dose's temporary health lives in the Data struct of the PainDebuff stat's effect.
-			$struct = Get-EffectProperty (Find-StatEffect 'PainDebuff') 'PainDebuff' 'Data'
-			$property = @($struct.Value | Where-Object Name -eq 'BaseValue')
-		} elseif ($stat.Name -eq 'DurationMagnitude') {
-			# Only a painkiller dose's duration so far, on the PainDebuff stat's effect.
-			$property = @(Get-EffectProperty (Find-StatEffect 'PainDebuff') 'PainDebuff' 'DurationMagnitude')
 		} else {
 			$property = @((Find-Stat $stat.Name).Value | Where-Object Name -eq 'Value')
 		}

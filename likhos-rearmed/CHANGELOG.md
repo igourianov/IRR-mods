@@ -1,5 +1,6 @@
 # Unreleased
-* the MFAK's Inject fracture fix is removed, since the game now hides the fracture screen distortion for the MFAK's Inject itself
+* updated for game version 1.4.0.3
+* reverted Morphine, the MFAK's Inject and Painkillers to vanilla, since the game now refreshes an active dose and hides the fracture screen distortion for the MFAK's Inject itself
 
 # 2.1.95
 * Morphine is the emergency dose: Morphine and the MFAK's Inject give +60 temporary health for 1 minute instead of +50 for 3 minutes (MFAK 6 minutes 20 seconds)

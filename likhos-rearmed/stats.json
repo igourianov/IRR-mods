@@ -326,17 +326,6 @@
 		"RecoverMultiplier": 1.5,
 		"DrainMultiplier": 0.5
 	},
-	"/Game/Blueprints/InventorySystem/Items/Medical/MFAK/ID_MFAK": {
-		"BaseValue": 60,
-		"DurationMagnitude": 60
-	},
-	"/Game/Blueprints/InventorySystem/Items/Medical/Morphine_Injector/ID_Morphine_Injector": {
-		"BaseValue": 60,
-		"DurationMagnitude": 60
-	},
-	"/Game/Blueprints/InventorySystem/Items/Medical/Painkiller/ID_Painkiller": {
-		"DurationMagnitude": 300
-	},
 	"/Game/Blueprints/InventorySystem/Items/Weapons/Rifle/AK-74M/ID_AK-74M": {
 		"Recoil": 55
 	},

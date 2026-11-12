@@ -31,35 +31,28 @@ Vanilla **Hold Breath** is toggle only. The mod adds hold: keep the key down and
 
 New keybind **Interact (Instant)** that mimics vanilla **Interact** behavior but without hold delay. Tap it to open containers instantly. Locked containers will still use unlock delay, but do not require holding the key. The vanilla binding is unaffected.
 
-## Consume Food/Drink
+## Smart Heal
 
-New keybind **Consume Food/Drink** that works like vanilla **Quick Heal** but for food and drinks. Press it to eat or drink the first food or drink item found in your inventory, without opening it. Medical items are never used.
+New keybind **Smart Heal (Tap/Hold)**, a smarter alternative for vanilla's **Quick Heal**, which tends to start a 14-second IV when you need a 2-second morphine shot. Uses items from anywhere in your inventory.
 
-## Use Medical
+Each press uses one item and picks the fastest one for the job. Among equally fast items it uses single-purpose items before the MFAK, and partly used items before fresh ones.
 
-New keybind **Use Medical (Tap/Hold)**, a smarter alternative for vanilla's **Quick Heal**, which tends to start a 14-second IV when you need a 2-second morphine shot. Uses items from anywhere in your inventory.
+**Tap** takes a painkiller: morphine, the MFAK's injection or Painkillers. It works even with a dose active, refreshing it.
 
-Each press treats one thing, the first that applies. Press again for the next problem. Painkiller steps are skipped while a dose is active.
-
-**Tap** is for the middle of a fight: it gets health back first and uses the fastest item for each step.
-
-1. Below 90% health: painkiller/morphine.
-2. Heavy bleed.
-3. Bleed.
-4. Fracture.
-5. Any health missing: painkiller/morphine.
-
-**Hold** is for healing out of combat: it focuses on lasting recovery and uses the slowest item for each condition, saving the fast ones for the next fight.
+**Hold** treats the first that applies. Hold again for the next problem.
 
 1. Heavy bleed.
 2. Bleed.
 3. Fracture.
 4. Any health missing: the IV that best covers it.
-5. No IV: Painkillers.
 
 ## Use Adrenaline
 
 New keybind **Use Adrenaline**. Press it to inject an Adrenaline Injector from anywhere in your inventory, without opening it. Pressing during an active boost restarts it.
+
+## Consume Food/Drink
+
+New keybind **Consume Food/Drink** that works like vanilla **Quick Heal** but for food and drinks. Press it to eat or drink the first food or drink item found in your inventory, without opening it. Medical items are never used.
 
 ## Magnifier binding
 
