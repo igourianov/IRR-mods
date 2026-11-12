@@ -8,7 +8,7 @@ Use counter on inventory tiles of medical items, keys and quest items now shows 
 
 ## Quick sell/deliver
 
-`Shift+Click` an item while in the hideout to sell it, the same as Sell from its context menu. A mission item is delivered for its mission instead, the same as Deliver from its context menu. Items that can't be sold or delivered are not affected.
+`Shift+Click` an item while in the hideout to sell it, the same as Sell from its context menu. A mission item is delivered for its mission instead. Items that can't be sold or delivered are not affected.
 
 ## Quick slot refill
 
@@ -17,10 +17,6 @@ A quick slot holds an item type rather than a single item. When its item is used
 For single use items, e.g. injectors, bandages or grenades, the slot shows how many your inventory holds.
 
 `Click` a quick slot in the inventory screen to clear it. Its item can no longer be dragged out of the slot.
-
-## Known issues
-
-* Delivering a mission item from the character inventory counts it for the mission but does not remove the item, so it can be delivered again. This is a vanilla bug and applies to Deliver from the context menu too. Deliver mission items from the stash.
 
 ## Requirements
 
