@@ -35,11 +35,13 @@ New keybind **Interact (Instant)** that mimics vanilla **Interact** behavior but
 
 New keybind **Consume Food/Drink** that works like vanilla **Quick Heal** but for food and drinks. Press it to eat or drink the first food or drink item found in your inventory, without opening it. Medical items are never used.
 
-## Combat Heal
+## Use Medical
 
-New keybind **Combat Heal (Tap/Hold)**, a smarter alternative for vanilla's **Quick Heal**, which tends to start a 14-second IV when you need a 2-second morphine shot. Uses items from anywhere in your inventory.
+New keybind **Use Medical (Tap/Hold)**, a smarter alternative for vanilla's **Quick Heal**, which tends to start a 14-second IV when you need a 2-second morphine shot. Uses items from anywhere in your inventory.
 
-**Tap** treats one thing, the first that applies, with the fastest item for it:
+Each press treats one thing, the first that applies. Press again for the next problem. Painkiller steps are skipped while a dose is active.
+
+**Tap** is for the middle of a fight: it gets health back first and uses the fastest item for each step.
 
 1. Below 90% health: painkiller/morphine.
 2. Heavy bleed.
@@ -47,9 +49,13 @@ New keybind **Combat Heal (Tap/Hold)**, a smarter alternative for vanilla's **Qu
 4. Fracture.
 5. Any health missing: painkiller/morphine.
 
-Painkiller steps are skipped while a dose is active. Tap again for the next problem.
+**Hold** is for healing out of combat: it focuses on lasting recovery and uses the slowest item for each condition, saving the fast ones for the next fight.
 
-**Hold** starts the IV that best covers missing health.
+1. Heavy bleed.
+2. Bleed.
+3. Fracture.
+4. Any health missing: the IV that best covers it.
+5. No IV: Painkillers.
 
 ## Use Adrenaline
 

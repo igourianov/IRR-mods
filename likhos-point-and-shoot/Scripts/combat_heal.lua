@@ -1,8 +1,10 @@
--- combat_heal.lua : a Combat Heal tap treats the most pressing problem with the fastest item carried (docs/solutions/combat-heal.md).
--- A hold starts the IV that best covers missing health (docs/solutions/combat-heal-hold-iv.md).
+-- combat_heal.lua : a Use Medical tap treats the most pressing problem with the fastest item carried (docs/solutions/combat-heal.md).
+-- A hold restores out of combat (docs/solutions/combat-heal-hold-conditions.md): conditions with the slowest item, then the IV that best covers missing health (docs/solutions/combat-heal-hold-iv.md), else a Painkiller when no dose is active (docs/solutions/combat-heal-hold-painkiller.md).
 -- The Use Adrenaline key shares its item search with a single stamina step (docs/solutions/adrenaline-bind.md).
 --
 -- Tap steps in order: painkiller below 90% with no dose active, heavy bleed, bleed, fracture, painkiller at 90% or above with health missing and no dose active.
+-- Hold steps in order: heavy bleed, bleed, fracture, IV, Painkiller with no dose active.
+-- Fracture goes before the IV: health stays missing while an IV heals, so a later fracture step would wait out every IV carried.
 -- A tap never heals: the Health Injector, the only instant heal, is deprecated.
 -- An item treats a step through a use context whose actions carry the step's stat tag, so the tag decides, not the item's name.
 -- Every game name here comes from docs/solutions/combat-heal.md (Recon).
@@ -20,6 +22,8 @@ local USES_TAG      = "Inventory.Stats.Durability"
 local USE_TIME_TAG  = "Inventory.Stats.Usage Time"
 local DOSE_BUFF     = "Character.Buffs.Medic.Painkiller"
 local PAINKILLER_AT = 0.9
+-- The hold's painkiller step is this item only. Morphine and the MFAK carry the same treatment tag.
+local PAINKILLER_ITEM = "Inventory.Items.Medical.Painkiller"
 
 --- Action stat tag -> the treatment it gives. Heals over time (IVs) serve a hold only.
 local TREATMENTS = {
@@ -32,7 +36,7 @@ local TREATMENTS = {
 	["Inventory.Stats.Stamina Boost"]    = "stamina",
 }
 
---- Condition steps, in order, between the two painkiller steps: the pawn's owned tag that makes the step apply.
+--- Condition steps, in order, for both tap and hold: the pawn's owned tag that makes the step apply.
 local CONDITIONS = {
 	{ treatment = "heavy_bleed", tag = "Character.Effects.Heavy Wounded" },
 	{ treatment = "bleed",       tag = "Character.Effects.Wounded" },
@@ -99,14 +103,16 @@ local function ranks_before(a, b)
 end
 
 --- The step's best candidate and its context, or nil.
---- rank(candidate, entry) gives the waste part of the rank: speed comes before it, uses left after it.
-local function pick(candidates, treatment, pawn, rank)
+--- step.rank(candidate, entry) gives the waste part of the rank: speed comes before it, uses left after it.
+--- Speed is fastest first, or slowest first when step.slowest is set, which saves the fast items for a fight.
+--- step.item, when set, limits the pick to candidates with that item identifier.
+local function pick(candidates, step, pawn)
 	local best, best_context, best_rank = nil, nil, nil
 	for _, candidate in ipairs(candidates) do
-		local entry = candidate.treatments[treatment]
-		if entry then
-			local r = { candidate.time }
-			for _, v in ipairs(rank(candidate, entry)) do r[#r + 1] = v end
+		local entry = candidate.treatments[step.treatment]
+		if entry and (not step.item or candidate.id == step.item) then
+			local r = { step.slowest and -candidate.time or candidate.time }
+			for _, v in ipairs(step.rank(candidate, entry)) do r[#r + 1] = v end
 			r[#r + 1] = candidate.uses
 			-- No item widget: the bind has none, unlike the context menu.
 			if (not best_rank or ranks_before(r, best_rank)) and entry.context:IsValidContext(pawn, nil, candidate.item) then
@@ -131,11 +137,17 @@ local function by_coverage(missing)
 	end
 end
 
---- The pawn's health attribute, or nil.
-local function resolve_health(pawn)
+--- The pawn's health attribute and its owned tags as a set, or nil. bind names the bind in log lines.
+local function resolve_condition(pawn, bind)
 	local health_comp = pawn:GetHealthComponent()
 	local health = util.valid(health_comp) and health_comp.Health or nil
-	return util.valid(health) and health or nil
+	local ability = pawn:GetAbilityComponent()
+	local tags_comp = util.valid(ability) and ability.GameplayTagsComponent or nil
+	if not (util.valid(health) and util.valid(tags_comp)) then
+		log.debug("%s: no health attribute or tags component", bind)
+		return nil
+	end
+	return health, tag_set(tags_comp.OwnedGameplayTags)
 end
 
 --- The pawn and the player's inventory component, or nil. bind names the bind in log lines.
@@ -162,12 +174,13 @@ local function collect(comp)
 		for j = 1, #items do
 			local item = items[j]
 			local definition = item.ItemDefinition
-			if util.valid(definition) and definition.ItemIdentifier.TagName:ToString():sub(1, #MEDICAL) == MEDICAL then
+			local id = util.valid(definition) and definition.ItemIdentifier.TagName:ToString() or nil
+			if id and id:sub(1, #MEDICAL) == MEDICAL then
 				local uses = stat(item, USES_TAG) or math.huge
 				if uses > 0 then
 					local treatments, count = item_treatments(definition)
 					if count > 0 then
-						candidates[#candidates + 1] = { item = item, time = stat(item, USE_TIME_TAG) or math.huge, uses = uses, treatments = treatments, count = count }
+						candidates[#candidates + 1] = { item = item, id = id, time = stat(item, USE_TIME_TAG) or math.huge, uses = uses, treatments = treatments, count = count }
 					end
 				end
 			end
@@ -179,7 +192,7 @@ end
 --- Execute the pick of the first step with a usable candidate.
 local function run(bind, steps, candidates, pawn)
 	for _, step in ipairs(steps) do
-		local best, context = pick(candidates, step.treatment, pawn, step.rank)
+		local best, context = pick(candidates, step, pawn)
 		if best then
 			log.debug("%s: %s: using %s (%.1f s)", bind, step.treatment, best.item.ItemDefinition:GetFullName(), best.time)
 			context:Execute(pawn, nil, best.item)
@@ -190,21 +203,15 @@ local function run(bind, steps, candidates, pawn)
 	log.debug("%s: nothing to treat", bind)
 end
 
---- The Combat Heal key's tap. Game thread.
+--- The Use Medical key's tap. Game thread.
 function M.tap()
 	local pawn, comp = resolve("CombatHeal")
 	if not pawn then return end
-	local health = resolve_health(pawn)
-	local ability = pawn:GetAbilityComponent()
-	local tags_comp = util.valid(ability) and ability.GameplayTagsComponent or nil
-	if not (health and util.valid(tags_comp)) then
-		log.debug("CombatHeal: no health attribute or tags component")
-		return
-	end
+	local health, owned = resolve_condition(pawn, "CombatHeal")
+	if not health then return end
 
 	local real, max = health:GetBaseValue(), health:GetCurrentMaxValue()
 	local active = dose_active(health)
-	local owned = tag_set(tags_comp.OwnedGameplayTags)
 	local names = {}
 	for name in pairs(owned) do names[#names + 1] = name end
 	log.debug("CombatHeal: real %.1f max %.1f, dose %s, tags [%s]", real, max, tostring(active), table.concat(names, ", "))
@@ -222,22 +229,23 @@ function M.tap()
 	run("CombatHeal", steps, collect(comp), pawn)
 end
 
---- The Combat Heal key's hold: the IV only, whatever else needs treating. Game thread.
+--- The Use Medical key's hold: a condition with the slowest item, else an IV, else a Painkiller. Game thread.
 function M.hold()
 	local pawn, comp = resolve("CombatHealHold")
 	if not pawn then return end
-	local health = resolve_health(pawn)
-	if not health then
-		log.debug("CombatHealHold: no health attribute")
-		return
-	end
+	local health, owned = resolve_condition(pawn, "CombatHealHold")
+	if not health then return end
 
-	local missing = health:GetCurrentMaxValue() - health:GetBaseValue()
-	if missing <= 0 then
-		log.debug("CombatHealHold: no health missing")
-		return
+	local steps = {}
+	for _, condition in ipairs(CONDITIONS) do
+		if owned[condition.tag] then steps[#steps + 1] = { treatment = condition.treatment, rank = by_treatments, slowest = true } end
 	end
-	run("CombatHealHold", { { treatment = "heal", rank = by_coverage(missing) } }, collect(comp), pawn)
+	local missing = health:GetCurrentMaxValue() - health:GetBaseValue()
+	if missing > 0 then
+		steps[#steps + 1] = { treatment = "heal", rank = by_coverage(missing) }
+		if not dose_active(health) then steps[#steps + 1] = { treatment = "painkiller", rank = by_treatments, item = PAINKILLER_ITEM } end
+	end
+	run("CombatHealHold", steps, collect(comp), pawn)
 end
 
 --- The Use Adrenaline key's press. Game thread.

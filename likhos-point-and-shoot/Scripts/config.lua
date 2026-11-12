@@ -15,7 +15,7 @@ return {
 
 	-- How long a tap/hold key may be held and still count as a tap, milliseconds.
 	-- Flashlight: released inside this window, the light it turned on stays on until the next press. Held past it, the light goes off on release.
-	-- Combat Heal: released inside this window, it treats the most pressing problem. Held past it, it starts an IV at once.
+	-- Use Medical: released inside this window, it treats the most pressing problem. Held past it, it treats a bleed or fracture with the slowest item, else starts an IV at once, else takes Painkillers.
 	-- Hold Breath: released inside this window, the breath stays held until the next press. Held past it, breath is let out on release.
 	tap_ms = 250,
 
@@ -77,8 +77,8 @@ return {
 		{
 			id      = "combat_heal",
 			enabled = true,
-			mapping = "LikhosCombatHeal",   -- Settings > Controls > Combat Heal (Tap/Hold)
-			action  = "CombatHeal",     -- tap: painkiller, heavy bleed, bleed or fracture, the fastest item first. Hold: an IV
+			mapping = "LikhosCombatHeal",   -- Settings > Controls > Use Medical (Tap/Hold)
+			action  = "CombatHeal",     -- tap: painkiller, heavy bleed, bleed or fracture, the fastest item first. Hold: heavy bleed, bleed or fracture, the slowest item first, else an IV, else Painkillers
 			block_in_ui = true,
 		},
 		{
