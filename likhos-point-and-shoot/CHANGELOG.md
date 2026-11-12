@@ -1,9 +1,9 @@
-# Unreleased
+# 1.6.172
 * renamed the Combat Heal (Tap/Hold) keybind to Use Medical (Tap/Hold). A key already set on it is kept
-* holding Use Medical without an IV takes Painkillers when no dose is active. Morphine and the MFAK are left for a tap
-* holding Use Medical treats a heavy bleed, bleed or fracture before starting an IV, with the slowest item for it, so the fast ones are left for a fight. It also works at full health
-* the blue objective marker also marks mission phones, quest items to pick up and mission boxes, and shows from at least 10 m away (`plant_marker_range`)
-* the objective marker's gear icon stays white and out of reach it fades as in vanilla. Only the ring is blue. `plant_marker_min_opacity` is removed
+* holding Use Medical with no IV and no active dose takes Painkillers. Morphine and the MFAK are left for a tap
+* holding Use Medical treats a heavy bleed, bleed or fracture before starting an IV, using the slowest item for it so the fast ones are kept for a fight. It also works at full health
+* the blue objective marker also covers mission phones, quest pickups and mission boxes, and shows from at least 10 m away (`plant_marker_range`)
+* the objective marker's gear icon stays white and fades out of reach as in vanilla. Only the ring is blue. `plant_marker_min_opacity` is removed
 
 # 1.6.164
 * Combat Heal no longer heals or starts an IV on a press. Hold the key to start an IV. The keybind is renamed to Combat Heal (Tap/Hold) and a key already set on it is kept
