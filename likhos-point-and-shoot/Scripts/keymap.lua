@@ -15,13 +15,47 @@ local OUTER = "/Engine/Transient"
 local IMC_NAME = "IMC_LikhosKeybinds"
 local STACK_PRIORITY = -1000
 
+-- In the order of their rows on the controls page.
+-- name: the key profile row name. display: the row label. description: shown in the controls page's setting info panel when the row is hovered. Plain text, the panel is a rich text block.
 M.MAPPINGS = {
-	LikhosPointShootingDirect = { display = "Point Shooting + Laser (Hold)" },
-	LikhosFlashlight          = { display = "Flashlight (Hold/Toggle)" },
-	LikhosInteractInstant     = { display = "Interact (Instant)" },
-	LikhosConsumeFoodDrink    = { display = "Consume Food/Drink" },
-	LikhosCombatHeal          = { display = "Smart Heal (Tap/Hold)" },
-	LikhosUseAdrenaline       = { display = "Use Adrenaline" },
+	{
+		name = "LikhosPointShootingDirect",
+		display = "Point Shooting + Laser (Hold)",
+		description = [[
+Hold to go straight into the point shooting pose bypassing aim.
+
+Activate the first laser on the gun: a visible laser with NVG off, an IR laser with NVG on when the gun has one.]],
+	},
+	{
+		name = "LikhosFlashlight",
+		display = "Flashlight (Hold/Toggle)",
+		description = "Activate the first flashlight on the gun (contextual to NVG). Hold for momentary activation. Tap to toggle.",
+	},
+	{
+		name = "LikhosInteractInstant",
+		display = "Interact (Instant)",
+		description = "Interact without holding down the button. Locked containers still take time to unlock.",
+	},
+	{
+		name = "LikhosCombatHeal",
+		display = "Smart Heal (Tap/Hold)",
+		description = [[
+Smarter alternative to Quick Heal. Predictable under pressure. Minimizes waste.
+
+Tap: consume pain medication (fastest first).
+
+Hold: treat bleed/fracture conditions, otherwise consume IV if HP is missing.]],
+	},
+	{
+		name = "LikhosUseAdrenaline",
+		display = "Use Adrenaline",
+		description = "Consume Adrenaline from player's inventory.",
+	},
+	{
+		name = "LikhosConsumeFoodDrink",
+		display = "Consume Food/Drink",
+		description = "Consume food/drink item from player's inventory. Does not consume medical items.",
+	},
 }
 
 local function action_name(mapping)
@@ -64,11 +98,11 @@ function M.register()
 	if not imc then
 		local transient = StaticFindObject(OUTER)
 		imc = construct("/Script/EnhancedInput.InputMappingContext", transient, IMC_NAME)
-		for mapping, spec in pairs(M.MAPPINGS) do
-			local ia = construct("/Script/EnhancedInput.InputAction", transient, action_name(mapping))
+		for _, mapping in ipairs(M.MAPPINGS) do
+			local ia = construct("/Script/EnhancedInput.InputAction", transient, action_name(mapping.name))
 			local pmks = construct("/Script/EnhancedInput.PlayerMappableKeySettings", ia, "PlayerMappableKeySettings")
-			pmks.Name = FName(mapping)
-			pmks.DisplayName = FText(spec.display)
+			pmks.Name = FName(mapping.name)
+			pmks.DisplayName = FText(mapping.display)
 			ia.PlayerMappableKeySettings = pmks
 			-- Unbound by default. The mapping inherits the action's mappable settings.
 			imc:MapKey(ia, { KeyName = FName("None") })

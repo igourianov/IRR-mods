@@ -28,7 +28,6 @@ local KEY_MAPPED     = "PlayerMappedName_60_D667E47C4761808F2AAD738F1F328FEA"
 -- The vanilla row every mod row is cloned from. Its construction triggers the section.
 local SOURCE_MAPPING = "IA_PointShooting"
 local SECTION_TITLE  = "Likho's Actions"
-local MAPPINGS = { "LikhosPointShootingDirect", "LikhosFlashlight", "LikhosInteractInstant", "LikhosCombatHeal", "LikhosUseAdrenaline", "LikhosConsumeFoodDrink" }
 
 local function mapped_name(row)
 	local ok, name = pcall(function() return row.Keybindings[1][KEY_MAPPED]:ToString() end)
@@ -78,27 +77,36 @@ local function create_like(source)
 	return lib:Create(source:GetOuter():GetOuter(), source:GetClass(), source:GetOwningPlayer())
 end
 
---- Clone the vanilla row source into a row for mapping, not yet on the page. Returns the new row, or nil.
+--- Clone the vanilla row source into a row for a keymap.MAPPINGS entry, not yet on the page. Returns the new row, or nil.
 local function create_row(source, mapping)
-	local ia = keymap.action(mapping)
+	local ia = keymap.action(mapping.name)
 	if not ia then
-		log.warn("menu: mapping %s isn't registered yet, row not added", mapping)
+		log.warn("menu: mapping %s isn't registered yet, row not added", mapping.name)
 		return nil
 	end
 
 	local row = create_like(source)
 	if not util.valid(row) then
-		log.warn("menu: could not create a row for %s", mapping)
+		log.warn("menu: could not create a row for %s", mapping.name)
 		return nil
 	end
 
 	-- Assignment copies struct and array values, so the vanilla row is left unchanged.
 	row.BarType = source.BarType
 	row.SettingBar = source.SettingBar
-	row.SettingBar[LABEL_SETTINGS][LABEL_TEXT] = FText(keymap.MAPPINGS[mapping].display)
+	row.SettingBar[LABEL_SETTINGS][LABEL_TEXT] = FText(mapping.display)
+	-- The page's WB_SettingInfo panel shows the hovered row's descriptor.
+	-- The page binds OnHovered to its OnSettingBarHovered only for the rows it builds itself, so the source's bindings are copied.
+	for _, binding in ipairs(source.OnHovered:GetBindings() or {}) do
+		row.OnHovered:Add(binding.Object, binding.FunctionName)
+	end
+	row.SettingDescriptor = source.SettingDescriptor
+	row.SettingDescriptor.OverrideTitle = FText(mapping.display)
+	row.SettingDescriptor.DescriptionRichText = FText(mapping.description)
+	row.SettingDescriptor.bVisible = true
 	row.Keybindings = source.Keybindings
 	row.Keybindings[1][KEY_ACTION] = ia
-	row.Keybindings[1][KEY_MAPPED] = FName(mapping)
+	row.Keybindings[1][KEY_MAPPED] = FName(mapping.name)
 	return row
 end
 
@@ -122,7 +130,7 @@ local function create_section(container, source)
 
 	local widgets = { { widget = header, layout = slot_layout(header_src.Slot), header = true } }
 	local row_layout = slot_layout(source.Slot)
-	for _, mapping in ipairs(MAPPINGS) do
+	for _, mapping in ipairs(keymap.MAPPINGS) do
 		local row = create_row(source, mapping)
 		if row then table.insert(widgets, { widget = row, layout = row_layout, row = true }) end
 	end

@@ -1,3 +1,6 @@
+# Unreleased
+* added tooltips for the mod keybinds
+
 # 1.7.179
 * fixed IV ranking by Smart Heal to not waste Blood IV if Saline IV is enough
 * removed the `low_ready_run_delay_ms` as a config option. It was misleading users.
