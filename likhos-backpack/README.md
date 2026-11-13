@@ -4,7 +4,7 @@ This mod provides several QoL improvements to inventory management.
 
 ## Whole use counts
 
-Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter. Single use items show no counter until used, then `0/1`. USB hacking devices show their remaining uses as a percentage, e.g. `75%`.
+Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter. Single use items show no counter until used, then `~`. USB hacking devices show their remaining uses as a percentage, e.g. `75%`.
 
 ## Quick sell/deliver
 

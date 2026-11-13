@@ -1,3 +1,6 @@
+# Unreleased
+* a spent single use item shows `~` instead of `0/1` in the inventory
+
 # 1.4.71
 * fixed one or two inventory tiles sometimes showing a decimal use count, or a count on an unused single use item, when many are on screen
 

@@ -68,9 +68,9 @@ local function rewrite_tile(path, format)
 	if not util.valid(tile) then return end
 	if format == "percent" then
 		show_percent(tile)
-	elseif block_number(tile.ItemMaxCapacity) == 1 and (block_number(tile.ItemCapacity) or 0) > 0 then
-		-- A single use item still unused shows no count. A spent one keeps 0/1.
-		tile.ItemCapacity:SetText(FText(""))
+	elseif block_number(tile.ItemMaxCapacity) == 1 then
+		-- A single use item still unused shows no count. A spent one shows ~ instead of 0/1.
+		tile.ItemCapacity:SetText(FText((block_number(tile.ItemCapacity) or 0) > 0 and "" or "~"))
 		tile.ItemMaxCapacity:SetText(FText(""))
 	else
 		round_numbers(tile.ItemCapacity)
