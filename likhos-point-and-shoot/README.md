@@ -81,7 +81,6 @@ Options are in `Scripts\config.lua`.
 
 - `hold_breath`: set `enabled = false` to restore the vanilla toggle.
 - `low_ready_default`: `false` restores the game's own auto low ready.
-- `low_ready_run_delay_ms`: how long after a run the gun lowers. Default 150.
 - `plant_marker`: `false` restores the vanilla objective markers.
 - `plant_marker_color`: ring color. Default `#33B5FF`.
 - `plant_marker_range`: distance in meters where an objective marker first shows. Default 10, 0 for vanilla.

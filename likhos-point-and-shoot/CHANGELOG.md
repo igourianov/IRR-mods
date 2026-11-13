@@ -1,3 +1,6 @@
+# Unreleased
+* removed the `low_ready_run_delay_ms` option. The gun lowers 150 ms after a run as before
+
 # 1.7.176
 * updated for game version 1.4.0.3
 * renamed the Use Medical (Tap/Hold) keybind to Smart Heal (Tap/Hold). A key already set on it is kept

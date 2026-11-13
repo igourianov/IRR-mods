@@ -7,7 +7,6 @@
 
 local log    = require("log")
 local hook   = require("hook")
-local config = require("config")
 local util   = require("util")
 
 local M = {}
@@ -16,6 +15,8 @@ local hooks = hook.new("low ready default", "the game's own auto low ready stays
 
 local HOOK_FN = "/Script/Test_C.FirstPersonAutoLowReady:OnAbilityEnded"
 local RUN_TAG = "Character.Abilities.Active.Running.Wants To Run"
+-- The shortest wait that lets the run to walk transition finish. Shorter makes the gun dip as the run ends.
+local RUN_DELAY_MS = 150
 local HOLSTERING_TAG = { TagName = FName("Character.Abilities.Active.Holstering") }
 
 -- Counts ability ends, so a start still pending from an earlier end skips itself.
@@ -40,7 +41,7 @@ local function on_ability_ended(context, ability_tag)
 	-- One frame is the earliest the start check allows. A later start shows the raised pose first.
 	-- After a run, a one frame start dips the gun through the run to walk transition.
 	if ability_tag:get().TagName:ToString() == RUN_TAG then
-		ExecuteInGameThreadWithDelay(config.low_ready_run_delay_ms, start)
+		ExecuteInGameThreadWithDelay(RUN_DELAY_MS, start)
 	else
 		ExecuteInGameThreadAfterFrames(1, start)
 	end

@@ -26,8 +26,6 @@ return {
 	-- Low ready is the weapon's resting position: the gun lowers as soon as aiming, sprinting, firing or any other action ends.
 	-- Works only with auto low ready turned on in the gameplay settings. Set false for the game's own auto low ready.
 	low_ready_default = true,
-	-- How long after a run ends the gun lowers, milliseconds. Shorter makes the gun dip as the run ends.
-	low_ready_run_delay_ms = 150,
 
 	-- The marker on a quest objective has a bright blue ring, a color rare in the game, so it stands out: a placement spot where a bomb or bug is planted, a mission phone, a quest item to pick up and a mission box.
 	-- Set false for the vanilla pale markers.
