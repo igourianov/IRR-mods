@@ -1,5 +1,6 @@
-# Unreleased
-* removed the `low_ready_run_delay_ms` option. The gun lowers 150 ms after a run as before
+# 1.7.179
+* fixed IV ranking by Smart Heal to not waste Blood IV if Saline IV is enough
+* removed the `low_ready_run_delay_ms` as a config option. It was misleading users.
 
 # 1.7.176
 * updated for game version 1.4.0.3

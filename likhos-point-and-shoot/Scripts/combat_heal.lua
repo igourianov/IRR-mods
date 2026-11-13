@@ -5,7 +5,7 @@
 -- Hold steps in order: heavy bleed, bleed, fracture, IV.
 -- Fracture goes before the IV: health stays missing while an IV heals, so a later fracture step would wait out every IV carried.
 -- An item treats a step through a use context whose actions carry the step's stat tag, so the tag decides, not the item's name.
--- Every game name here comes from docs/solutions/combat-heal.md (Recon).
+-- Every game name here comes from docs/solutions/combat-heal.md (Recon), except the heal amount path in effect_amount, from the CXXHeaderDump of 2026-11-11.
 -- Only reads game state to pick the item. The one call that changes anything is the item's own use.
 -- Holds no UObject between calls.
 
@@ -113,11 +113,25 @@ local function by_treatments(candidate)
 	return { candidate.count }
 end
 
+--- The Amount of the effect behind the definition's stat under tag, or nil.
+--- It is what an IV heals and what its description declares. The item's own stat value under the same tag can be higher (Saline IV: 65 against 40).
+local function effect_amount(definition, tag)
+	local stats = definition.ItemStats
+	for i = 1, #stats do
+		local config = stats[i].StatItemConfig
+		if util.valid(config) and config.StatTag.TagName:ToString() == tag then
+			local effect = config.StatEffect
+			return util.valid(effect) and effect.Amount or nil
+		end
+	end
+	return nil
+end
+
 --- The heal rank for this much missing health.
 --- A heal covering all missing health beats one falling short. Least overheal among covering heals, least shortfall among short ones.
 local function by_coverage(missing)
 	return function(candidate, entry)
-		local heal = stat(candidate.item, entry.tag) or 0
+		local heal = effect_amount(candidate.item.ItemDefinition, entry.tag) or 0
 		if heal >= missing then return { 0, heal - missing } end
 		return { 1, missing - heal }
 	end
