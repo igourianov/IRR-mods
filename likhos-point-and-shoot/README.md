@@ -1,6 +1,6 @@
 # Likho's Point and Shoot
 
-Tactical shortcuts and control tweaks, all usable without opening the inventory or menus.
+Tactical shortcuts and control tweaks usable without opening the inventory or menus, plus inventory management tweaks.
 
 ## Point Shooting
 
@@ -75,6 +75,26 @@ Quest objectives are marked with a bright blue ring instead of vanilla's pale gr
 
 Other interaction markers stay vanilla.
 
+## Inventory
+
+These were the features of Likho's Backpack, which is now part of this mod.
+
+### Whole use counts
+
+Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter. Single use items show no counter until used, then `~`. USB hacking devices show their remaining uses as a percentage, e.g. `75%`.
+
+### Quick sell/deliver
+
+`Shift+Click` an item while in the hideout to sell it, the same as Sell from its context menu. A mission item is delivered for its mission instead. Items that can't be sold or delivered are not affected.
+
+### Quick slot refill
+
+A quick slot holds an item type rather than a single item. When its item is used up or leaves your inventory, the slot takes the next one of the same type from anywhere in your inventory, partly used ones first. It empties once none are left.
+
+For single use items, e.g. injectors, bandages or grenades, the slot shows how many your inventory holds.
+
+`Click` a quick slot in the inventory screen to clear it. Its item can no longer be dragged out of the slot.
+
 ## Configuration
 
 Options are in `Scripts\config.lua`.
@@ -84,6 +104,9 @@ Options are in `Scripts\config.lua`.
 - `plant_marker`: `false` restores the vanilla objective markers.
 - `plant_marker_color`: ring color. Default `#33B5FF`.
 - `plant_marker_range`: distance in meters where an objective marker first shows. Default 10, 0 for vanilla.
+- `whole_uses`: `false` restores the vanilla decimal use counts.
+- `quick_sell`: `false` restores vanilla `Shift+Click` in the hideout.
+- `quick_slot_refill`: `false` restores vanilla quick slots, which empty after one use.
 
 ## Requirements
 
@@ -102,7 +125,7 @@ Options are in `Scripts\config.lua`.
    ```
 
 3. Launch the game once. If `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS.log` appears, UE4SS works.
-4. Extract `likhos-point-and-shoot.zip` into `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\Mods\`. You should end up with a `likhos-point-and-shoot` folder there.
+4. Extract `likhos-point-and-shoot.zip` into `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\Mods\`. You should end up with a `likhos-point-and-shoot` folder there. If you had Likho's Backpack installed, delete its `likhos-backpack` folder there.
 5. Launch the game and assign the new keys under Settings > Controls, in the **Likho's Actions** section at the top.
 
 ## Uninstall

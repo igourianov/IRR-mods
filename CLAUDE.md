@@ -34,8 +34,8 @@ Class names, UFunction names and property paths must come from a UE4SS dump or L
 
 ```powershell
 .\tools\build\build.ps1                          # build and deploy every mod folder that has mod.txt
-.\tools\build\build.ps1 likhos-backpack          # one mod
-.\tools\build\build.ps1 likhos-backpack likhos-rearmed   # several mods
+.\tools\build\build.ps1 likhos-point-and-shoot   # one mod
+.\tools\build\build.ps1 likhos-point-and-shoot likhos-rearmed   # several mods
 ```
 
 - Needs `tools\build\build.config.json` (gitignored, copy of `tools\build\build.config.example.json`) holding the game dir.
@@ -46,8 +46,8 @@ Class names, UFunction names and property paths must come from a UE4SS dump or L
 ### tools/publish/publish.ps1
 
 ```powershell
-.\tools\publish\publish.ps1 likhos-backpack -DryRun   # pack dist\<mod>.zip, print the Nexus requests, upload nothing
-.\tools\publish\publish.ps1 likhos-backpack           # pack and upload as a new version of the mod's Nexus file
+.\tools\publish\publish.ps1 likhos-point-and-shoot -DryRun   # pack dist\<mod>.zip, print the Nexus requests, upload nothing
+.\tools\publish\publish.ps1 likhos-point-and-shoot           # pack and upload as a new version of the mod's Nexus file
 ```
 
 - Mod name is required unless `tools\publish\publish.config.json` lists only one mod.
