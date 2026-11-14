@@ -11,7 +11,7 @@ While merging, the inventory access that Point and Shoot's consumable binds and 
 - Backpack's three features move with their behavior unchanged, except quick sell: whole use counts, Shift+Click quick sell in the hideout and quick slot refill with click to clear and single use counts.
 - Quick sell sells only. Vanilla no longer delivers a mission item from the inventory, so the Deliver path and every mention of delivery are gone.
 - The mod keeps its name, Likho's Point and Shoot.
-- Every game name the moved code uses already comes from the solution docs its file headers cite (`medic-uses-display.md`, `usb-uses-display.md`, `hideout-quick-sell.md`, `quick-deliver.md`, `quick-slot-*.md`). The merge introduces no new game name.
+- Every game name the moved code uses already comes from the solution docs its file headers cite (`medic-uses-display.md`, `usb-uses-display.md`, `hideout-quick-sell.md`, `quick-slot-*.md`). The merge introduces no new game name.
 - The mod folder stays `likhos-point-and-shoot`. A renamed folder leaves the old one in every updating player's `ue4ss\Mods`, where both copies load and register the mod's key mappings twice.
 - The Backpack Nexus page is retired by hand on the site. Nothing in the repo publishes to it again.
 - Ruled out: a final inert Backpack release. The folder is deleted outright and git history keeps it.
