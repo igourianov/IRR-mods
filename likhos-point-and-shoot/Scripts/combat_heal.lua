@@ -15,9 +15,7 @@ local inventory = require("inventory")
 
 local M = {}
 
-local LIBRARY_CDO   = "/Script/Test_C.Default__InventoryFunctionLibrary"
 local MEDICAL       = "Inventory.Items.Medical."
-local USES_TAG      = "Inventory.Stats.Durability"
 local USE_TIME_TAG  = "Inventory.Stats.Usage Time"
 
 --- Action stat tag -> the treatment it gives. Heals over time (IVs) serve a hold only.
@@ -37,16 +35,6 @@ local CONDITIONS = {
 	{ treatment = "bleed",       tag = "Character.Effects.Wounded" },
 	{ treatment = "fracture",    tag = "Character.Effects.Fractured" },
 }
-
---- The item's CurrentStats value under tag, or nil.
-local function stat(item, tag)
-	local stats = item.CurrentStats
-	for i = 1, #stats do
-		local s = stats[i]
-		if s.Tag.TagName:ToString() == tag then return s.Value end
-	end
-	return nil
-end
 
 --- The container's tag names as a set.
 local function tag_set(container)
@@ -140,11 +128,10 @@ end
 --- The pawn and the player's inventory component, or nil. bind names the bind in log lines.
 local function resolve(bind)
 	local pc = FindFirstOf("PlayerController")
-	local library = StaticFindObject(LIBRARY_CDO)
 	local pawn = util.valid(pc) and pc.Pawn or nil
-	local comp = util.valid(pawn) and util.valid(library) and library:GetPlayerInventoryComponent(pc) or nil
-	if not util.valid(comp) then
-		log.debug("%s: no pawn, inventory library or inventory component", bind)
+	local comp = util.valid(pawn) and inventory.player_component(pc) or nil
+	if not comp then
+		log.debug("%s: no pawn or inventory component", bind)
 		return nil
 	end
 	return pawn, comp
@@ -152,24 +139,17 @@ end
 
 --- Every medical item with uses left that gives at least one treatment.
 local function collect(comp)
-	-- Every main container, nested storage included: MainContainers is flat and holds each container item's storage as its own entry.
-	-- Items are passed to the context as read from the MainContainers property. A ContainerItem returned by one UFunction crashes the game when passed to another.
 	local candidates = {}
-	local containers = comp.MainContainers
-	for i = 1, #containers do
-		-- In grid order: a full tie in pick goes to the first candidate collected.
-		local items = inventory.grid_order(containers[i])
-		for j = 1, #items do
-			local item = items[j]
-			local definition = item.ItemDefinition
-			local id = util.valid(definition) and definition.ItemIdentifier.TagName:ToString() or nil
-			if id and id:sub(1, #MEDICAL) == MEDICAL then
-				local uses = stat(item, USES_TAG) or math.huge
-				if uses > 0 then
-					local treatments, count = item_treatments(definition)
-					if count > 0 then
-						candidates[#candidates + 1] = { item = item, time = stat(item, USE_TIME_TAG) or math.huge, uses = uses, treatments = treatments, count = count }
-					end
+	-- In grid order: a full tie in pick goes to the first candidate collected.
+	for item in inventory.items(comp, true) do
+		local definition = item.ItemDefinition
+		local id = util.valid(definition) and definition.ItemIdentifier.TagName:ToString() or nil
+		if id and id:sub(1, #MEDICAL) == MEDICAL then
+			local uses = inventory.uses_left(item)
+			if uses > 0 then
+				local treatments, count = item_treatments(definition)
+				if count > 0 then
+					candidates[#candidates + 1] = { item = item, time = inventory.stat(item, USE_TIME_TAG) or math.huge, uses = uses, treatments = treatments, count = count }
 				end
 			end
 		end

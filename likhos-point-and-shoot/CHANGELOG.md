@@ -1,5 +1,8 @@
 # Unreleased
 * added tooltips for the mod keybinds
+* Likho's Backpack is now part of this mod and is retired: whole use counts, quick sell and quick slot refill. Delete the `likhos-backpack` folder if you had it installed
+* a spent single use item shows `~` instead of `0/1` in the inventory
+* Shift+Click in the hideout no longer delivers mission items, since the game no longer delivers them from the inventory
 
 # 1.7.179
 * fixed IV ranking by Smart Heal to not waste Blood IV if Saline IV is enough
