@@ -83,9 +83,9 @@ These were the features of Likho's Backpack, which is now part of this mod.
 
 Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter. Single use items show no counter until used, then `~`. USB hacking devices show their remaining uses as a percentage, e.g. `75%`.
 
-### Quick sell/deliver
+### Quick sell
 
-`Shift+Click` an item while in the hideout to sell it, the same as Sell from its context menu. A mission item is delivered for its mission instead. Items that can't be sold or delivered are not affected.
+`Shift+Click` an item while in the hideout to sell it, the same as Sell from its context menu. Items that can't be sold are not affected.
 
 ### Quick slot refill
 
