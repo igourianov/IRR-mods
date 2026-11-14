@@ -1,6 +1,22 @@
 # Likho's Point and Shoot
 
-Tactical shortcuts and control tweaks usable without opening the inventory or menus, plus inventory management tweaks.
+Tactical shortcuts, control tweaks and inventory management improvements.
+
+## Features
+
+- **Point Shooting + Laser (Hold):** new keybind that goes straight into point shooting and turns on the laser.
+- **Flashlight (Hold/Toggle):** new keybind for the weapon light, without the radial menu. Follows the same NVG rules as the laser.
+- **Hold Breath:** adds hold to the vanilla toggle key. Releasing it lets the breath out, and a tap still toggles.
+- **Interact (Instant):** new keybind that opens containers without the hold delay. Locked containers still take the unlock time, but without holding the key. The vanilla **Interact** is unaffected.
+- **Smart Heal (Tap/Hold):** new keybind: tap for the fastest painkiller, hold to treat bleeds, fractures and missing health.
+- **Use Adrenaline:** new keybind that injects adrenaline from anywhere in the inventory.
+- **Consume Food/Drink:** new keybind to consume first food or drink item from anywhere in the inventory.
+- **Quick sell:** `Shift+Click` sells an item in the hideout.
+- **Quick slot auto refill:** a quick slot refills with the same item type after use.
+- **Magnifier binding:** mouse scroll folds and unfolds the EOTech+Magnifier combo, the same way it zooms an LPVO.
+- **Low ready by default:** the gun lowers as soon as an action ends.
+- **Objective markers:** bright, longer range markers on quest objectives.
+- **Item use counts:** less visual clutter in the inventory.
 
 ## Point Shooting
 
@@ -8,28 +24,10 @@ Point shooting is faster than gun sights at close range, but vanilla's controls 
 
 Adds **Point Shooting + Laser (Hold)** keybind, which goes straight into the point shooting pose without aiming. Hold only. Binding it to a mouse side button works well.
 
-## Laser activation
-
-**Point Shooting + Laser (Hold)** additionally activates the first laser module it finds equipped on the gun.
-
-Contextual to NVG:
+It additionally activates the first laser module it finds equipped on the gun. Contextual to NVG:
 
 - **NVG off:** the first visible laser.
 - **NVG on:** the first IR laser. If the weapon has no IR laser, the first visible laser.
-
-## Flashlight (Hold/Toggle)
-
-New keybind to turn on your weapon light without opening the radial menu or cycling through activation modes.
-
-Works as both momentary switch and toggle. Follows the same NVG rules as the laser.
-
-## Hold Breath
-
-Vanilla **Hold Breath** is toggle only. The mod adds hold: keep the key down and releasing it lets the breath out. A tap still toggles.
-
-## Interact (Instant)
-
-New keybind **Interact (Instant)** that mimics vanilla **Interact** behavior but without hold delay. Tap it to open containers instantly. Locked containers will still use unlock delay, but do not require holding the key. The vanilla binding is unaffected.
 
 ## Smart Heal
 
@@ -46,17 +44,13 @@ Each press uses one item and picks the fastest one for the job. Among equally fa
 3. Fracture.
 4. Any health missing: the IV that best covers it.
 
-## Use Adrenaline
+## Quick slot auto refill
 
-New keybind **Use Adrenaline**. Press it to inject an Adrenaline Injector from anywhere in your inventory, without opening it. Pressing during an active boost restarts it.
+Less inventory management: a quick slot refills automatically with an item of the same type after use. It empties once none are left.
 
-## Consume Food/Drink
+For single-use items (injectors, bandages, grenades, etc.), the slot shows how many your inventory holds.
 
-New keybind **Consume Food/Drink** that works like vanilla **Quick Heal** but for food and drinks. Press it to eat or drink the first food or drink item found in your inventory, without opening it. Medical items are never used.
-
-## Magnifier binding
-
-The EOTech+Magnifier combo now works using the mouse scroll, the same way an LPVO does. The old binding still works but is no longer needed.
+`Click` a quick slot in the inventory screen to clear it. Its item can no longer be dragged out of the slot.
 
 ## Low ready by default
 
@@ -75,48 +69,12 @@ Quest objectives are marked with a bright blue ring instead of vanilla's pale gr
 
 Other interaction markers stay vanilla.
 
-## Inventory
+# Install UE4SS (required)
 
-These were the features of Likho's Backpack, which is now part of this mod.
+The mod runs on the UE4SS experimental release, which is not included in the mod zip. Tested with the release of 2026-11-07 (v3.0.1-1217). The stable 3.0.1 does not work with this game. If you already have it installed for another mod, skip to the mod installation.
 
-### Whole use counts
-
-Use counter on inventory tiles of medical items, keys and quest items now shows as whole values, reducing the visual clutter. Single use items show no counter until used, then `~`. USB hacking devices show their remaining uses as a percentage, e.g. `75%`.
-
-### Quick sell
-
-`Shift+Click` an item while in the hideout to sell it, the same as Sell from its context menu. Items that can't be sold are not affected.
-
-### Quick slot refill
-
-A quick slot holds an item type rather than a single item. When its item is used up or leaves your inventory, the slot takes the next one of the same type from anywhere in your inventory, partly used ones first. It empties once none are left.
-
-For single use items, e.g. injectors, bandages or grenades, the slot shows how many your inventory holds.
-
-`Click` a quick slot in the inventory screen to clear it. Its item can no longer be dragged out of the slot.
-
-## Configuration
-
-Options are in `Scripts\config.lua`.
-
-- `hold_breath`: set `enabled = false` to restore the vanilla toggle.
-- `low_ready_default`: `false` restores the game's own auto low ready.
-- `plant_marker`: `false` restores the vanilla objective markers.
-- `plant_marker_color`: ring color. Default `#33B5FF`.
-- `plant_marker_range`: distance in meters where an objective marker first shows. Default 10, 0 for vanilla.
-- `whole_uses`: `false` restores the vanilla decimal use counts.
-- `quick_sell`: `false` restores vanilla `Shift+Click` in the hideout.
-- `quick_slot_refill`: `false` restores vanilla quick slots, which empty after one use.
-
-## Requirements
-
-- Incursion Red River, Steam version. Tested on build 26487830.
-- [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) experimental release, installed separately. It is not included in the mod zip. Tested with the release of 2026-11-07 (v3.0.1-1217). The stable 3.0.1 does not work with this game. If you already have it installed for another mod, skip to step 4.
-
-## Installation
-
-1. Download the `UE4SS_v3.0.1-*.zip` file from the [UE4SS experimental release](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) and extract it into `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\`. You should end up with `dwmapi.dll` and a `ue4ss` folder there.
-2. In `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS-settings.ini` set the engine version. The game crashes on the first tick without it:
+1. Download the `UE4SS_v3.0.1-*.zip` file from the [UE4SS experimental release](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) and extract it into `PROJECT QUARANTINE\Test_C\Binaries\Win64\`. You should end up with `dwmapi.dll` and a `ue4ss` folder there.
+2. In `PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS-settings.ini` set the engine version. The game crashes on the first tick without it:
 
    ```ini
    [EngineVersionOverride]
@@ -124,15 +82,13 @@ Options are in `Scripts\config.lua`.
    MinorVersion = 6
    ```
 
-3. Launch the game once. If `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS.log` appears, UE4SS works.
-4. Extract `likhos-point-and-shoot.zip` into `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\Mods\`. You should end up with a `likhos-point-and-shoot` folder there. If you had Likho's Backpack installed, delete its `likhos-backpack` folder there.
-5. Launch the game and assign the new keys under Settings > Controls, in the **Likho's Actions** section at the top.
+3. Launch the game once. If `PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS.log` appears, UE4SS works.
 
-## Uninstall
+# Install this mod
 
-Delete the `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\Mods\likhos-point-and-shoot` folder.
+1. Extract `likhos-point-and-shoot.zip` into `PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\Mods\`. You should end up with a `likhos-point-and-shoot` folder there.
+2. Launch the game and assign the new keys under Settings > Controls, in the **Likho's Actions** section at the top.
 
-## Troubleshooting
+To uninstall delete the `PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\Mods\likhos-point-and-shoot` folder.
 
-- **Nothing happens.** Open `steamapps\common\PROJECT QUARANTINE\Test_C\Binaries\Win64\ue4ss\UE4SS.log` and look for `[PointAndShoot]` lines.
-- **Broke after a game update.** Expected. Wait for the mod update.
+Every feature added by this mod can be disabled in `Scripts\config.lua`.
