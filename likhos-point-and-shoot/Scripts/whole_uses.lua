@@ -6,6 +6,7 @@
 
 local util = require("util")
 local hook = require("hook")
+local inventory = require("inventory")
 
 local M = {}
 
@@ -14,19 +15,14 @@ local hooks = hook.new("whole uses", "use counts keep decimals")
 local TILE_CLASS = "/Game/Blueprints/InventorySystem/Widgets/W_InventoryItem.W_InventoryItem_C"
 local HOOK_FN    = TILE_CLASS .. ":K2_UpdateItemCount"
 
--- Use count stat config class to the tile format. U_Content_C's tag, Inventory.Stats.Durability, is shared with weapon and armor durability, so the class tells it apart.
 -- U_Battery_C is the USB hacking devices' use count, shown as the remaining percentage.
-local USES_FORMATS = { U_Content_C = "whole", U_Battery_C = "percent" }
+local BATTERY_CONFIG = "U_Battery_C"
 
 local function uses_format(tile)
 	local definition = tile.ContainerItem.ItemDefinition
 	if not util.valid(definition) then return nil end
-	local stats = definition.ItemStats
-	for i = 1, #stats do
-		local config = stats[i].StatItemConfig
-		local format = util.valid(config) and USES_FORMATS[config:GetClass():GetFName():ToString()]
-		if format then return format end
-	end
+	if inventory.config_stat(definition, inventory.USES_CONFIG) then return "whole" end
+	if inventory.config_stat(definition, BATTERY_CONFIG) then return "percent" end
 	return nil
 end
 

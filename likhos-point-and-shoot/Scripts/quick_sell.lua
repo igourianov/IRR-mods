@@ -7,6 +7,7 @@
 local log  = require("log")
 local util = require("util")
 local hook = require("hook")
+local inventory = require("inventory")
 
 local M = {}
 
@@ -16,7 +17,6 @@ local TILE_CLASS = "/Game/Blueprints/InventorySystem/Widgets/W_InventoryItem.W_I
 local HOOK_FN    = TILE_CLASS .. ":OnMouseButtonDown"
 -- Tried in order, the first one vanilla offers for the item runs. Mission items offer Deliver and no Sell.
 local CONTEXT_CLASSES = { "U_Deliver_C", "U_Sell_C" }
-local INPUT_LIB  = "/Script/Engine.Default__KismetInputLibrary"
 
 local function item_str(item)
 	return string.format("%s %08x", item.ItemDefinition:GetFName():ToString(), item.ItemUID.A & 0xffffffff)
@@ -42,18 +42,10 @@ local function deliver_or_sell(path, uid)
 	log.debug("quick sell: neither deliver nor sell offered for %s", item_str(item))
 end
 
---- Whether Shift is held, from Slate's current modifier state.
---- UE4SS won't pass the click's PointerEvent as the InputEvent InputEvent_IsShiftDown takes. The mask's bits are engine-internal, so the library decodes it, from a fresh struct rather than the returned one.
-local function shift_down(input)
-	local mask = input:GetModifierKeysState().ModifierKeysStateMask
-	return input:ModifierKeysState_IsShiftDown({ ModifierKeysStateMask = mask })
-end
-
 -- The mouse event is only readable while the handler runs. The sell or delivery waits a tick, since it removes the clicked tile.
 local function on_mouse_down(context, _, mouse_event)
-	local input = StaticFindObject(INPUT_LIB)
-	if input:PointerEvent_GetEffectingButton(mouse_event:get()).KeyName:ToString() ~= "LeftMouseButton" then return end
-	if not shift_down(input) then return end
+	local mods = inventory.left_click_modifiers(mouse_event)
+	if not (mods and mods.shift) then return end
 
 	local tile = context:get()
 	local path = util.path(tile)

@@ -10,9 +10,7 @@ local inventory = require("inventory")
 
 local M = {}
 
-local LIBRARY_CDO = "/Script/Test_C.Default__InventoryFunctionLibrary"
 local USE_CONTEXT = "U_UseInventoryItem_C"
-local USES_TAG    = "Inventory.Stats.Durability"
 -- ItemIdentifier tag prefixes. Medical items sit under Inventory.Items.Medical.
 local PREFIXES = { "Inventory.Items.Provisions.Food.", "Inventory.Items.Provisions.Drinks." }
 
@@ -22,15 +20,6 @@ local function is_provision(definition)
 		if tag:sub(1, #prefix) == prefix then return true end
 	end
 	return false
-end
-
-local function uses_left(item)
-	local stats = item.CurrentStats
-	for i = 1, #stats do
-		local stat = stats[i]
-		if stat.Tag.TagName:ToString() == USES_TAG then return stat.Value end
-	end
-	return math.huge
 end
 
 --- The definition's use context, or nil.
@@ -46,33 +35,22 @@ end
 --- The Consume Food/Drink key's press. Game thread.
 function M.press()
 	local pc = FindFirstOf("PlayerController")
-	local library = StaticFindObject(LIBRARY_CDO)
 	local pawn = util.valid(pc) and pc.Pawn or nil
-	if not (util.valid(pawn) and util.valid(library)) then
-		log.debug("ConsumeFoodDrink: no pawn or inventory library")
-		return
-	end
-	local comp = library:GetPlayerInventoryComponent(pc)
-	if not util.valid(comp) then
-		log.debug("ConsumeFoodDrink: no inventory component")
+	local comp = util.valid(pawn) and inventory.player_component(pc) or nil
+	if not comp then
+		log.debug("ConsumeFoodDrink: no pawn or inventory component")
 		return
 	end
 
-	-- Items are passed to the context as read from the MainContainers property. A ContainerItem returned by one UFunction crashes the game when passed to another.
-	local containers = comp.MainContainers
-	for i = 1, #containers do
-		local items = inventory.grid_order(containers[i])
-		for j = 1, #items do
-			local item = items[j]
-			local definition = item.ItemDefinition
-			if util.valid(definition) and is_provision(definition) and uses_left(item) > 0 then
-				local context = use_context(definition)
-				-- No item widget: the bind has none, unlike the context menu.
-				if context and context:IsValidContext(pawn, nil, item) then
-					log.debug("ConsumeFoodDrink: using %s", definition:GetFullName())
-					context:Execute(pawn, nil, item)
-					return
-				end
+	for item in inventory.items(comp, true) do
+		local definition = item.ItemDefinition
+		if util.valid(definition) and is_provision(definition) and inventory.uses_left(item) > 0 then
+			local context = use_context(definition)
+			-- No item widget: the bind has none, unlike the context menu.
+			if context and context:IsValidContext(pawn, nil, item) then
+				log.debug("ConsumeFoodDrink: using %s", definition:GetFullName())
+				context:Execute(pawn, nil, item)
+				return
 			end
 		end
 	end

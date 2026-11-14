@@ -9,22 +9,18 @@
 local log  = require("log")
 local util = require("util")
 local hook = require("hook")
+local inventory = require("inventory")
 
 local M = {}
 
 local hooks = hook.new("quick slot clear", "a click on a quick slot stays vanilla")
 
-local LIBRARY_CDO  = "/Script/Test_C.Default__InventoryFunctionLibrary"
-local INPUT_LIB    = "/Script/Engine.Default__KismetInputLibrary"
 local TILE_CLASS   = "/Game/Blueprints/InventorySystem/Widgets/W_InventoryItem.W_InventoryItem_C"
 local SLOT_COUNT   = 4
 -- Short so a slot refills right after its item leaves.
 local POLL_MS      = 50
 -- The tile count walks every item tile, so it runs on every COUNT_EVERY-th poll only.
 local COUNT_EVERY  = 5
-local USES_TAG     = "Inventory.Stats.Durability"
--- The uses stat's config class. Its tag, USES_TAG, is shared with weapon and armor durability, so a definition's stats are told apart by this class.
-local USES_CONFIG  = "U_Content_C"
 local SLOT_WIDGET  = "W_QuickSlotContainer_C"
 local TILE_WIDGET  = "W_InventoryItem_C"
 
@@ -41,28 +37,9 @@ local function is_zero(g)
 	return g.A == 0 and g.B == 0 and g.C == 0 and g.D == 0
 end
 
---- Every item of comp, in container order: `for item in inventory_items(comp)`.
---- Read from comp.MainContainers rather than GetContainerItemByUID. A struct returned by a UFunction call crashes the game when passed to another one, still on UE4SS 1217, and UE4SS before 1217 crashes converting a returned ContainerItem to Lua. One read from a property passes fine.
-local function inventory_items(comp)
-	local containers = comp.MainContainers
-	local container_count = #containers
-	local i, j, item_count = 0, 0, 0
-	local items = nil
-	return function()
-		while j >= item_count do
-			i = i + 1
-			if i > container_count then return nil end
-			items = containers[i].ContainerItems
-			j, item_count = 0, #items
-		end
-		j = j + 1
-		return items[j]
-	end
-end
-
 --- Whether comp holds an item with uid.
 local function holds(comp, uid)
-	for item in inventory_items(comp) do
+	for item in inventory.items(comp) do
 		if util.same_guid(item.ItemUID, uid) then return true end
 	end
 	return false
@@ -72,7 +49,7 @@ end
 local function locate(comp, wanted)
 	local found = {}
 	if next(wanted) == nil then return found end
-	for item in inventory_items(comp) do
+	for item in inventory.items(comp) do
 		local uid = item.ItemUID
 		for index, w in pairs(wanted) do
 			if util.same_guid(uid, w) then found[index] = item end
@@ -81,32 +58,19 @@ local function locate(comp, wanted)
 	return found
 end
 
-local function uses_left(item)
-	local stats = item.CurrentStats
-	for i = 1, #stats do
-		local stat = stats[i]
-		if stat.Tag.TagName:ToString() == USES_TAG then return stat.Value end
-	end
-	return math.huge
-end
-
 --- The definition path of item when it has uses left, or nil.
 --- A spent item can sit at 0 uses: briefly before the game removes it, or for good when saved that way by an older version of this mod.
 local function usable_def(item)
 	local definition = item.ItemDefinition
-	if not util.valid(definition) or uses_left(item) <= 0 then return nil end
+	if not util.valid(definition) or inventory.uses_left(item) <= 0 then return nil end
 	return definition:GetFullName()
 end
 
 --- Whether items of definition are used up in one use: a uses stat of 1, or no uses stat and no stacking (grenades).
 local function single_use(definition)
 	if not util.valid(definition) then return false end
-	local stats = definition.ItemStats
-	for i = 1, #stats do
-		local stat = stats[i]
-		local config = stat.StatItemConfig
-		if util.valid(config) and config:GetClass():GetFName():ToString() == USES_CONFIG then return stat.Value == 1 end
-	end
+	local stat = inventory.config_stat(definition, inventory.USES_CONFIG)
+	if stat then return stat.Value == 1 end
 	return not definition.ItemProperties.CanStack
 end
 
@@ -120,10 +84,7 @@ local EMPTY_ITEM = { ItemUID = { A = 0, B = 0, C = 0, D = 0 } }
 
 --- The player's inventory component, which holds the quick slots, or nil outside a level with a player.
 local function player_inventory()
-	local pc = FindFirstOf("PlayerController")
-	local library = StaticFindObject(LIBRARY_CDO)
-	local comp = util.valid(pc) and util.valid(library) and library:GetPlayerInventoryComponent(pc) or nil
-	return util.valid(comp) and comp or nil
+	return inventory.player_component(FindFirstOf("PlayerController"))
 end
 
 --- Track the live binding of slot index, refill the slot once its recorded item has left the inventory, or clear it while it names an item outside the inventory.
@@ -147,9 +108,9 @@ local function check_slot(comp, index, uid, item)
 	-- Fewest uses left first, so partly used items are finished before fresh ones. Ties keep container order.
 	local refill, refill_uses
 	if left then
-		for candidate in inventory_items(comp) do
+		for candidate in inventory.items(comp) do
 			if usable_def(candidate) == record.def then
-				local uses = uses_left(candidate)
+				local uses = inventory.uses_left(candidate)
 				if not refill or uses < refill_uses then refill, refill_uses = candidate, uses end
 			end
 		end
@@ -217,7 +178,7 @@ local tile_paths = {}
 local function count_matching(comp, slots)
 	local counts = {}
 	for index in pairs(slots) do counts[records[index].def] = 0 end
-	for item in inventory_items(comp) do
+	for item in inventory.items(comp) do
 		local def = usable_def(item)
 		local count = def and counts[def]
 		if count then counts[def] = count + 1 end
@@ -294,11 +255,9 @@ local function on_mouse_down(context, _, mouse_event)
 	local tile = context:get()
 	local element = tile.BaseContainerElementRef
 	if not (util.valid(element) and element:GetClass():GetFName():ToString() == SLOT_WIDGET) then return end
-	local input = StaticFindObject(INPUT_LIB)
-	if input:PointerEvent_GetEffectingButton(mouse_event:get()).KeyName:ToString() ~= "LeftMouseButton" then return end
-	-- Shift+Click sells or drops and Ctrl+Click moves the item, both vanilla. The mask's bits are engine-internal, so the library decodes it, from a fresh struct rather than the returned one (docs/solutions/hideout-quick-sell.md).
-	local keys = { ModifierKeysStateMask = input:GetModifierKeysState().ModifierKeysStateMask }
-	if input:ModifierKeysState_IsShiftDown(keys) or input:ModifierKeysState_IsControlDown(keys) or input:ModifierKeysState_IsAltDown(keys) then return end
+	-- Shift+Click sells or drops and Ctrl+Click moves the item, both vanilla.
+	local mods = inventory.left_click_modifiers(mouse_event)
+	if not mods or mods.shift or mods.ctrl or mods.alt then return end
 	local index = element.QuickSlotIndex
 	local uid = util.guid(tile.ContainerItem.ItemUID)
 	ExecuteInGameThreadWithDelay(1, hooks.guard(function() clear_clicked(index, uid) end))
