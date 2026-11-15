@@ -12,12 +12,8 @@ local devices = require("devices")
 local quick_use = require("quick_use")
 local consume = require("consume")
 local combat_heal = require("combat_heal")
-local config  = require("config")
 
 local M = {}
-
---- A press released within this window is a tap. Flashlight leaves the light on, CombatHeal takes a painkiller instead of treating a condition or starting an IV, HoldBreath keeps the vanilla toggle.
-local TAP_MS = config.tap_ms or 250
 
 --------------------------------------------------------------------------
 -- Shared resolution and device handling
@@ -41,11 +37,6 @@ end
 local function device_off(wc, name)
 	local dev = devices.find(wc, name)
 	if dev and devices.is_on(dev) then devices.set(dev, false) end
-end
-
---- Milliseconds since `at`. os.clock is wall time on Windows (docs/solutions/point-aim-bind.md, Recon, Enhanced Input injection).
-local function elapsed_ms(at)
-	return (os.clock() - at) * 1000
 end
 
 --------------------------------------------------------------------------
@@ -125,10 +116,9 @@ end
 -- Flashlight: tap to leave the light on, hold to light while held (docs/solutions/flashlight-bind.md)
 --------------------------------------------------------------------------
 
--- Non-nil while a Flashlight hold is live. Plain values only, no UObjects.
+-- Set by a press, read by the release of a hold. Plain values only, no UObjects.
 --   device : full name of the light the press turned on, nil when the press turned one off or found none
 --   weapon : full name of the weapon component that light is on
---   at     : os.clock() at press, to tell a tap from a hold
 local flashlight = nil
 
 --- Turn the light that suits the player's vision on, or off when it is already on, whoever turned it on.
@@ -151,15 +141,15 @@ local function flashlight_press()
 		log.debug("Flashlight: no pawn or equipped weapon right now")
 		return
 	end
-	flashlight = { device = try_devices(light_toggle, wc), weapon = wc:GetFullName(), at = os.clock() }
+	flashlight = { device = try_devices(light_toggle, wc), weapon = wc:GetFullName() }
 end
 
-local function flashlight_release()
+-- A tap leaves the light on until the next press.
+local function flashlight_hold_release()
 	local state = flashlight
 	flashlight = nil
-	-- Nothing to put out when the press turned a light off or found none, and a tap leaves the light on until the next press.
+	-- Nothing to put out when the press turned a light off or found none.
 	if not (state and state.device) then return end
-	if elapsed_ms(state.at) < TAP_MS then return end
 
 	local wc = player.weapon_component()
 	if not wc then return end
@@ -168,33 +158,6 @@ local function flashlight_release()
 		return
 	end
 	try_devices(device_off, wc, state.device)
-end
-
---------------------------------------------------------------------------
--- CombatHeal: tap for a painkiller, hold to treat a condition or start an IV (docs/solutions/medical-rework.md)
---------------------------------------------------------------------------
-
--- Non-nil while a CombatHeal press is live. Plain values only, no UObjects.
---   at    : os.clock() at press, to tell a tap from a hold
---   fired : the hold has run, so release does nothing
-local combat_heal_press = nil
-
-local function combat_heal_down()
-	combat_heal_press = { at = os.clock(), fired = false }
-end
-
---- The hold fires as the tap window passes, so its item starts without waiting for release.
-local function combat_heal_held()
-	local state = combat_heal_press
-	if not state or state.fired or elapsed_ms(state.at) < TAP_MS then return end
-	state.fired = true
-	combat_heal.hold()
-end
-
-local function combat_heal_up()
-	local state = combat_heal_press
-	combat_heal_press = nil
-	if state and not state.fired then combat_heal.tap() end
 end
 
 --------------------------------------------------------------------------
@@ -220,17 +183,7 @@ local function hold_breath_active(pawn)
 	return active
 end
 
--- os.clock() at the key's press, nil when no press is pending.
-local hold_breath_at = nil
-
-local function hold_breath_press()
-	hold_breath_at = os.clock()
-end
-
-local function hold_breath_release()
-	local at = hold_breath_at
-	hold_breath_at = nil
-	if not at or elapsed_ms(at) < TAP_MS then return end
+local function hold_breath_hold_release()
 	local pawn = player.pawn()
 	-- Ended by itself (stamina, an interrupting ability), toggled off by the press or never started: the injected press would toggle a new one on.
 	if not (pawn and hold_breath_active(pawn)) then return end
@@ -239,8 +192,9 @@ end
 
 --------------------------------------------------------------------------
 
---- Each entry describes one logical action. press, held and release are Lua functions.
---- held runs every tick while a hold bind is down.
+--- Each entry describes one logical action, a Lua function per phase it acts on (triggers.lua).
+--- press and release run on the key's press and release, held every tick while it is down.
+--- hold runs once when the key is still down past tap_ms. On release, hold_release runs after a hold, tap otherwise.
 M.ACTIONS = {
 	["PointAim"] = {
 		press   = point_aim_press,
@@ -248,12 +202,11 @@ M.ACTIONS = {
 		release = point_aim_release,
 	},
 	["Flashlight"] = {
-		press   = flashlight_press,
-		release = flashlight_release,
+		press        = flashlight_press,
+		hold_release = flashlight_hold_release,
 	},
 	["HoldBreath"] = {
-		press   = hold_breath_press,
-		release = hold_breath_release,
+		hold_release = hold_breath_hold_release,
 	},
 	-- docs/solutions/tap-to-use.md
 	["QuickUse"] = {
@@ -263,11 +216,11 @@ M.ACTIONS = {
 	["ConsumeFoodDrink"] = {
 		press   = consume.press,
 	},
-	-- docs/solutions/combat-heal.md, docs/solutions/combat-heal-hold-iv.md
+	-- docs/solutions/combat-heal.md, docs/solutions/combat-heal-hold-iv.md, docs/solutions/medical-rework.md
+	-- Tap for a painkiller, hold to treat a condition or start an IV. The hold fires as the tap window passes, so its item starts without waiting for release.
 	["CombatHeal"] = {
-		press   = combat_heal_down,
-		held    = combat_heal_held,
-		release = combat_heal_up,
+		tap     = combat_heal.tap,
+		hold    = combat_heal.hold,
 	},
 	-- docs/solutions/adrenaline-bind.md
 	["UseAdrenaline"] = {
@@ -278,7 +231,7 @@ M.ACTIONS = {
 --- Actions found undefined this session, so the error logs once rather than every tick.
 local disabled = {}
 
---- Invoke one side of an action. `phase` is "press", "held" or "release".
+--- Invoke one phase of an action, a key of its ACTIONS entry.
 --- MUST be called from the game thread (see input.lua).
 function M.invoke(name, phase)
 	if disabled[name] then return false end
@@ -301,8 +254,6 @@ function M.reset()
 	disabled = {}
 	point_aim = nil
 	flashlight = nil
-	combat_heal_press = nil
-	hold_breath_at = nil
 	quick_use.reset()
 end
 
