@@ -61,7 +61,7 @@ local function is_objective(target)
 	if shows_plant_icon(target.InteractionOptions) then return true end
 	local owner = target:GetOwner()
 	if not util.valid(owner) then return false end
-	if owner:GetClass():GetFName():ToString() == MISSION_BOX then return true end
+	if util.class_name(owner) == MISSION_BOX then return true end
 	local pickup_class = StaticFindObject(PICKUP_CLASS)
 	if not (util.valid(pickup_class) and owner:IsA(pickup_class)) then return false end
 	local holder = owner.InventoryComponent

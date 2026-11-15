@@ -29,14 +29,6 @@ local COLLAPSED          = 1
 local HIDDEN             = 2
 local HIT_TEST_INVISIBLE = 3
 
-local function guid_str(g)
-	return string.format("%08x%08x%08x%08x", g.A & 0xffffffff, g.B & 0xffffffff, g.C & 0xffffffff, g.D & 0xffffffff)
-end
-
-local function is_zero(g)
-	return g.A == 0 and g.B == 0 and g.C == 0 and g.D == 0
-end
-
 --- Whether comp holds an item with uid.
 local function holds(comp, uid)
 	for item in inventory.items(comp) do
@@ -92,7 +84,7 @@ local function check_slot(comp, index, uid, item)
 		local def = util.valid(definition) and definition:GetFullName() or nil
 		local single = single_use(definition)
 		records[index] = { uid = uid, def = def, single = single }
-		log.debug("quick slot %d bound to %s %s, single use %s", index, tostring(def), guid_str(uid), tostring(single))
+		log.debug("quick slot %d bound to %s %s, single use %s", index, tostring(def), util.guid_str(uid), tostring(single))
 		return
 	end
 
@@ -114,14 +106,14 @@ local function check_slot(comp, index, uid, item)
 		local new_uid = util.guid(refill.ItemUID)
 		comp:UpdateQuickSlot(index, refill)
 		records[index] = { uid = new_uid, def = record.def, single = record.single }
-		log.debug("quick slot %d refilled with %s %s", index, record.def, guid_str(new_uid))
+		log.debug("quick slot %d refilled with %s %s", index, record.def, util.guid_str(new_uid))
 		return
 	end
 	if left then log.debug("quick slot %d empty: no %s left", index, record.def) end
 	-- An entry naming an item outside the inventory, with nothing to refill it: the item sat in a container moved to another inventory, like the stash or the floor, and the game leaves the slot bound then.
 	if not uid then return end
 	comp:UpdateQuickSlot(index, EMPTY_ITEM)
-	log.debug("quick slot %d cleared: %s is not in the inventory", index, guid_str(uid))
+	log.debug("quick slot %d cleared: %s is not in the inventory", index, util.guid_str(uid))
 end
 
 --- Show count on a quick slot tile in place of its uses.
@@ -193,7 +185,7 @@ local function poll()
 	for i = 1, #slots do
 		local slot = slots[i]
 		local uid = util.guid(slot.ItemUID)
-		if not is_zero(uid) then wanted[slot.Index] = uid end
+		if not util.is_zero_guid(uid) then wanted[slot.Index] = uid end
 	end
 	local found = locate(comp, wanted)
 	for index = 0, SLOT_COUNT - 1 do check_slot(comp, index, wanted[index], found[index]) end

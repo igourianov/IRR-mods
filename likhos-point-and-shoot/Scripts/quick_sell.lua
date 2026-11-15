@@ -16,7 +16,7 @@ local hooks = hook.new("quick sell", "Shift+Click stays vanilla")
 local SELL_CONTEXT  = "U_Sell_C"
 
 local function item_str(item)
-	return string.format("%s %08x", item.ItemDefinition:GetFName():ToString(), item.ItemUID.A & 0xffffffff)
+	return item.ItemDefinition:GetFName():ToString() .. " " .. util.guid_str(item.ItemUID)
 end
 
 local function sell(path, uid)

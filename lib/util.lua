@@ -30,6 +30,24 @@ function M.component(actor, class_path)
 	return M.valid(comp) and comp or nil
 end
 
+--- The short name of obj's class, the form FindAllOf and FindFirstOf take.
+function M.class_name(obj)
+	return obj:GetClass():GetFName():ToString()
+end
+
+--- The first valid object of tarray for which pred(obj) is true, or nil.
+function M.find(tarray, pred)
+	local found = nil
+	tarray:ForEach(function(_, elem)
+		local obj = elem:get()
+		if M.valid(obj) and pred(obj) then
+			found = obj
+			return true
+		end
+	end)
+	return found
+end
+
 --- A plain Lua copy of an FGuid, which stays valid after the struct it was read from is gone.
 function M.guid(g)
 	return { A = g.A, B = g.B, C = g.C, D = g.D }
@@ -37,6 +55,15 @@ end
 
 function M.same_guid(a, b)
 	return a.A == b.A and a.B == b.B and a.C == b.C and a.D == b.D
+end
+
+function M.is_zero_guid(g)
+	return g.A == 0 and g.B == 0 and g.C == 0 and g.D == 0
+end
+
+--- An FGuid as 32 hex digits, for log lines.
+function M.guid_str(g)
+	return string.format("%08x%08x%08x%08x", g.A & 0xffffffff, g.B & 0xffffffff, g.C & 0xffffffff, g.D & 0xffffffff)
 end
 
 return M

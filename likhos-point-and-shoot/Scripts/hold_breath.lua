@@ -14,15 +14,7 @@ local function active(pawn)
 	local comp = pawn:GetAbilityComponent()
 	local cls = StaticFindObject(SGA_HOLD_BREATH)
 	if not (util.valid(comp) and util.valid(cls)) then return false end
-	local found = false
-	comp.ActiveAbilities:ForEach(function(_, elem)
-		local ability = elem:get()
-		if util.valid(ability) and ability:IsA(cls) then
-			found = true
-			return true
-		end
-	end)
-	return found
+	return util.find(comp.ActiveAbilities, function(ability) return ability:IsA(cls) end) ~= nil
 end
 
 local function hold_release()

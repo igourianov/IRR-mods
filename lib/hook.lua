@@ -16,15 +16,19 @@ function M.new(name, fallback)
 	-- fn_path -> true once RegisterHook accepted it.
 	local hooked = {}
 
-	--- Wrap fn in a pcall that logs the group's first failure and swallows the rest.
-	function group.guard(fn)
-		return function(...)
-			local ok, err = pcall(fn, ...)
-			if not ok and not error_logged then
-				error_logged = true
-				log.error("%s failed, %s: %s", name, fallback, tostring(err))
-			end
+	--- Call fn(...) and return its results, or nothing when it fails. Logs the group's first failure and swallows the rest.
+	function group.try(fn, ...)
+		local result = table.pack(pcall(fn, ...))
+		if result[1] then return table.unpack(result, 2, result.n) end
+		if not error_logged then
+			error_logged = true
+			log.error("%s failed, %s: %s", name, fallback, tostring(result[2]))
 		end
+	end
+
+	--- Wrap fn in group.try. The wrapper returns nothing, since a hook callback's return value may reach UE4SS.
+	function group.guard(fn)
+		return function(...) group.try(fn, ...) end
 	end
 
 	--- Hook fn_path with guarded pre and optional post callbacks.

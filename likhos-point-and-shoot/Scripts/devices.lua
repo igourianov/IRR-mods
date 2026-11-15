@@ -4,24 +4,16 @@
 -- Works on a WeaponComponent handed in by the caller and holds no UObject between calls.
 -- A missing game name raises. A caller that must go on without its device calls through M.try.
 
-local log  = require("log")
 local util = require("util")
+local hook = require("hook")
 
 local M = {}
 
 -- Device failures log once per session, so a renamed game name doesn't flood the log every press.
-local error_logged = false
+local hooks = hook.new("device handling", "the action continues without it")
 
 --- Call fn(...) and return its result, or nil when it fails, so a broken device lookup still leaves the rest of the caller's action working.
-function M.try(fn, ...)
-	local ok, res = pcall(fn, ...)
-	if ok then return res end
-	if not error_logged then
-		error_logged = true
-		log.error("device handling failed, the action continues without it: %s", tostring(res))
-	end
-	return nil
-end
+M.try = hooks.try
 
 local NVG_SUBSYSTEM = "IRRNightVision_Subsystem"
 local DEVICE_OFF, DEVICE_ON = 0, 1   -- EIRRTacticalDeviceState
@@ -81,15 +73,7 @@ end
 
 --- The device on `wc` with this full name, or nil. Lets a caller reach a device it recorded earlier without holding it.
 function M.find(wc, name)
-	local found = nil
-	wc.TacticalAttachments:ForEach(function(_, elem)
-		local dev = elem:get()
-		if util.valid(dev) and dev:GetFullName() == name then
-			found = dev
-			return true
-		end
-	end)
-	return found
+	return util.find(wc.TacticalAttachments, function(dev) return dev:GetFullName() == name end)
 end
 
 function M.is_on(dev)

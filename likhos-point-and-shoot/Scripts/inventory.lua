@@ -94,7 +94,7 @@ function M.config_stat(definition, class)
 	for i = 1, #stats do
 		local stat = stats[i]
 		local config = stat.StatItemConfig
-		if util.valid(config) and config:GetClass():GetFName():ToString() == class then return stat end
+		if util.valid(config) and util.class_name(config) == class then return stat end
 	end
 	return nil
 end

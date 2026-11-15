@@ -46,7 +46,7 @@ end
 --- A tile's BaseContainerElementRef is the container element it was created for, here the quick slot widget.
 function M.quick_slot_index(tile)
 	local element = tile.BaseContainerElementRef
-	if not (util.valid(element) and element:GetClass():GetFName():ToString() == SLOT_WIDGET) then return nil end
+	if not (util.valid(element) and util.class_name(element) == SLOT_WIDGET) then return nil end
 	return element.QuickSlotIndex
 end
 

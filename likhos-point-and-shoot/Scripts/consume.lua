@@ -19,7 +19,7 @@ local function use_context(definition)
 	local contexts = definition.ItemContexts
 	for i = 1, #contexts do
 		local context = contexts[i]
-		if util.valid(context) and context:GetClass():GetFName():ToString() == USE_CONTEXT then return context end
+		if util.valid(context) and util.class_name(context) == USE_CONTEXT then return context end
 	end
 	return nil
 end

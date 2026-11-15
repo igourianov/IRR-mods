@@ -39,10 +39,6 @@ local function header_title(header)
 	return ok and title or nil
 end
 
-local function class_name(widget)
-	return widget:GetClass():GetFName():ToString()
-end
-
 --- The first child of container that matches, or nil.
 local function find_child(container, matches)
 	for i = 0, container:GetChildrenCount() - 1 do
@@ -113,8 +109,8 @@ end
 --- The section's widgets in page order, each with the slot layout it takes, built before the page is touched so a failure leaves it unchanged. Nil if the page has no header and spacer to clone.
 local function create_section(container, source)
 	-- The page's first header has no spacer above it. The first spacer separates our section from it.
-	local header_src = find_child(container, function(c) return class_name(c) == HEADER_CLASS end)
-	local spacer_src = find_child(container, function(c) return class_name(c) == SPACER_CLASS end)
+	local header_src = find_child(container, function(c) return util.class_name(c) == HEADER_CLASS end)
+	local spacer_src = find_child(container, function(c) return util.class_name(c) == SPACER_CLASS end)
 	if not header_src or not spacer_src then
 		log.warn("menu: no vanilla section header to clone, rows not added")
 		return nil
@@ -158,7 +154,7 @@ local function add_section(source_path)
 	keymap.register()
 
 	-- The section is built in one pass, so a page that has its header already has its rows.
-	if find_child(container, function(c) return class_name(c) == HEADER_CLASS and header_title(c) == SECTION_TITLE end) then return end
+	if find_child(container, function(c) return util.class_name(c) == HEADER_CLASS and header_title(c) == SECTION_TITLE end) then return end
 
 	local section = create_section(container, source)
 	if not section then return end

@@ -46,15 +46,7 @@ local function has_folded_mode(sight)
 end
 
 local function find_magnifier(wc)
-	local found = nil
-	wc.LocSightComponents:ForEach(function(_, elem)
-		local sight = elem:get()
-		if util.valid(sight) and has_folded_mode(sight) then
-			found = sight
-			return true
-		end
-	end)
-	return found
+	return util.find(wc.LocSightComponents, has_folded_mode)
 end
 
 -- bIncrement reads correctly here only. By the post callback the parameter holds unrelated values.
