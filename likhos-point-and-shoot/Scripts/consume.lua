@@ -8,8 +8,7 @@ local log       = require("log")
 local util      = require("util")
 local player    = require("player")
 local inventory = require("inventory")
-
-local M = {}
+local actions   = require("actions")
 
 local USE_CONTEXT = "U_UseInventoryItem_C"
 -- ItemIdentifier tag prefixes. Medical items sit under Inventory.Items.Medical.
@@ -34,7 +33,7 @@ local function use_context(definition)
 end
 
 --- The Consume Food/Drink key's press. Game thread.
-function M.press()
+local function press()
 	local pawn = player.pawn()
 	local comp = pawn and player.inventory()
 	if not comp then
@@ -57,4 +56,6 @@ function M.press()
 	log.debug("ConsumeFoodDrink: no usable food or drink")
 end
 
-return M
+actions.define("ConsumeFoodDrink", {
+	press = press,
+})

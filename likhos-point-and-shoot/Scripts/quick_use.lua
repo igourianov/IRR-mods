@@ -4,10 +4,11 @@
 -- The key starts the same ability F does, with the target's hold settings zeroed for that one interaction, so F keeps its hold.
 -- Holds no UObject between calls.
 
-local log    = require("log")
-local util   = require("util")
-local hook   = require("hook")
-local player = require("player")
+local log     = require("log")
+local util    = require("util")
+local hook    = require("hook")
+local player  = require("player")
+local actions = require("actions")
 
 local M = {}
 
@@ -128,17 +129,15 @@ local function on_finish(_, target)
 	if comp then release_ability(comp, sga_class) end
 end
 
---- The Interact (Instant) key's press. Game thread.
-M.press = hooks.guard(press)
+actions.define("QuickUse", {
+	press = hooks.guard(press),
+	-- Drop the override without writing. Level load takes its options with it.
+	reset = function() override = nil end,
+})
 
 --- Hook the interaction end, which puts the zeroed holds back. The class is native.
 function M.install()
 	hooks.install(FINISH_FN, nil, on_finish)
-end
-
---- Drop the override without writing. Called on level load, which takes its options with it.
-function M.reset()
-	override = nil
 end
 
 return M

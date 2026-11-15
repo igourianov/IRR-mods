@@ -4,7 +4,7 @@
 -- What the action does with them is its own: PointAim runs from press until release, Flashlight tells a tap from a hold.
 --
 -- mapping: a key profile row name, one of the mod's own from keymap.lua or a vanilla one.
--- action:  a key into the ACTIONS table in actions.lua.
+-- action:  an action name a feature module defines through actions.define.
 
 return {
 	-- "error" | "warn" | "info" | "debug"

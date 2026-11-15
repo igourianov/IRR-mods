@@ -19,6 +19,13 @@ local whole_uses = require("whole_uses")
 local quick_sell = require("quick_sell")
 local quick_slots = require("quick_slots")
 
+-- Bind features define their actions (actions.lua) when loaded.
+require("point_aim")
+require("flashlight")
+require("hold_breath")
+require("consume")
+require("combat_heal")
+
 local config = require("config")
 
 --------------------------------------------------------------------------

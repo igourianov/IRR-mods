@@ -13,8 +13,7 @@ local log       = require("log")
 local util      = require("util")
 local player    = require("player")
 local inventory = require("inventory")
-
-local M = {}
+local actions   = require("actions")
 
 local MEDICAL       = "Inventory.Items.Medical."
 local USE_TIME_TAG  = "Inventory.Stats.Usage Time"
@@ -52,9 +51,9 @@ local function item_treatments(definition)
 	for i = 1, #contexts do
 		local context = contexts[i]
 		if util.valid(context) then
-			local actions = context.ToTriggerActions
-			for j = 1, #actions do
-				local action = actions[j]
+			local triggered = context.ToTriggerActions
+			for j = 1, #triggered do
+				local action = triggered[j]
 				if util.valid(action) then
 					for tag in pairs(tag_set(action.EffectStatTags)) do
 						local treatment = TREATMENTS[tag]
@@ -178,13 +177,8 @@ local function use(bind, treatment)
 	run(bind, { { treatment = treatment, rank = by_treatments } }, collect(comp), pawn)
 end
 
---- The Smart Heal key's tap. Game thread.
-function M.tap()
-	use("CombatHeal", "painkiller")
-end
-
 --- The Smart Heal key's hold: a condition, else an IV. Game thread.
-function M.hold()
+local function hold()
 	local pawn, comp = resolve("CombatHealHold")
 	if not pawn then return end
 	local health_comp = pawn:GetHealthComponent()
@@ -206,10 +200,13 @@ function M.hold()
 	run("CombatHealHold", steps, collect(comp), pawn)
 end
 
---- The Use Adrenaline key's press. Game thread.
---- The injector's effect replaces an active one, so a press during a boost restarts it.
-function M.use_adrenaline()
-	use("UseAdrenaline", "stamina")
-end
+-- Tap for a painkiller, hold to treat a condition or start an IV. The hold fires as the tap window passes, so its item starts without waiting for release.
+actions.define("CombatHeal", {
+	tap  = function() use("CombatHeal", "painkiller") end,
+	hold = hold,
+})
 
-return M
+-- The injector's effect replaces an active one, so a press during a boost restarts it.
+actions.define("UseAdrenaline", {
+	press = function() use("UseAdrenaline", "stamina") end,
+})

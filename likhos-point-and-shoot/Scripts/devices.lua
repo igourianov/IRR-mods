@@ -2,11 +2,26 @@
 --
 -- Every game name here comes from the Recon sections of docs/solutions/point-aim-auto-laser.md (lasers) and docs/solutions/point-aim-devices.md (lights, night vision).
 -- Works on a WeaponComponent handed in by the caller and holds no UObject between calls.
--- A missing game name raises. The caller decides what a failure means.
+-- A missing game name raises. A caller that must go on without its device calls through M.try.
 
+local log  = require("log")
 local util = require("util")
 
 local M = {}
+
+-- Device failures log once per session, so a renamed game name doesn't flood the log every press.
+local error_logged = false
+
+--- Call fn(...) and return its result, or nil when it fails, so a broken device lookup still leaves the rest of the caller's action working.
+function M.try(fn, ...)
+	local ok, res = pcall(fn, ...)
+	if ok then return res end
+	if not error_logged then
+		error_logged = true
+		log.error("device handling failed, the action continues without it: %s", tostring(res))
+	end
+	return nil
+end
 
 local NVG_SUBSYSTEM = "IRRNightVision_Subsystem"
 local DEVICE_OFF, DEVICE_ON = 0, 1   -- EIRRTacticalDeviceState
@@ -83,6 +98,12 @@ end
 
 function M.set(dev, on)
 	dev:SetDeviceState(on and DEVICE_ON or DEVICE_OFF)
+end
+
+--- Turn off the device on `wc` with this full name, if it is still there and on.
+function M.off(wc, name)
+	local dev = M.find(wc, name)
+	if dev and M.is_on(dev) then M.set(dev, false) end
 end
 
 return M
