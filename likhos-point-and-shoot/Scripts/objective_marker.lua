@@ -1,4 +1,4 @@
--- plant_marker.lua : the markers of quest objectives (placement spots, mission phones, quest item pickups and mission boxes) have a ring in a color that stands out and show from farther away.
+-- objective_marker.lua : the markers of quest objectives (placement spots, mission phones, quest item pickups and mission boxes) have a ring in a color that stands out and show from farther away.
 -- Design: docs/solutions/plant-spot-marker.md, reworked for quest pickups and range by docs/solutions/objective-marker-range.md.
 --
 -- Every game name here comes from those two docs.

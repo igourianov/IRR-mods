@@ -1,4 +1,4 @@
--- quick_use.lua : the Interact (Instant) key uses the targeted interactable at once, holds included (docs/solutions/tap-to-use.md).
+-- instant_interact.lua : the Interact (Instant) key uses the targeted interactable at once, holds included (docs/solutions/tap-to-use.md).
 --
 -- Every game name here comes from docs/solutions/tap-to-use.md (Recon).
 -- The key starts the same ability F does, with the target's hold settings zeroed for that one interaction, so F keeps its hold.
@@ -12,7 +12,7 @@ local actions = require("actions")
 
 local M = {}
 
-local hooks = hook.new("quick use", "the Interact (Instant) key does nothing")
+local hooks = hook.new("instant interact", "the Interact (Instant) key does nothing")
 
 local LIB_PATH     = "/Script/Test_C.Default__InteractionFunctionLibrary"
 local ABILITY_COMP = "/Script/Test_C.GameplayAbilityComponent"

@@ -1,4 +1,4 @@
--- consume.lua : the Consume Food/Drink key uses the first usable food or drink item in the inventory (docs/solutions/eat-food-bind.md).
+-- food_drink.lua : the Consume Food/Drink key uses the first usable food or drink item in the inventory (docs/solutions/eat-food-bind.md).
 --
 -- Every game name here comes from docs/solutions/eat-food-bind.md (Recon).
 -- Only reads game state to pick the item. The one call that changes anything is the item's own use.

@@ -1,4 +1,4 @@
--- combat_heal.lua : a Smart Heal tap takes the fastest painkiller carried, a hold treats a condition or starts an IV (docs/solutions/medical-rework.md).
+-- smart_heal.lua : a Smart Heal tap takes the fastest painkiller carried, a hold treats a condition or starts an IV (docs/solutions/medical-rework.md).
 -- The Use Adrenaline key shares its item search with a single stamina step (docs/solutions/adrenaline-bind.md).
 --
 -- Tap: one painkiller step, whatever the health or an active dose. A new dose refreshes the temporary health pool, so wasting one is the player's choice.

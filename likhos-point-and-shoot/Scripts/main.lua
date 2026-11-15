@@ -12,9 +12,9 @@ local actions  = require("actions")
 local keymap   = require("keymap")
 local menu     = require("menu")
 local magnifier = require("magnifier")
-local quick_use = require("quick_use")
+local instant_interact = require("instant_interact")
 local low_ready = require("low_ready")
-local plant_marker = require("plant_marker")
+local objective_marker = require("objective_marker")
 local whole_uses = require("whole_uses")
 local quick_sell = require("quick_sell")
 local quick_slots = require("quick_slots")
@@ -23,8 +23,8 @@ local quick_slots = require("quick_slots")
 require("point_aim")
 require("flashlight")
 require("hold_breath")
-require("consume")
-require("combat_heal")
+require("food_drink")
+require("smart_heal")
 
 local config = require("config")
 
@@ -86,9 +86,9 @@ local function init()
 	end)
 	menu.install()
 	if config.magnifier_zoom then magnifier.install() end
-	quick_use.install()
+	instant_interact.install()
 	if config.low_ready_default then low_ready.install() end
-	if config.plant_marker then plant_marker.install() end
+	if config.plant_marker then objective_marker.install() end
 	if config.whole_uses then whole_uses.install() end
 	if config.quick_sell then quick_sell.install() end
 	if config.quick_slot_refill then quick_slots.install() end
