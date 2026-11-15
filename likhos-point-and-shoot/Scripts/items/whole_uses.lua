@@ -1,13 +1,13 @@
--- whole_uses.lua : an item that counts uses shows them as whole numbers on its inventory tile (docs/solutions/medic-uses-display.md).
+-- items/whole_uses.lua : an item that counts uses shows them as whole numbers on its inventory tile (docs/solutions/medic-uses-display.md).
 --
 -- Every game name here comes from docs/solutions/medic-uses-display.md and docs/solutions/usb-uses-display.md.
 -- The native ItemWidget writes the uses, a float stat, into the tile with decimals. This rewrites that text once the game has drawn it.
 -- Holds no UObject between calls.
 
-local util = require("util")
-local hook = require("hook")
-local inventory = require("inventory")
-local item_tile = require("item_tile")
+local util = require("lib.util")
+local hook = require("lib.hook")
+local inventory = require("items.inventory")
+local item_tile = require("items.item_tile")
 
 local M = {}
 

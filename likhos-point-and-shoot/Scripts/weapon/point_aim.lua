@@ -1,13 +1,13 @@
--- point_aim.lua : hold to aim straight into point sight, with the laser that suits the player's vision on (docs/solutions/point-aim-bind.md).
+-- weapon/point_aim.lua : hold to aim straight into point sight, with the laser that suits the player's vision on (docs/solutions/point-aim-bind.md).
 --
 -- Every game name here comes from docs/solutions/point-aim-bind.md (Recon).
 -- Holds no UObject between calls.
 
-local log     = require("log")
-local util    = require("util")
-local player  = require("player")
-local devices = require("devices")
-local actions = require("actions")
+local log     = require("lib.log")
+local util    = require("lib.util")
+local player  = require("core.player")
+local devices = require("weapon.devices")
+local actions = require("core.actions")
 
 -- IA_Aim has a Released trigger, so aim holds only while its one-frame press repeats every tick.
 local IA_AIM = "/Game/Blueprints/InputSystem/InputActions/IA_Aim.IA_Aim"

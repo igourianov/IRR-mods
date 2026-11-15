@@ -1,4 +1,4 @@
--- smart_heal.lua : a Smart Heal tap takes the fastest painkiller carried, a hold treats a condition or starts an IV (docs/solutions/medical-rework.md).
+-- items/smart_heal.lua : a Smart Heal tap takes the fastest painkiller carried, a hold treats a condition or starts an IV (docs/solutions/medical-rework.md).
 -- The Use Adrenaline key shares its item search with a single stamina step (docs/solutions/adrenaline-bind.md).
 --
 -- Tap: one painkiller step, whatever the health or an active dose. A new dose refreshes the temporary health pool, so wasting one is the player's choice.
@@ -9,11 +9,11 @@
 -- Only reads game state to pick the item. The one call that changes anything is the item's own use.
 -- Holds no UObject between calls.
 
-local log       = require("log")
-local util      = require("util")
-local player    = require("player")
-local inventory = require("inventory")
-local actions   = require("actions")
+local log       = require("lib.log")
+local util      = require("lib.util")
+local player    = require("core.player")
+local inventory = require("items.inventory")
+local actions   = require("core.actions")
 
 local MEDICAL       = { "Inventory.Items.Medical." }
 local USE_TIME_TAG  = "Inventory.Stats.Usage Time"

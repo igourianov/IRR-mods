@@ -1,14 +1,14 @@
--- food_drink.lua : the Consume Food/Drink key uses the first usable food or drink item in the inventory (docs/solutions/eat-food-bind.md).
+-- items/food_drink.lua : the Consume Food/Drink key uses the first usable food or drink item in the inventory (docs/solutions/eat-food-bind.md).
 --
 -- Every game name here comes from docs/solutions/eat-food-bind.md (Recon).
 -- Only reads game state to pick the item. The one call that changes anything is the item's own use.
 -- Holds no UObject between calls.
 
-local log       = require("log")
-local util      = require("util")
-local player    = require("player")
-local inventory = require("inventory")
-local actions   = require("actions")
+local log       = require("lib.log")
+local util      = require("lib.util")
+local player    = require("core.player")
+local inventory = require("items.inventory")
+local actions   = require("core.actions")
 
 local USE_CONTEXT = "U_UseInventoryItem_C"
 -- ItemIdentifier tag prefixes. Medical items sit under Inventory.Items.Medical.

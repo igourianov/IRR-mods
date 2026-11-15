@@ -1,14 +1,14 @@
--- menu.lua : adds the mod's keybinding rows to the game's keyboard controls page, in their own "Likho's Actions" section at the top.
+-- controls/menu.lua : adds the mod's keybinding rows to the game's keyboard controls page, in their own "Likho's Actions" section at the top.
 --
--- Each row is a clone of a vanilla row (WB_SingleSettingBar_C), pointed at a mapping from keymap.lua.
+-- Each row is a clone of a vanilla row (WB_SingleSettingBar_C), pointed at a mapping from controls/keymap.lua.
 -- The vanilla row logic then shows, rebinds, saves and resets the key.
 -- The section header is a clone of the page's first one (W_InventorySection_C), followed by a clone of its first Spacer.
 -- See docs/solutions/point-aim-keybind-menu.md and docs/solutions/keybind-section.md (Recon) for the recon behind every name here.
 
-local log    = require("log")
-local util   = require("util")
-local keymap = require("keymap")
-local hook   = require("hook")
+local log    = require("lib.log")
+local util   = require("lib.util")
+local keymap = require("controls.keymap")
+local hook   = require("lib.hook")
 
 local M = {}
 

@@ -1,9 +1,9 @@
--- item_tile.lua : the inventory item tile, W_InventoryItem_C, shared by quick sell, the quick slots and whole use counts.
+-- items/item_tile.lua : the inventory item tile, W_InventoryItem_C, shared by quick sell, the quick slots and whole use counts.
 -- Owns the tile's one click hook and hands each left click to the features registered for it.
 -- Holds no UObject between calls.
 
-local util = require("util")
-local hook = require("hook")
+local util = require("lib.util")
+local hook = require("lib.hook")
 
 local M = {}
 

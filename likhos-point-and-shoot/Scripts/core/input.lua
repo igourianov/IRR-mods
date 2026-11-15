@@ -1,10 +1,10 @@
--- input.lua : mapped key polling.
+-- core/input.lua : mapped key polling.
 
-local log      = require("log")
-local util     = require("util")
-local player   = require("player")
-local triggers = require("triggers")
-local keymap   = require("keymap")
+local log      = require("lib.log")
+local util     = require("lib.util")
+local player   = require("core.player")
+local triggers = require("core.triggers")
+local keymap   = require("controls.keymap")
 
 local M = {}
 

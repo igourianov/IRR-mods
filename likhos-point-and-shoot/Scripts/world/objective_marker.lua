@@ -1,14 +1,14 @@
--- objective_marker.lua : the markers of quest objectives (placement spots, mission phones, quest item pickups and mission boxes) have a ring in a color that stands out and show from farther away.
+-- world/objective_marker.lua : the markers of quest objectives (placement spots, mission phones, quest item pickups and mission boxes) have a ring in a color that stands out and show from farther away.
 -- Design: docs/solutions/plant-spot-marker.md, reworked for quest pickups and range by docs/solutions/objective-marker-range.md.
 --
 -- Every game name here comes from those two docs.
 -- Holds no UObject between calls. Targets are passed by path.
 
-local log    = require("log")
-local util   = require("util")
-local hook   = require("hook")
+local log    = require("lib.log")
+local util   = require("lib.util")
+local hook   = require("lib.hook")
 local config = require("config")
-local inventory = require("inventory")
+local inventory = require("items.inventory")
 
 local M = {}
 

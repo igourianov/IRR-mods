@@ -3,7 +3,7 @@
 -- The key is set in the game's controls menu on the mapping's row, the mod's own or a vanilla one, and polled every tick, so the action gets a real press and release.
 -- What the action does with them is its own: PointAim runs from press until release, Flashlight tells a tap from a hold.
 --
--- mapping: a key profile row name, one of the mod's own from keymap.lua or a vanilla one.
+-- mapping: a key profile row name, one of the mod's own from controls/keymap.lua or a vanilla one.
 -- action:  an action name a feature module defines through actions.define.
 
 return {

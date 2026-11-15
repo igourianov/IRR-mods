@@ -1,11 +1,11 @@
--- flashlight.lua : tap to leave the light that suits the player's vision on, hold to light it while held (docs/solutions/flashlight-bind.md).
+-- weapon/flashlight.lua : tap to leave the light that suits the player's vision on, hold to light it while held (docs/solutions/flashlight-bind.md).
 --
 -- Holds no UObject between calls.
 
-local log     = require("log")
-local player  = require("player")
-local devices = require("devices")
-local actions = require("actions")
+local log     = require("lib.log")
+local player  = require("core.player")
+local devices = require("weapon.devices")
+local actions = require("core.actions")
 
 -- Set by a press, read by the release of a hold. Plain values only, no UObjects.
 --   device : full name of the light the press turned on, nil when the press turned one off or found none

@@ -1,11 +1,11 @@
--- devices.lua : which tactical device suits the player's vision (docs/solutions/flashlight-bind.md).
+-- weapon/devices.lua : which tactical device suits the player's vision (docs/solutions/flashlight-bind.md).
 --
 -- Every game name here comes from the Recon sections of docs/solutions/point-aim-auto-laser.md (lasers) and docs/solutions/point-aim-devices.md (lights, night vision).
 -- Works on a WeaponComponent handed in by the caller and holds no UObject between calls.
 -- A missing game name raises. A caller that must go on without its device calls through M.try.
 
-local util = require("util")
-local hook = require("hook")
+local util = require("lib.util")
+local hook = require("lib.hook")
 
 local M = {}
 

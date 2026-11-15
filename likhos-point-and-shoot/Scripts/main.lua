@@ -3,34 +3,34 @@
 -- Entry point. UE4SS loads this once at startup for every enabled mod.
 -- Hot reload (Ctrl+R in the UE4SS console) re-runs this file, so keep it idempotent: no duplicate registrations, no duplicate loops.
 
-local log      = require("log")
-local util     = require("util")
-local player   = require("player")
-local input    = require("input")
-local triggers = require("triggers")
-local actions  = require("actions")
-local keymap   = require("keymap")
-local menu     = require("menu")
-local magnifier = require("magnifier")
-local instant_interact = require("instant_interact")
-local low_ready = require("low_ready")
-local objective_marker = require("objective_marker")
-local whole_uses = require("whole_uses")
-local quick_sell = require("quick_sell")
-local quick_slots = require("quick_slots")
+local log      = require("lib.log")
+local util     = require("lib.util")
+local player   = require("core.player")
+local input    = require("core.input")
+local triggers = require("core.triggers")
+local actions  = require("core.actions")
+local keymap   = require("controls.keymap")
+local menu     = require("controls.menu")
+local magnifier = require("weapon.magnifier")
+local instant_interact = require("world.instant_interact")
+local low_ready = require("weapon.low_ready")
+local objective_marker = require("world.objective_marker")
+local whole_uses = require("items.whole_uses")
+local quick_sell = require("items.quick_sell")
+local quick_slots = require("items.quick_slots")
 
--- Bind features define their actions (actions.lua) when loaded.
-require("point_aim")
-require("flashlight")
-require("hold_breath")
-require("food_drink")
-require("smart_heal")
+-- Bind features define their actions (core/actions.lua) when loaded.
+require("weapon.point_aim")
+require("weapon.flashlight")
+require("weapon.hold_breath")
+require("items.food_drink")
+require("items.smart_heal")
 
 local config = require("config")
 
 --------------------------------------------------------------------------
 
---- The binds of config that are enabled and have a mapping. Binds take their keys from the controls menu (keymap.lua) and are polled from the tick loop, so they get a release event.
+--- The binds of config that are enabled and have a mapping. Binds take their keys from the controls menu (controls/keymap.lua) and are polled from the tick loop, so they get a release event.
 local function active_binds()
 	local active = {}
 	for _, bind in ipairs(config.binds) do

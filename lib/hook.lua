@@ -1,7 +1,7 @@
 -- hook.lua : RegisterHook for a feature module, with log-once error guards and deferral until a Blueprint class loads.
 
-local log  = require("log")
-local util = require("util")
+local log  = require("lib.log")
+local util = require("lib.util")
 
 local M = {}
 

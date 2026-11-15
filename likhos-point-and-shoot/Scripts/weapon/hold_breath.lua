@@ -1,11 +1,11 @@
--- hold_breath.lua : the vanilla Hold Breath key toggles on a tap and holds breath only while held on a hold (docs/solutions/hold-breath-hold.md).
+-- weapon/hold_breath.lua : the vanilla Hold Breath key toggles on a tap and holds breath only while held on a hold (docs/solutions/hold-breath-hold.md).
 --
 -- The vanilla key toggles the ability on its own press, so the mod acts only on a release past the tap window.
 -- Holds no UObject between calls.
 
-local util    = require("util")
-local player  = require("player")
-local actions = require("actions")
+local util    = require("lib.util")
+local player  = require("core.player")
+local actions = require("core.actions")
 
 local IA_HOLD_BREATH = "/Game/Blueprints/InputSystem/InputActions/IA_HoldBreath.IA_HoldBreath"
 local SGA_HOLD_BREATH = "/Game/Blueprints/SimpleGameplayAbilitySystem/Abilities/SGA_HoldBreath.SGA_HoldBreath_C"

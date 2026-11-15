@@ -1,14 +1,14 @@
--- instant_interact.lua : the Interact (Instant) key uses the targeted interactable at once, holds included (docs/solutions/tap-to-use.md).
+-- world/instant_interact.lua : the Interact (Instant) key uses the targeted interactable at once, holds included (docs/solutions/tap-to-use.md).
 --
 -- Every game name here comes from docs/solutions/tap-to-use.md (Recon).
 -- The key starts the same ability F does, with the target's hold settings zeroed for that one interaction, so F keeps its hold.
 -- Holds no UObject between calls.
 
-local log     = require("log")
-local util    = require("util")
-local hook    = require("hook")
-local player  = require("player")
-local actions = require("actions")
+local log     = require("lib.log")
+local util    = require("lib.util")
+local hook    = require("lib.hook")
+local player  = require("core.player")
+local actions = require("core.actions")
 
 local M = {}
 

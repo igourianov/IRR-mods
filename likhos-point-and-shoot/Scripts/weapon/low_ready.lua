@@ -1,13 +1,13 @@
--- low_ready.lua : low ready is the weapon's resting position (docs/solutions/low-ready-default.md).
+-- weapon/low_ready.lua : low ready is the weapon's resting position (docs/solutions/low-ready-default.md).
 --
 -- Every game name here comes from docs/solutions/low-ready-default.md.
 -- Starts low ready itself after every ability end, since the game's own auto low ready never lowers the gun while the character moves.
 -- The menu's auto low ready toggle stays the player's switch for it.
 -- Holds no UObject between ability ends.
 
-local log    = require("log")
-local hook   = require("hook")
-local util   = require("util")
+local log    = require("lib.log")
+local hook   = require("lib.hook")
+local util   = require("lib.util")
 
 local M = {}
 

@@ -5,7 +5,7 @@
 .DESCRIPTION
 	Edits EnhancedInputUserSettings.sav directly. The game must not be running.
 	Without -Unused or -Name it lists the saved mappings and changes nothing.
-	A mod mapping (name starting with Likhos) is unused when no likhos-*\Scripts\*.lua in this repo mentions its name.
+	A mod mapping (name starting with Likhos) is unused when no .lua file under likhos-*\Scripts in this repo mentions its name.
 	The whole file is parsed before anything is written, and the write is refused if any part of it does not match the known layout.
 	The original is copied next to it as <file>.<yyyy-MM-dd.HHmmss>.bak.
 	A removed mapping falls back to its default key, or disappears if nothing registers it any more.
@@ -125,7 +125,8 @@ for ($p = 0; $p -lt $profiles; $p++) {
 if ($pos -ne $bytes.Length) { Fail 'data after the last profile' }
 
 # ---------------------------------------------------------------- select
-$lua = (Get-ChildItem (Join-Path $root 'likhos-*\Scripts\*.lua') | Get-Content -Raw) -join "`n"
+$scriptDirs = Get-ChildItem $root -Directory -Filter 'likhos-*' | ForEach-Object { Join-Path $_.FullName 'Scripts' } | Where-Object { Test-Path $_ }
+$lua = ($scriptDirs | ForEach-Object { Get-ChildItem $_ -Recurse -Filter *.lua -File } | Get-Content -Raw) -join "`n"
 foreach ($e in $entries) {
 	$e.Unused = $e.Name.StartsWith('Likhos') -and $lua -notmatch "\b$([regex]::Escape($e.Name))\b"
 	$e.Remove = ($Unused -and $e.Unused) -or @($Name).Where({ $e.Name -like $_ }).Count -gt 0

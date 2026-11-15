@@ -4,7 +4,7 @@
 
 .DESCRIPTION
 	A build bumps the patch segment of the mod's version in mod.txt when the mod folder has uncommitted changes.
-	A Lua mod gets the shared modules in lib\ copied into its Scripts folder, and a change to lib\ counts as a change to every Lua mod. A pak mod counts only its own folder, since a version stands for a change to the mod's own edits.
+	A Lua mod gets the shared modules in lib\ copied into its Scripts\lib folder, and a change to lib\ counts as a change to every Lua mod. A pak mod counts only its own folder, since a version stands for a change to the mod's own edits.
 	A mod whose mod.txt names a pak is a pak mod. tools\pak\pak.ps1 stages its files from the edit lists in its folder, repak packs them into dist\<pak> and the pak is copied into Content\Paks\~mods.
 	The pinned tools a pak build needs, repak and UAssetGUI, are downloaded into tools\<name> on first use.
 	A pak build also needs the game's usmap, which UE4SS generates in game into its own folder.
@@ -161,8 +161,7 @@ foreach ($m in $Mods) {
 		Copy-Item $pakPath $pakDest -Force
 		Write-Host "packed   $label  -> $(Join-Path $pakDest $pak)" -ForegroundColor Green
 	} else {
-		$clash = $libFiles | Where-Object { Test-Path (Join-Path $src "Scripts\$($_.Name)") }
-		if ($clash) { Write-Error "${m}: Scripts has its own $($clash.Name -join ', '), which the copy from lib would overwrite." }
+		if (Test-Path (Join-Path $src 'Scripts\lib')) { Write-Error "${m}: Scripts has its own lib folder, which the copy from lib would overwrite." }
 
 		if (Test-Path $dest) {
 			# A deploy from an older symlink build is removed as a link, so the workspace it points at survives.
@@ -172,7 +171,8 @@ foreach ($m in $Mods) {
 		}
 
 		Copy-Item $src $dest -Recurse -Force
-		Copy-Item $libFiles.FullName (Join-Path $dest 'Scripts') -Force
+		$libDest = New-Item -ItemType Directory -Force (Join-Path $dest 'Scripts\lib')
+		Copy-Item $libFiles.FullName $libDest -Force
 		Write-Host "copied   $label  -> $dest" -ForegroundColor Green
 	}
 }

@@ -1,5 +1,5 @@
 -- util.lua : small helpers.
-local log = require("log")
+local log = require("lib.log")
 local M = {}
 
 --- pcall wrapper that logs and swallows. Returns ok, result.

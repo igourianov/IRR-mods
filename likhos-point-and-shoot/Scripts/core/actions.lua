@@ -1,15 +1,15 @@
--- actions.lua : action name -> the functions that run its phases.
+-- core/actions.lua : action name -> the functions that run its phases.
 -- Each bind feature defines its own actions when it is loaded, so this module knows none of them.
 
-local log  = require("log")
-local util = require("util")
+local log  = require("lib.log")
+local util = require("lib.util")
 
 local M = {}
 
 -- name -> phases, as passed to M.define.
 local defined = {}
 
---- Define action `name` with a Lua function per phase it acts on (triggers.lua), and optionally reset, which drops its state on level load.
+--- Define action `name` with a Lua function per phase it acts on (core/triggers.lua), and optionally reset, which drops its state on level load.
 --- press and release run on the key's press and release, held every tick while it is down.
 --- hold runs once when the key is still down past tap_ms. On release, hold_release runs after a hold, tap otherwise.
 function M.define(name, phases)
@@ -20,7 +20,7 @@ end
 local disabled = {}
 
 --- Invoke one phase of an action.
---- MUST be called from the game thread (see input.lua).
+--- MUST be called from the game thread (see core/input.lua).
 function M.invoke(name, phase)
 	if disabled[name] then return false end
 

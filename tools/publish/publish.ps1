@@ -6,7 +6,7 @@
 	Zips the mod folder from this workspace, then publishes it through the Nexus v3 upload
 	API under the version in its mod.txt. The zip holds the bare mod folder, so extracting
 	it into ue4ss\Mods installs the mod. A Lua mod's zip also holds the shared modules from
-	lib\ in its Scripts folder, as build.ps1 deploys it. A pak mod's zip holds ~mods\<pak> from the last
+	lib\ in its Scripts\lib folder, as build.ps1 deploys it. A pak mod's zip holds ~mods\<pak> from the last
 	build.ps1 run instead, so extracting it into Content\Paks installs the mod.
 
 	The line items of every CHANGELOG.md section newer than the version live on Nexus, up to
@@ -78,7 +78,7 @@ function New-ModArchive {
 			[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $entry) | Out-Null
 		}
 		foreach ($file in $Lib) {
-			[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, "$Folder/Scripts/$($file.Name)") | Out-Null
+			[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, "$Folder/Scripts/lib/$($file.Name)") | Out-Null
 		}
 	} finally {
 		$zip.Dispose()

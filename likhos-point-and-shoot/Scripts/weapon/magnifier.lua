@@ -1,13 +1,13 @@
--- magnifier.lua : the zoom input folds and unfolds a hybrid sight's magnifier (docs/solutions/magnifier-zoom.md).
+-- weapon/magnifier.lua : the zoom input folds and unfolds a hybrid sight's magnifier (docs/solutions/magnifier-zoom.md).
 --
 -- Every game name here comes from docs/solutions/magnifier-zoom.md.
 -- Scroll forward at the zoom's end stop unfolds, scroll back folds. The vanilla Toggle Magnifier input does the flip.
 -- Holds no UObject between calls.
 
-local log     = require("log")
-local util    = require("util")
-local player  = require("player")
-local hook    = require("hook")
+local log     = require("lib.log")
+local util    = require("lib.util")
+local player  = require("core.player")
+local hook    = require("lib.hook")
 
 local M = {}
 

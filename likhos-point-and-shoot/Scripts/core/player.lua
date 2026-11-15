@@ -1,8 +1,8 @@
--- player.lua : the local player's controller, pawn and the parts features act on, resolved per call.
+-- core/player.lua : the local player's controller, pawn and the parts features act on, resolved per call.
 -- Only the PlayerController is cached: it survives respawns and the pawn does not.
 
-local log  = require("log")
-local util = require("util")
+local log  = require("lib.log")
+local util = require("lib.util")
 
 local M = {}
 

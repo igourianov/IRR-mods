@@ -4,8 +4,8 @@
 -- No UFunction gets a struct argument: on UE4SS 1217 a struct returned by one UFunction crashes the game when passed into another.
 -- Hot reload re-runs this file. Re-registering a console command replaces the handler.
 
-local log    = require("log")
-local util   = require("util")
+local log    = require("lib.log")
+local util   = require("lib.util")
 local config = require("config")
 
 local LIBRARY = "/Script/Test_C.Default__InventoryFunctionLibrary"

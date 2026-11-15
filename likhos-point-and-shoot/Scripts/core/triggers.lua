@@ -1,11 +1,11 @@
--- triggers.lua : press, hold and release state per bind.
+-- core/triggers.lua : press, hold and release state per bind.
 --
--- Binds are polled by input.lua, which reports the real press and release.
+-- Binds are polled by core/input.lua, which reports the real press and release.
 -- Press starts the action, tick() runs its held side every tick while the key is down and release ends it.
 -- A key still down once tap_ms has passed is a hold: `hold` fires once from the tick, and release then fires `hold_release`. A key released earlier fires `tap` on release.
 
-local log     = require("log")
-local actions = require("actions")
+local log     = require("lib.log")
+local actions = require("core.actions")
 local config  = require("config")
 
 local M = {}

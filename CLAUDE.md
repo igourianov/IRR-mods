@@ -16,9 +16,9 @@ The load-bearing ones:
 
 ## Layout
 
-- `likhos-<name>/`: one mod, with `mod.txt`, `Scripts/` and `README.md`. All Lua lives flat in `Scripts/`; plain `require("log")`.
+- `likhos-<name>/`: one mod, with `mod.txt`, `Scripts/` and `README.md`. Only `main.lua` and `config.lua` sit at the root of `Scripts/`. Every other module lives in a domain folder under it and is required by its dotted path, e.g. `require("weapon.devices")`. Point and Shoot's folders are `core/` (player, bind polling and dispatch), `controls/` (key mappings and the controls page), `weapon/`, `items/` and `world/`.
   A mod's `README.bbcode` (gitignored) is regenerated from `README.md` before publishing. Never edit it; edit `README.md` only.
-- `lib/`: Lua modules shared by every Lua mod (`log`, `util`, `hook`). `build.ps1` and `publish.ps1` copy them into each mod's `Scripts/`, so a mod never has its own file with a `lib` name. Each mod names itself for log lines with `log.setup("<Name>", config.log_level)`.
+- `lib/`: Lua modules shared by every Lua mod (`log`, `util`, `hook`). `build.ps1` and `publish.ps1` copy them into each mod's `Scripts/lib/`, required as `require("lib.log")`, so a mod never has its own `Scripts/lib/` folder. Each mod names itself for log lines with `log.setup("<Name>", config.log_level)`.
 - A pak mod (`likhos-rearmed`) has `pak=` in `mod.txt` and the JSON edit lists (`reclass`, `clone`, `retarget`, `stats`, `supported`, `loadouts`, `loot`) that `tools\pak\pak.ps1` stages the pak's files from. `build.ps1` packs it with repak into `dist\` and installs it into `Content\Paks\~mods`.
 - `tools/`: one folder per repo tool (`build/`, `publish/`, `pak/`, `gunsmith/`, `clear-keybinds/`), each holding the script and its configs. The scripts resolve paths from their own location, so they run from any directory. The tools `build.ps1` downloads (`repak/`, `UAssetGUI/`) and local backups in `tools/` are gitignored.
 - `docs/solutions/`: session level docs written by the solarch skill, one per piece of work, holding its design and its own recon. Write one only through solarch. Read another solution doc only when the user points at it.
@@ -40,7 +40,7 @@ Class names, UFunction names and property paths must come from a UE4SS dump or L
 
 - Needs `tools\build\build.config.json` (gitignored, copy of `tools\build\build.config.example.json`) holding the game dir.
 - Bumps the patch number in `mod.txt` when the mod folder has uncommitted changes. For a Lua mod, a change in `lib\` also counts. A pak mod counts only its own folder, so a `tools\pak\` change bumps no mod. The bumped `mod.txt` keeps the folder dirty, so every build bumps again until committed.
-- Lua mod: copies the mod folder to `ue4ss\Mods\<mod>` and `lib\*.lua` into its `Scripts\`. Fails if `Scripts\` has a file with a `lib` name.
+- Lua mod: copies the mod folder to `ue4ss\Mods\<mod>` and `lib\*.lua` into its `Scripts\lib\`. Fails if the mod has its own `Scripts\lib\`.
 - Pak mod: runs `tools\pak\pak.ps1` on the mod's edit lists to stage files, packs with repak into `dist\<pak>`, copies it into `Content\Paks\~mods`. Downloads repak and UAssetGUI into `tools\` on first use. Needs a usmap in the UE4SS folder, generated in game with the UE4SS mappings dump key after every game patch.
 
 ### tools/publish/publish.ps1
@@ -81,7 +81,7 @@ Use it when a mod key mapping is renamed or removed, or when a saved key mapping
 
 ```powershell
 .\tools\clear-keybinds\clear-keybinds.ps1                        # list saved mappings, mark unused Likhos* ones
-.\tools\clear-keybinds\clear-keybinds.ps1 -Unused                # remove Likhos* mappings no likhos-*\Scripts\*.lua mentions
+.\tools\clear-keybinds\clear-keybinds.ps1 -Unused                # remove Likhos* mappings no .lua under likhos-*\Scripts mentions
 .\tools\clear-keybinds\clear-keybinds.ps1 -Name LikhosQuickUse   # remove by name, wildcards allowed
 ```
 

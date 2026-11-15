@@ -1,13 +1,13 @@
--- keymap.lua : the mod's player-mappable keys, stored in the game's Enhanced Input user settings.
+-- controls/keymap.lua : the mod's player-mappable keys, stored in the game's Enhanced Input user settings.
 --
 -- Each mapping is a runtime InputAction in a mod InputMappingContext, registered with EnhancedInputUserSettings and active at the lowest priority.
 -- Nothing listens to the actions.
--- The controls menu row (menu.lua) rebinds a key and the game saves it. input.lua reads the key and polls it.
+-- The controls menu row (controls/menu.lua) rebinds a key and the game saves it. core/input.lua reads the key and polls it.
 -- See docs/solutions/point-aim-keybind-menu.md.
 
-local log    = require("log")
-local util   = require("util")
-local player = require("player")
+local log    = require("lib.log")
+local util   = require("lib.util")
+local player = require("core.player")
 
 local M = {}
 
