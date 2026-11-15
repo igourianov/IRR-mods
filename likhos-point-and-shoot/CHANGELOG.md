@@ -1,3 +1,6 @@
+# 2.0.197
+* major refactoring of mod's internals
+
 # 1.8.186
 * merged Likho's Backpack mod into this mod, as they have much overlap in inventory management. Delete the `likhos-backpack` folder if you had it installed
 * added tooltips for the mod keybinds
