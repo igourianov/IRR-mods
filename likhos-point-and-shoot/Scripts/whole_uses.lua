@@ -7,13 +7,13 @@
 local util = require("util")
 local hook = require("hook")
 local inventory = require("inventory")
+local item_tile = require("item_tile")
 
 local M = {}
 
 local hooks = hook.new("whole uses", "use counts keep decimals")
 
-local TILE_CLASS = "/Game/Blueprints/InventorySystem/Widgets/W_InventoryItem.W_InventoryItem_C"
-local HOOK_FN    = TILE_CLASS .. ":K2_UpdateItemCount"
+local HOOK_FN = item_tile.CLASS .. ":K2_UpdateItemCount"
 
 -- U_Battery_C is the USB hacking devices' use count, shown as the remaining percentage.
 local BATTERY_CONFIG = "U_Battery_C"
@@ -101,7 +101,7 @@ end
 
 --- Hook the inventory tile once its Blueprint class is loaded.
 function M.install()
-	hooks.install(HOOK_FN, TILE_CLASS, on_update)
+	hooks.install(HOOK_FN, item_tile.CLASS, on_update)
 end
 
 return M

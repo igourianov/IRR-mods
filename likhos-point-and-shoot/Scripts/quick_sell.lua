@@ -7,14 +7,12 @@
 local log  = require("log")
 local util = require("util")
 local hook = require("hook")
-local inventory = require("inventory")
+local item_tile = require("item_tile")
 
 local M = {}
 
 local hooks = hook.new("quick sell", "Shift+Click stays vanilla")
 
-local TILE_CLASS    = "/Game/Blueprints/InventorySystem/Widgets/W_InventoryItem.W_InventoryItem_C"
-local HOOK_FN       = TILE_CLASS .. ":OnMouseButtonDown"
 local SELL_CONTEXT  = "U_Sell_C"
 
 local function item_str(item)
@@ -39,20 +37,17 @@ local function sell(path, uid)
 	log.debug("quick sell: sold %s", item_str(item))
 end
 
--- The mouse event is only readable while the handler runs. The sale waits a tick, since it removes the clicked tile.
-local function on_mouse_down(context, _, mouse_event)
-	local mods = inventory.left_click_modifiers(mouse_event)
-	if not (mods and mods.shift) then return end
-
-	local tile = context:get()
+-- The sale waits a tick, since it removes the clicked tile.
+local function on_click(tile, mods)
+	if not mods.shift then return end
 	local path = util.path(tile)
 	local uid = util.guid(tile.ContainerItem.ItemUID)
 	ExecuteInGameThreadWithDelay(1, hooks.guard(function() sell(path, uid) end))
 end
 
---- Hook the inventory tile's click handler once its Blueprint class is loaded.
+--- Handle Shift+Click on inventory tiles.
 function M.install()
-	hooks.install(HOOK_FN, TILE_CLASS, on_mouse_down)
+	item_tile.on_click("quick sell", hooks.guard(on_click))
 end
 
 return M

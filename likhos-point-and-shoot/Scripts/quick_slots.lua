@@ -11,18 +11,17 @@ local util = require("util")
 local hook = require("hook")
 local player = require("player")
 local inventory = require("inventory")
+local item_tile = require("item_tile")
 
 local M = {}
 
 local hooks = hook.new("quick slot clear", "a click on a quick slot stays vanilla")
 
-local TILE_CLASS   = "/Game/Blueprints/InventorySystem/Widgets/W_InventoryItem.W_InventoryItem_C"
 local SLOT_COUNT   = 4
 -- Short so a slot refills right after its item leaves.
 local POLL_MS      = 50
 -- The tile count walks every item tile, so it runs on every COUNT_EVERY-th poll only.
 local COUNT_EVERY  = 5
-local SLOT_WIDGET  = "W_QuickSlotContainer_C"
 local TILE_WIDGET  = "W_InventoryItem_C"
 
 -- ESlateVisibility
@@ -144,15 +143,12 @@ end
 local polls = 0
 
 --- The slot index of tile when it is a quick slot tile of the inventory screen at screen_path showing its slot's recorded item, or nil.
---- A tile's BaseContainerElementRef is the container element it was created for, here the quick slot widget.
---- Neither the quick slot widget's ItemRef nor its GetContainerItems() gives the tile: the widget overrides AddItem and GetContainerItems, and the call returns an empty array to Lua.
+--- The tile is found from its quick slot widget rather than the other way: neither the widget's ItemRef nor its GetContainerItems() gives the tile. The widget overrides AddItem and GetContainerItems, and the call returns an empty array to Lua.
 --- The inventory screen of an earlier level stays alive, its quick slot tiles showing the same bound items (seen in game 2026-11-09), so a tile counts only under the current screen.
 --- A tile the slot has replaced keeps its slot and item until garbage collection, which can take a minute (seen in game 2026-11-09), so a tile counts only while it has a parent.
 local function tile_slot(tile, screen_path)
-	local element = tile.BaseContainerElementRef
-	if not (util.valid(element) and element:GetClass():GetFName():ToString() == SLOT_WIDGET) then return nil end
-	local index = element.QuickSlotIndex
-	local record = records[index]
+	local index = item_tile.quick_slot_index(tile)
+	local record = index and records[index]
 	if not (record and util.same_guid(tile.ContainerItem.ItemUID, record.uid) and util.valid(tile:GetParent())) then return nil end
 	if util.path(tile):sub(1, #screen_path + 1) ~= screen_path .. "." then return nil end
 	return index
@@ -245,16 +241,12 @@ local function clear_clicked(index, uid)
 	end
 end
 
--- The mouse event is only readable while the handler runs. The clear waits a tick, since it removes the clicked tile.
+-- The clear waits a tick, since it removes the clicked tile.
 -- The press also starts vanilla's drag detection, so a quick slot tile can no longer be dragged out.
-local function on_mouse_down(context, _, mouse_event)
-	local tile = context:get()
-	local element = tile.BaseContainerElementRef
-	if not (util.valid(element) and element:GetClass():GetFName():ToString() == SLOT_WIDGET) then return end
+local function on_click(tile, mods)
+	local index = item_tile.quick_slot_index(tile)
 	-- Shift+Click sells or drops and Ctrl+Click moves the item, both vanilla.
-	local mods = inventory.left_click_modifiers(mouse_event)
-	if not mods or mods.shift or mods.ctrl or mods.alt then return end
-	local index = element.QuickSlotIndex
+	if not index or mods.shift or mods.ctrl or mods.alt then return end
 	local uid = util.guid(tile.ContainerItem.ItemUID)
 	ExecuteInGameThreadWithDelay(1, hooks.guard(function() clear_clicked(index, uid) end))
 end
@@ -263,7 +255,7 @@ local loop_handle = nil
 
 --- Start the poll and hook the tile click. UE4SS cancels the mod's delayed actions on unload, so a hot reload needs no explicit cancel.
 function M.install()
-	hooks.install(TILE_CLASS .. ":OnMouseButtonDown", TILE_CLASS, on_mouse_down)
+	item_tile.on_click("quick slot clear", hooks.guard(on_click))
 	if loop_handle then return end
 	loop_handle = LoopInGameThreadWithDelay(POLL_MS, function()
 		util.safe("quick slot poll", poll)

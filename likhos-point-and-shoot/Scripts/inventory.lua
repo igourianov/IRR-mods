@@ -1,11 +1,10 @@
--- inventory.lua : inventory reads shared by the consumable binds, the quick slots and the inventory tiles.
+-- inventory.lua : item reads shared by the consumable binds, the quick slots and the inventory tiles.
 -- Holds no UObject between calls.
 
 local util = require("util")
 
 local M = {}
 
-local INPUT_LIB   = "/Script/Engine.Default__KismetInputLibrary"
 local USES_TAG    = "Inventory.Stats.Durability"
 
 --- The uses stat's config class. Its tag, USES_TAG, is shared with weapon and armor durability, so a definition's stats are told apart by this class.
@@ -98,16 +97,6 @@ function M.config_stat(definition, class)
 		if util.valid(config) and config:GetClass():GetFName():ToString() == class then return stat end
 	end
 	return nil
-end
-
---- For a left click on an item tile, { shift, ctrl, alt }, each whether it is held, or nil for another button. Only callable while the click handler runs, when mouse_event is readable.
---- UE4SS won't pass the click's PointerEvent as the InputEvent InputEvent_IsShiftDown takes, so the state comes from Slate's current modifier state.
---- The mask's bits are engine-internal, so the library decodes it, from a fresh struct rather than the returned one (docs/solutions/hideout-quick-sell.md).
-function M.left_click_modifiers(mouse_event)
-	local input = StaticFindObject(INPUT_LIB)
-	if input:PointerEvent_GetEffectingButton(mouse_event:get()).KeyName:ToString() ~= "LeftMouseButton" then return nil end
-	local keys = { ModifierKeysStateMask = input:GetModifierKeysState().ModifierKeysStateMask }
-	return { shift = input:ModifierKeysState_IsShiftDown(keys), ctrl = input:ModifierKeysState_IsControlDown(keys), alt = input:ModifierKeysState_IsAltDown(keys) }
 end
 
 return M
