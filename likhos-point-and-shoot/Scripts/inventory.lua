@@ -45,6 +45,35 @@ function M.items(comp, grid)
 	end
 end
 
+--- The definition's ItemIdentifier tag name.
+function M.item_id(definition)
+	return definition.ItemIdentifier.TagName:ToString()
+end
+
+--- Whether the definition's ItemIdentifier tag name starts with prefix.
+function M.has_prefix(definition, prefix)
+	return M.item_id(definition):sub(1, #prefix) == prefix
+end
+
+--- The items of comp in grid order whose ItemIdentifier starts with one of prefixes and that have uses left: `for item, uses in inventory.usable(comp, prefixes)`.
+function M.usable(comp, prefixes)
+	local next_item = M.items(comp, true)
+	return function()
+		for item in next_item do
+			local definition = item.ItemDefinition
+			local id = util.valid(definition) and M.item_id(definition) or ""
+			for _, prefix in ipairs(prefixes) do
+				if id:sub(1, #prefix) == prefix then
+					local uses = M.uses_left(item)
+					if uses > 0 then return item, uses end
+					break
+				end
+			end
+		end
+		return nil
+	end
+end
+
 --- The item's CurrentStats value under tag, or nil.
 function M.stat(item, tag)
 	local stats = item.CurrentStats

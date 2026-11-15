@@ -15,7 +15,7 @@ local player    = require("player")
 local inventory = require("inventory")
 local actions   = require("actions")
 
-local MEDICAL       = "Inventory.Items.Medical."
+local MEDICAL       = { "Inventory.Items.Medical." }
 local USE_TIME_TAG  = "Inventory.Stats.Usage Time"
 
 --- Action stat tag -> the treatment it gives. Heals over time (IVs) serve a hold only.
@@ -140,17 +140,10 @@ end
 local function collect(comp)
 	local candidates = {}
 	-- In grid order: a full tie in pick goes to the first candidate collected.
-	for item in inventory.items(comp, true) do
-		local definition = item.ItemDefinition
-		local id = util.valid(definition) and definition.ItemIdentifier.TagName:ToString() or nil
-		if id and id:sub(1, #MEDICAL) == MEDICAL then
-			local uses = inventory.uses_left(item)
-			if uses > 0 then
-				local treatments, count = item_treatments(definition)
-				if count > 0 then
-					candidates[#candidates + 1] = { item = item, time = inventory.stat(item, USE_TIME_TAG) or math.huge, uses = uses, treatments = treatments, count = count }
-				end
-			end
+	for item, uses in inventory.usable(comp, MEDICAL) do
+		local treatments, count = item_treatments(item.ItemDefinition)
+		if count > 0 then
+			candidates[#candidates + 1] = { item = item, time = inventory.stat(item, USE_TIME_TAG) or math.huge, uses = uses, treatments = treatments, count = count }
 		end
 	end
 	return candidates

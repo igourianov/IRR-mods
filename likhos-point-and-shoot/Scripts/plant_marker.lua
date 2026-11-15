@@ -8,6 +8,7 @@ local log    = require("log")
 local util   = require("util")
 local hook   = require("hook")
 local config = require("config")
+local inventory = require("inventory")
 
 local M = {}
 
@@ -63,9 +64,9 @@ local function is_objective(target)
 	if owner:GetClass():GetFName():ToString() == MISSION_BOX then return true end
 	local pickup_class = StaticFindObject(PICKUP_CLASS)
 	if not (util.valid(pickup_class) and owner:IsA(pickup_class)) then return false end
-	local inventory = owner.InventoryComponent
-	local definition = util.valid(inventory) and inventory.PickUpContainerItem.ContainerItem.ItemDefinition or nil
-	return util.valid(definition) and definition.ItemIdentifier.TagName:ToString():sub(1, #QUEST_ITEM) == QUEST_ITEM
+	local holder = owner.InventoryComponent
+	local definition = util.valid(holder) and holder.PickUpContainerItem.ContainerItem.ItemDefinition or nil
+	return util.valid(definition) and inventory.has_prefix(definition, QUEST_ITEM)
 end
 
 -- Options are per-target subobjects (probed 2026-11-11), so the color reaches this target's marker only. Vanilla tints the ring with BorderColor on every marker update.

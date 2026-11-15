@@ -14,14 +14,6 @@ local USE_CONTEXT = "U_UseInventoryItem_C"
 -- ItemIdentifier tag prefixes. Medical items sit under Inventory.Items.Medical.
 local PREFIXES = { "Inventory.Items.Provisions.Food.", "Inventory.Items.Provisions.Drinks." }
 
-local function is_provision(definition)
-	local tag = definition.ItemIdentifier.TagName:ToString()
-	for _, prefix in ipairs(PREFIXES) do
-		if tag:sub(1, #prefix) == prefix then return true end
-	end
-	return false
-end
-
 --- The definition's use context, or nil.
 local function use_context(definition)
 	local contexts = definition.ItemContexts
@@ -41,16 +33,14 @@ local function press()
 		return
 	end
 
-	for item in inventory.items(comp, true) do
+	for item in inventory.usable(comp, PREFIXES) do
 		local definition = item.ItemDefinition
-		if util.valid(definition) and is_provision(definition) and inventory.uses_left(item) > 0 then
-			local context = use_context(definition)
-			-- No item widget: the bind has none, unlike the context menu.
-			if context and context:IsValidContext(pawn, nil, item) then
-				log.debug("ConsumeFoodDrink: using %s", definition:GetFullName())
-				context:Execute(pawn, nil, item)
-				return
-			end
+		local context = use_context(definition)
+		-- No item widget: the bind has none, unlike the context menu.
+		if context and context:IsValidContext(pawn, nil, item) then
+			log.debug("ConsumeFoodDrink: using %s", definition:GetFullName())
+			context:Execute(pawn, nil, item)
+			return
 		end
 	end
 	log.debug("ConsumeFoodDrink: no usable food or drink")
