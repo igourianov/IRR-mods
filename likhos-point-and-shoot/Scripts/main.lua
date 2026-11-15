@@ -30,22 +30,26 @@ local config = require("config")
 
 --------------------------------------------------------------------------
 
-local function register_binds()
-	local count = 0
+--- The binds of config that are enabled and have a mapping. Binds take their keys from the controls menu (keymap.lua) and are polled from the tick loop, so they get a release event.
+local function active_binds()
+	local active = {}
 	for _, bind in ipairs(config.binds) do
-		if bind.enabled then
-			if input.register(bind) then count = count + 1 end
-		else
+		if not bind.enabled then
 			log.debug("bind '%s' disabled in config", bind.id)
+		elseif not bind.mapping then
+			log.error("bind '%s' has no mapping - ignoring", bind.id)
+		else
+			active[#active + 1] = bind
+			log.info("registered bind '%s' on mapping %s (polled)", bind.id, bind.mapping)
 		end
 	end
-	log.info("%d of %d bind(s) active", count, #config.binds)
-	return count
+	log.info("%d of %d bind(s) active", #active, #config.binds)
+	return active
 end
 
 local loop_handle = nil
 
-local function start_tick_loop()
+local function start_tick_loop(binds)
 	if loop_handle then return end
 
 	-- LoopAsync runs its callback on UE4SS's async thread. Calling ExecuteInGameThread from there every tick corrupted the Lua state (random crashes inside UE4SS's Lua runtime).
@@ -54,8 +58,8 @@ local function start_tick_loop()
 	-- UE4SS cancels the mod's delayed actions on unload, so a hot reload needs no explicit cancel. This build has no ModRef:OnUnload despite Types.lua declaring it.
 	loop_handle = LoopInGameThreadAfterFrames(1, function()
 		util.safe("tick", function()
-			input.poll(config.binds)
-			triggers.tick(config.binds)
+			input.poll(binds)
+			triggers.tick(binds)
 		end)
 	end)
 	log.debug("tick loop started, every frame")
@@ -90,7 +94,8 @@ local function init()
 	if config.quick_slot_refill then quick_slots.install() end
 
 	-- The tick loop runs Lua every frame. Skip it when nothing can use it.
-	if register_binds() > 0 then start_tick_loop() end
+	local binds = active_binds()
+	if #binds > 0 then start_tick_loop(binds) end
 
 	RegisterConsoleCommandHandler("kb_status", function()
 		log.info("player controller: %s", player.controller() and "acquired" or "none")

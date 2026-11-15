@@ -35,7 +35,7 @@ end
 --- Called every frame from the game thread.
 function M.tick(binds)
 	for _, bind in ipairs(binds) do
-		local state = bind.enabled and holding[bind.id]
+		local state = holding[bind.id]
 		if state then
 			actions.invoke(bind.action, "held")
 			if not state.hold and (os.clock() - state.at) * 1000 >= TAP_MS then
