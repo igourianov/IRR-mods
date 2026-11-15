@@ -16,6 +16,12 @@ local OUTER = "/Engine/Transient"
 local IMC_NAME = "IMC_LikhosKeybinds"
 local STACK_PRIORITY = -1000
 
+-- A vanilla action in the game's gameplay contexts. Its having any mapping, None included, means those contexts are in the live stack.
+-- On a raid load the controls page refreshes its vanilla rows once, when the stack first gets mappings. If the mod's context lands first, the rows refresh without their keys and show None for the rest of the raid.
+local VANILLA_ACTION = "IA_Fire"
+local RETRY_MS = 100
+local RETRY_LIMIT = 300
+
 -- In the order of their rows on the controls page.
 -- name: the key profile row name. display: the row label. description: shown in the controls page's setting info panel when the row is hovered. Plain text, the panel is a rich text block.
 M.MAPPINGS = {
@@ -86,13 +92,38 @@ function M.action(mapping)
 	return find(action_name(mapping))
 end
 
---- Build the mod's actions and context if missing, register the context with user settings and activate it.
---- Registration also restores the user's saved keys. The context is live on return. Game thread. Safe to repeat.
+-- VANILLA_ACTION's path, resolved once. A path, not the UObject, so nothing is held across a level load.
+local vanilla_path = nil
+
+---@return UObject? # nil while the action isn't loaded
+local function vanilla_action()
+	local ia = vanilla_path and StaticFindObject(vanilla_path)
+	if util.valid(ia) then return ia end
+	vanilla_path = nil
+	for _, obj in ipairs(FindAllOf("InputAction") or {}) do
+		if util.valid(obj) and obj:GetFName():ToString() == VANILLA_ACTION then
+			vanilla_path = util.path(obj)
+			return obj
+		end
+	end
+	return nil
+end
+
+local function game_contexts_live(subsystem)
+	local ia = vanilla_action()
+	if not ia then return false end
+	local keys = subsystem:QueryKeysMappedToAction(ia)
+	return type(keys) == "table" and #keys > 0
+end
+
+--- Build the mod's actions and context if missing, register the context with user settings and, once the game's contexts are live, activate it.
+--- Registration also restores the user's saved keys. Game thread. Safe to repeat.
+---@return boolean # whether the mod's context is live on return
 function M.register()
 	local settings, subsystem = user_settings()
 	if not settings then
 		log.debug("keymap: no Enhanced Input user settings yet")
-		return
+		return false
 	end
 
 	local imc = find(IMC_NAME)
@@ -115,10 +146,40 @@ function M.register()
 		log.info("keymap: registered %s with user settings", IMC_NAME)
 	end
 
+	if not game_contexts_live(subsystem) then return false end
+
 	-- The controls menu shows a row's key only if its context is active (FindInputActionKey reads QueryKeysMappedToAction).
 	-- Below every vanilla context it can't consume their keys. Adding it again only resets its priority.
 	-- A row reads its key once, when built during a level load. A deferred stack rebuild left rows built in the meantime showing None.
 	subsystem:AddMappingContext(imc, STACK_PRIORITY, { bForceImmediately = true })
+	return true
+end
+
+-- request key -> generation of its latest request
+local pending = {}
+
+--- Call register() until the mod's context is live, then on_live(). Game thread.
+--- A newer request under the same key cancels the older one's retries. The retries give up after RETRY_LIMIT, which is expected in a level without the game's gameplay contexts, like the lobby.
+function M.when_live(key, on_live)
+	local gen = (pending[key] or 0) + 1
+	pending[key] = gen
+	local tries = 0
+	local function attempt()
+		if pending[key] ~= gen then return end
+		if M.register() then
+			pending[key] = nil
+			if on_live then on_live() end
+			return
+		end
+		tries = tries + 1
+		if tries >= RETRY_LIMIT then
+			pending[key] = nil
+			log.debug("keymap: %s gave up waiting for the game's input contexts", key)
+			return
+		end
+		ExecuteInGameThreadWithDelay(RETRY_MS, function() util.safe("keymap register", attempt) end)
+	end
+	attempt()
 end
 
 ---@return UObject? # nil before Enhanced Input user settings exist

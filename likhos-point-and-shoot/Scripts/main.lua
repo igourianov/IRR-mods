@@ -63,7 +63,7 @@ local function init()
 		magnifier.reset()
 		-- This callback runs inside the PlayerController's construction. Build and register the mod's input objects a tick later.
 		-- A hot reload needs no call: the registration lives in the engine's user settings, not in Lua.
-		ExecuteInGameThreadWithDelay(1, function() util.safe("keymap register", keymap.register) end)
+		ExecuteInGameThreadWithDelay(1, function() util.safe("keymap register", keymap.when_live, "controller") end)
 	end)
 	require("controls.menu").install()
 	require("weapon.point_aim").install()

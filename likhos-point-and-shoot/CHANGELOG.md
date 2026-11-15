@@ -1,3 +1,6 @@
+# 2.0.203
+* fixed the controls menu showing every vanilla key as unbound in raid. The mod's keybinds now wait for the game's own to load
+
 # 2.0.197
 * major refactoring of mod's internals
 

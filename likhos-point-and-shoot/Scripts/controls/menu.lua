@@ -154,9 +154,6 @@ local function add_section(source_path)
 		return
 	end
 
-	-- A row reads its key once, when built. The page can build before the PlayerController acquire registers the mod's context, so it is registered here too.
-	keymap.register()
-
 	-- The section is built in one pass, so a page that has its header already has its rows.
 	if find_child(container, function(c) return util.class_name(c) == HEADER_CLASS and header_title(c) == SECTION_TITLE end) then return end
 
@@ -189,9 +186,12 @@ local function on_row_constructed(context)
 	if mapped_name(source) ~= SOURCE_MAPPING then return end
 
 	-- The hook fires while the page may still be building its rows, so the list is changed on the next timer tick.
+	-- A row reads its key once, when built, so the section waits for the mod's context to be live. The page can build before the PlayerController acquire registers it, so it is registered from here too.
 	-- The row is passed by path. It is looked up again rather than held.
 	local path = util.path(source)
-	ExecuteInGameThreadWithDelay(1, hooks.guard(function() add_section(path) end))
+	ExecuteInGameThreadWithDelay(1, hooks.guard(function()
+		keymap.when_live(path, hooks.guard(function() add_section(path) end))
+	end))
 end
 
 --- Hook the vanilla row class once it is loaded.
