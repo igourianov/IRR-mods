@@ -77,13 +77,16 @@ Use it to check weapon and attachment balance: it prints each weapon's lowest-re
 
 ### tools/clear-keybinds/clear-keybinds.ps1
 
-Use it when a mod key mapping is renamed or removed, or when a saved key mapping needs to go. It edits `EnhancedInputUserSettings.sav` directly and backs it up first. Run it without switches to list first and tell the user what it would remove. The game must be closed. Layout and recon: `docs/solutions/clear-keybinds.md`.
+Use it when a mod key mapping is renamed or removed, when a saved key mapping needs to go, or when a key, including a default one, needs clearing. It edits `EnhancedInputUserSettings.sav` directly and backs it up first. Run it without switches to list first and tell the user what it would remove. The game must be closed. Layout and recon: `docs/solutions/clear-keybinds.md`.
 
 ```powershell
-.\tools\clear-keybinds\clear-keybinds.ps1                        # list saved mappings, mark unused Likhos* ones
+.\tools\clear-keybinds\clear-keybinds.ps1                        # list saved mappings, mark unused Likhos* ones, then the game defaults not overridden
 .\tools\clear-keybinds\clear-keybinds.ps1 -Unused                # remove Likhos* mappings no .lua under likhos-*\Scripts mentions
-.\tools\clear-keybinds\clear-keybinds.ps1 -Name LikhosQuickUse   # remove by name, wildcards allowed
+.\tools\clear-keybinds\clear-keybinds.ps1 -Reset LikhosQuickUse  # delete saved mappings by name, restoring defaults, wildcards allowed
+.\tools\clear-keybinds\clear-keybinds.ps1 -Unbind IA_ToggleAttachmentMenu   # save the key None for a saved or default mapping
 ```
+
+- Default keys come from the game paks (`IM_PlayerEnhancedInputMapping`), cached in `tools\clear-keybinds\cache` (gitignored) and re-read when a game pak or the usmap changes. Needs repak, UAssetGUI and the usmap, else only saved mappings are listed.
 
 In-game console: `kb_status`.
 

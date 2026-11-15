@@ -22,5 +22,8 @@ tools/ue4ss-*/
 # Game data gunsmith.ps1 extracts, rebuilt after a game patch
 tools/gunsmith/cache/
 
+# Default keys clear-keybinds.ps1 extracts, rebuilt after a game patch
+tools/clear-keybinds/cache/
+
 # ephemeral bbcode conversion
 *.bbcode
