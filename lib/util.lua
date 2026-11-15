@@ -2,6 +2,9 @@
 local log = require("lib.log")
 local M = {}
 
+-- UE4SS's Types.lua declares no class for a struct read from a property. Such a value is valid only while the struct it was read from lives (see M.guid).
+---@alias StructValue table
+
 --- pcall wrapper that logs and swallows. Returns ok, result.
 function M.safe(context, fn, ...)
 	local ok, res = pcall(fn, ...)

@@ -15,6 +15,8 @@ local player    = require("core.player")
 local inventory = require("items.inventory")
 local actions   = require("core.actions")
 
+local M = {}
+
 local MEDICAL       = { "Inventory.Items.Medical." }
 local USE_TIME_TAG  = "Inventory.Stats.Usage Time"
 
@@ -36,7 +38,6 @@ local CONDITIONS = {
 	{ treatment = "fracture",    tag = "Character.Effects.Fractured" },
 }
 
---- The container's tag names as a set.
 local function tag_set(container)
 	local set = {}
 	local tags = container.GameplayTags
@@ -45,6 +46,8 @@ local function tag_set(container)
 end
 
 --- Treatment -> { context, tag } for the first context giving it, and the number of distinct treatments.
+---@return table<string, { context: UObject, tag: string }> by_treatment
+---@return integer count
 local function item_treatments(definition)
 	local by_treatment, count = {}, 0
 	local contexts = definition.ItemContexts
@@ -77,7 +80,9 @@ local function ranks_before(a, b)
 	return false
 end
 
---- The step's best candidate and its context, or nil.
+--- The step's best candidate and its context.
+---@return table? candidate
+---@return UObject? context
 --- step.rank(candidate, entry) gives the waste part of the rank: fastest comes before it, fewest uses left after it.
 local function pick(candidates, step, pawn)
 	local best, best_context, best_rank = nil, nil, nil
@@ -101,7 +106,8 @@ local function by_treatments(candidate)
 	return { candidate.count }
 end
 
---- The Amount of the effect behind the definition's stat under tag, or nil.
+--- The Amount of the effect behind the definition's stat under tag.
+---@return number?
 --- It is what an IV heals and what its description declares. The item's own stat value under the same tag can be higher (Saline IV: 65 against 40).
 local function effect_amount(definition, tag)
 	local stats = definition.ItemStats
@@ -125,7 +131,9 @@ local function by_coverage(missing)
 	end
 end
 
---- The pawn and the player's inventory component, or nil. bind names the bind in log lines.
+--- bind names the bind in log lines.
+---@return UObject? pawn
+---@return UObject? comp
 local function resolve(bind)
 	local pawn = player.pawn()
 	local comp = pawn and player.inventory()
@@ -163,14 +171,14 @@ local function run(bind, steps, candidates, pawn)
 	log.debug("%s: nothing to treat", bind)
 end
 
---- One unconditional step of this treatment. Game thread.
+--- Game thread.
 local function use(bind, treatment)
 	local pawn, comp = resolve(bind)
 	if not pawn then return end
 	run(bind, { { treatment = treatment, rank = by_treatments } }, collect(comp), pawn)
 end
 
---- The Smart Heal key's hold: a condition, else an IV. Game thread.
+--- Game thread.
 local function hold()
 	local pawn, comp = resolve("CombatHealHold")
 	if not pawn then return end
@@ -193,13 +201,18 @@ local function hold()
 	run("CombatHealHold", steps, collect(comp), pawn)
 end
 
--- Tap for a painkiller, hold to treat a condition or start an IV. The hold fires as the tap window passes, so its item starts without waiting for release.
-actions.define("CombatHeal", {
-	tap  = function() use("CombatHeal", "painkiller") end,
-	hold = hold,
-})
+--- Define the CombatHeal and UseAdrenaline actions.
+function M.install()
+	-- Tap for a painkiller, hold to treat a condition or start an IV. The hold fires as the tap window passes, so its item starts without waiting for release.
+	actions.define("CombatHeal", {
+		tap  = function() use("CombatHeal", "painkiller") end,
+		hold = hold,
+	})
 
--- The injector's effect replaces an active one, so a press during a boost restarts it.
-actions.define("UseAdrenaline", {
-	press = function() use("UseAdrenaline", "stamina") end,
-})
+	-- The injector's effect replaces an active one, so a press during a boost restarts it.
+	actions.define("UseAdrenaline", {
+		press = function() use("UseAdrenaline", "stamina") end,
+	})
+end
+
+return M

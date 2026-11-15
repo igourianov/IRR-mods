@@ -27,7 +27,7 @@ function M.watch(on_ready)
 	end)
 end
 
---- The local PlayerController, or nil.
+---@return UObject?
 function M.controller()
 	if util.valid(controller) then return controller end
 	local pc = FindFirstOf("PlayerController")
@@ -36,14 +36,15 @@ function M.controller()
 	return pc
 end
 
---- The local player's pawn, or nil.
+---@return UObject?
 function M.pawn()
 	local pc = M.controller()
 	local pawn = pc and pc.Pawn
 	return util.valid(pawn) and pawn or nil
 end
 
---- The player's inventory component, which holds the main containers and the quick slots, or nil outside a level with a player.
+--- The player's inventory component, which holds the main containers and the quick slots.
+---@return UObject? # nil outside a level with a player
 function M.inventory()
 	local pc = M.controller()
 	local library = StaticFindObject(INVENTORY_LIB)
@@ -52,7 +53,7 @@ function M.inventory()
 	return util.valid(comp) and comp or nil
 end
 
---- The equipped weapon's WeaponComponent, or nil.
+---@return UObject?
 function M.weapon_component()
 	local pawn = M.pawn()
 	local library = StaticFindObject(INVENTORY_LIB)
@@ -60,7 +61,7 @@ function M.weapon_component()
 	return util.component(library:GetEquippedWeapon(pawn), WEAPON_COMP)
 end
 
---- The local player's Enhanced Input subsystem, or nil.
+---@return UObject?
 function M.input_subsystem()
 	local subsystem = FindFirstOf(INPUT_SUBSYSTEM)
 	return util.valid(subsystem) and subsystem or nil

@@ -29,7 +29,6 @@ local COLLAPSED          = 1
 local HIDDEN             = 2
 local HIT_TEST_INVISIBLE = 3
 
---- Whether comp holds an item with uid.
 local function holds(comp, uid)
 	for item in inventory.items(comp) do
 		if util.same_guid(item.ItemUID, uid) then return true end
@@ -50,7 +49,8 @@ local function locate(comp, wanted)
 	return found
 end
 
---- The definition path of item when it has uses left, or nil.
+--- The definition path of item when it has uses left.
+---@return string?
 --- A spent item can sit at 0 uses: briefly before the game removes it, or for good when saved that way by an older version of this mod.
 local function usable_def(item)
 	local definition = item.ItemDefinition
@@ -74,8 +74,9 @@ local records_comp = nil
 -- The item UpdateQuickSlot takes to clear a slot.
 local EMPTY_ITEM = { ItemUID = { A = 0, B = 0, C = 0, D = 0 } }
 
---- Track the live binding of slot index, refill the slot once its recorded item has left the inventory, or clear it while it names an item outside the inventory.
---- uid is the slot's QuickSlots entry, or nil. item is that item from locate, or nil when the entry is stale.
+--- Track the live binding of slot index, refill the slot once its recorded item has left the inventory or clear it while it names an item outside the inventory.
+---@param uid table? # the slot's QuickSlots entry
+---@param item StructValue? # that ContainerItem from locate, nil when the entry is stale
 local function check_slot(comp, index, uid, item)
 	local record = records[index]
 	if item then
@@ -134,7 +135,8 @@ end
 -- Polls run since load, to pace the tile count.
 local polls = 0
 
---- The slot index of tile when it is a quick slot tile of the inventory screen at screen_path showing its slot's recorded item, or nil.
+--- The slot index of tile when it is a quick slot tile of the inventory screen at screen_path showing its slot's recorded item.
+---@return integer?
 --- The tile is found from its quick slot widget rather than the other way: neither the widget's ItemRef nor its GetContainerItems() gives the tile. The widget overrides AddItem and GetContainerItems, and the call returns an empty array to Lua.
 --- The inventory screen of an earlier level stays alive, its quick slot tiles showing the same bound items (seen in game 2026-11-09), so a tile counts only under the current screen.
 --- A tile the slot has replaced keeps its slot and item until garbage collection, which can take a minute (seen in game 2026-11-09), so a tile counts only while it has a parent.

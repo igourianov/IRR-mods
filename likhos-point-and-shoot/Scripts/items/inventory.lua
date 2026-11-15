@@ -44,12 +44,10 @@ function M.items(comp, grid)
 	end
 end
 
---- The definition's ItemIdentifier tag name.
 function M.item_id(definition)
 	return definition.ItemIdentifier.TagName:ToString()
 end
 
---- Whether the definition's ItemIdentifier tag name starts with prefix.
 function M.has_prefix(definition, prefix)
 	return M.item_id(definition):sub(1, #prefix) == prefix
 end
@@ -73,7 +71,7 @@ function M.usable(comp, prefixes)
 	end
 end
 
---- The item's CurrentStats value under tag, or nil.
+---@return number?
 function M.stat(item, tag)
 	local stats = item.CurrentStats
 	for i = 1, #stats do
@@ -88,7 +86,7 @@ function M.uses_left(item)
 	return M.stat(item, USES_TAG) or math.huge
 end
 
---- The definition's ItemStats entry whose config is of class, or nil.
+---@return StructValue? # the ItemStats entry whose config is of class
 function M.config_stat(definition, class)
 	local stats = definition.ItemStats
 	for i = 1, #stats do

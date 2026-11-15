@@ -12,7 +12,8 @@ local M = {}
 -- Device failures log once per session, so a renamed game name doesn't flood the log every press.
 local hooks = hook.new("device handling", "the action continues without it")
 
---- Call fn(...) and return its result, or nil when it fails, so a broken device lookup still leaves the rest of the caller's action working.
+--- Call fn(...), so a broken device lookup still leaves the rest of the caller's action working.
+---@return any? # fn's result, nil when it fails
 M.try = hooks.try
 
 local NVG_SUBSYSTEM = "IRRNightVision_Subsystem"
@@ -50,7 +51,8 @@ local function nvg_on()
 	return nvg:IsInfraredModeEnabledOnPlayer()
 end
 
---- The device of `kind` ("laser" or "light") that suits the player's vision, or nil when the weapon has none.
+--- The device of `kind` ("laser" or "light") that suits the player's vision.
+---@return UObject? # nil when the weapon has none
 --- Selection is by presence, not by state: an already-on device still counts as the pick.
 function M.pick(wc, kind)
 	local spec = KINDS[kind]
@@ -71,7 +73,8 @@ function M.pick(wc, kind)
 	return first.visible
 end
 
---- The device on `wc` with this full name, or nil. Lets a caller reach a device it recorded earlier without holding it.
+--- The device on `wc` with this full name. Lets a caller reach a device it recorded earlier without holding it.
+---@return UObject?
 function M.find(wc, name)
 	return util.find(wc.TacticalAttachments, function(dev) return dev:GetFullName() == name end)
 end

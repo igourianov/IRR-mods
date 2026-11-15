@@ -10,11 +10,13 @@ local player    = require("core.player")
 local inventory = require("items.inventory")
 local actions   = require("core.actions")
 
+local M = {}
+
 local USE_CONTEXT = "U_UseInventoryItem_C"
 -- ItemIdentifier tag prefixes. Medical items sit under Inventory.Items.Medical.
 local PREFIXES = { "Inventory.Items.Provisions.Food.", "Inventory.Items.Provisions.Drinks." }
 
---- The definition's use context, or nil.
+---@return UObject?
 local function use_context(definition)
 	local contexts = definition.ItemContexts
 	for i = 1, #contexts do
@@ -46,6 +48,11 @@ local function press()
 	log.debug("ConsumeFoodDrink: no usable food or drink")
 end
 
-actions.define("ConsumeFoodDrink", {
-	press = press,
-})
+--- Define the ConsumeFoodDrink action.
+function M.install()
+	actions.define("ConsumeFoodDrink", {
+		press = press,
+	})
+end
+
+return M

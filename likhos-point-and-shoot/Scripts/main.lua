@@ -10,25 +10,8 @@ local input    = require("core.input")
 local triggers = require("core.triggers")
 local actions  = require("core.actions")
 local keymap   = require("controls.keymap")
-local menu     = require("controls.menu")
 local magnifier = require("weapon.magnifier")
-local instant_interact = require("world.instant_interact")
-local low_ready = require("weapon.low_ready")
-local objective_marker = require("world.objective_marker")
-local whole_uses = require("items.whole_uses")
-local quick_sell = require("items.quick_sell")
-local quick_slots = require("items.quick_slots")
-
--- Bind features define their actions (core/actions.lua) when loaded.
-require("weapon.point_aim")
-require("weapon.flashlight")
-require("weapon.hold_breath")
-require("items.food_drink")
-require("items.smart_heal")
-
-local config = require("config")
-
---------------------------------------------------------------------------
+local config   = require("config")
 
 --- The binds of config that are enabled and have a mapping. Binds take their keys from the controls menu (controls/keymap.lua) and are polled from the tick loop, so they get a release event.
 local function active_binds()
@@ -65,8 +48,6 @@ local function start_tick_loop(binds)
 	log.debug("tick loop started, every frame")
 end
 
---------------------------------------------------------------------------
-
 local function init()
 	log.setup("PointAndShoot", config.log_level)
 	log.info("loading")
@@ -84,16 +65,20 @@ local function init()
 		-- A hot reload needs no call: the registration lives in the engine's user settings, not in Lua.
 		ExecuteInGameThreadWithDelay(1, function() util.safe("keymap register", keymap.register) end)
 	end)
-	menu.install()
+	require("controls.menu").install()
+	require("weapon.point_aim").install()
+	require("weapon.flashlight").install()
+	require("weapon.hold_breath").install()
+	require("items.food_drink").install()
+	require("items.smart_heal").install()
+	require("world.instant_interact").install()
 	if config.magnifier_zoom then magnifier.install() end
-	instant_interact.install()
-	if config.low_ready_default then low_ready.install() end
-	if config.plant_marker then objective_marker.install() end
-	if config.whole_uses then whole_uses.install() end
-	if config.quick_sell then quick_sell.install() end
-	if config.quick_slot_refill then quick_slots.install() end
+	if config.low_ready_default then require("weapon.low_ready").install() end
+	if config.plant_marker then require("world.objective_marker").install() end
+	if config.whole_uses then require("items.whole_uses").install() end
+	if config.quick_sell then require("items.quick_sell").install() end
+	if config.quick_slot_refill then require("items.quick_slots").install() end
 
-	-- The tick loop runs Lua every frame. Skip it when nothing can use it.
 	local binds = active_binds()
 	if #binds > 0 then start_tick_loop(binds) end
 

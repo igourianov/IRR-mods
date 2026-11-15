@@ -24,7 +24,7 @@ local function allowed(bind, pc)
 	return shown ~= true
 end
 
---- Turn key state changes of binds into press and release events. Game thread, every tick.
+--- Game thread, every tick.
 --- Keys are read every tick, so a rebind in the controls menu applies at once. No key mapped: never down.
 function M.poll(binds)
 	local pc = player.controller()

@@ -7,6 +7,8 @@ local util    = require("lib.util")
 local player  = require("core.player")
 local actions = require("core.actions")
 
+local M = {}
+
 local IA_HOLD_BREATH = "/Game/Blueprints/InputSystem/InputActions/IA_HoldBreath.IA_HoldBreath"
 local SGA_HOLD_BREATH = "/Game/Blueprints/SimpleGameplayAbilitySystem/Abilities/SGA_HoldBreath.SGA_HoldBreath_C"
 
@@ -24,6 +26,11 @@ local function hold_release()
 	player.inject_press(IA_HOLD_BREATH)
 end
 
-actions.define("HoldBreath", {
-	hold_release = hold_release,
-})
+--- Define the HoldBreath action.
+function M.install()
+	actions.define("HoldBreath", {
+		hold_release = hold_release,
+	})
+end
+
+return M

@@ -57,7 +57,10 @@ local function zero_holds(target)
 	override = { target = target:GetFullName(), options = options }
 end
 
---- The local PlayerController, its pawn's ability component and the SGA_Interact class, or nil while any is missing.
+--- The local PlayerController, its pawn's ability component and the SGA_Interact class.
+---@return UObject? pc # nil, with the other two, while any is missing
+---@return UObject? comp
+---@return UObject? sga_class
 local function interact_parts()
 	local pc = player.controller()
 	local sga_class = StaticFindObject(SGA_INTERACT)
@@ -122,14 +125,13 @@ local function on_finish(_, target)
 	if comp then release_ability(comp, sga_class) end
 end
 
-actions.define("QuickUse", {
-	press = hooks.guard(press),
-	-- Drop the override without writing. Level load takes its options with it.
-	reset = function() override = nil end,
-})
-
---- Hook the interaction end, which puts the zeroed holds back. The class is native.
+--- Define the QuickUse action and hook the interaction end, which puts the zeroed holds back. The class is native.
 function M.install()
+	actions.define("QuickUse", {
+		press = hooks.guard(press),
+		-- Drop the override without writing. Level load takes its options with it.
+		reset = function() override = nil end,
+	})
 	hooks.install(FINISH_FN, nil, on_finish)
 end
 

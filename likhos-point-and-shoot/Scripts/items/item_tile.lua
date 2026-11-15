@@ -17,7 +17,8 @@ local SLOT_WIDGET = "W_QuickSlotContainer_C"
 -- name -> handler(tile, mods), as passed to M.on_click.
 local handlers = {}
 
---- For a left click on an item tile, { shift, ctrl, alt }, each whether it is held, or nil for another button. Only callable while the click handler runs, when mouse_event is readable.
+--- For a left click on an item tile, whether each modifier key is held. Only callable while the click handler runs, when mouse_event is readable.
+---@return { shift: boolean, ctrl: boolean, alt: boolean }? # nil for another button
 --- UE4SS won't pass the click's PointerEvent as the InputEvent InputEvent_IsShiftDown takes, so the state comes from Slate's current modifier state.
 --- The mask's bits are engine-internal, so the library decodes it, from a fresh struct rather than the returned one (docs/solutions/hideout-quick-sell.md).
 local function left_click_modifiers(mouse_event)
@@ -42,7 +43,7 @@ function M.on_click(name, handler)
 	hooks.install(M.CLASS .. ":OnMouseButtonDown", M.CLASS, on_mouse_down)
 end
 
---- The quick slot index of tile when it sits in a quick slot, or nil.
+---@return integer? # nil when tile is not in a quick slot
 --- A tile's BaseContainerElementRef is the container element it was created for, here the quick slot widget.
 function M.quick_slot_index(tile)
 	local element = tile.BaseContainerElementRef

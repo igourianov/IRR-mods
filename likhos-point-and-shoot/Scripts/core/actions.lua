@@ -19,7 +19,6 @@ end
 --- Actions found undefined this session, so the error logs once rather than every tick.
 local disabled = {}
 
---- Invoke one phase of an action.
 --- MUST be called from the game thread (see core/input.lua).
 function M.invoke(name, phase)
 	if disabled[name] then return false end

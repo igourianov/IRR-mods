@@ -81,7 +81,7 @@ local function user_settings()
 	return settings, subsystem
 end
 
---- The mod's InputAction for a mapping, or nil before register() has built it.
+---@return UObject? # nil before register() has built it
 function M.action(mapping)
 	return find(action_name(mapping))
 end
@@ -121,7 +121,7 @@ function M.register()
 	subsystem:AddMappingContext(imc, STACK_PRIORITY, { bForceImmediately = true })
 end
 
---- The active key profile, or nil before Enhanced Input user settings exist.
+---@return UObject? # nil before Enhanced Input user settings exist
 --- Looked up per call: the user settings belong to the local player.
 function M.profile()
 	local settings = user_settings()
@@ -155,7 +155,6 @@ function M.keys(mapping, profile)
 	return out
 end
 
---- Human-readable keys for kb_status.
 function M.describe(mapping)
 	local names = {}
 	for _, k in ipairs(M.keys(mapping, M.profile())) do table.insert(names, k.KeyName:ToString()) end

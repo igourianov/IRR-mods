@@ -9,6 +9,8 @@ local player  = require("core.player")
 local devices = require("weapon.devices")
 local actions = require("core.actions")
 
+local M = {}
+
 -- IA_Aim has a Released trigger, so aim holds only while its one-frame press repeats every tick.
 local IA_AIM = "/Game/Blueprints/InputSystem/InputActions/IA_Aim.IA_Aim"
 
@@ -18,7 +20,9 @@ local IA_AIM = "/Game/Blueprints/InputSystem/InputActions/IA_Aim.IA_Aim"
 --   device  : full name of the laser this hold turned on, nil when it turned none on
 local hold = nil
 
---- Aiming subobject and the equipped weapon's WeaponComponent, or nil.
+--- Aiming subobject and the equipped weapon's WeaponComponent.
+---@return UObject? ads # nil, with wc, when either is missing
+---@return UObject? wc
 local function resolve_aim_objects()
 	local pawn = player.pawn()
 	if not pawn then return nil end
@@ -78,9 +82,14 @@ local function release()
 	if state.device then devices.try(devices.off, wc, state.device) end
 end
 
-actions.define("PointAim", {
-	press   = press,
-	held    = held,
-	release = release,
-	reset   = function() hold = nil end,
-})
+--- Define the PointAim action.
+function M.install()
+	actions.define("PointAim", {
+		press   = press,
+		held    = held,
+		release = release,
+		reset   = function() hold = nil end,
+	})
+end
+
+return M

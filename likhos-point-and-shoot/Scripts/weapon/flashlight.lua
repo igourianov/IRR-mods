@@ -7,6 +7,8 @@ local player  = require("core.player")
 local devices = require("weapon.devices")
 local actions = require("core.actions")
 
+local M = {}
+
 -- Set by a press, read by the release of a hold. Plain values only, no UObjects.
 --   device : full name of the light the press turned on, nil when the press turned one off or found none
 --   weapon : full name of the weapon component that light is on
@@ -51,8 +53,13 @@ local function hold_release()
 	devices.try(devices.off, wc, state.device)
 end
 
-actions.define("Flashlight", {
-	press        = press,
-	hold_release = hold_release,
-	reset        = function() pressed = nil end,
-})
+--- Define the Flashlight action.
+function M.install()
+	actions.define("Flashlight", {
+		press        = press,
+		hold_release = hold_release,
+		reset        = function() pressed = nil end,
+	})
+end
+
+return M

@@ -104,7 +104,6 @@ local function scan()
 	end
 end
 
---- Decorate objective targets as they spawn, and the ones already there for a hot reload.
 function M.install()
 	tint = parse_color(config.plant_marker_color)
 	if not tint then

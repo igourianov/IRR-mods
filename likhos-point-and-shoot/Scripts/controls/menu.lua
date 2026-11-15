@@ -29,17 +29,19 @@ local KEY_MAPPED     = "PlayerMappedName_60_D667E47C4761808F2AAD738F1F328FEA"
 local SOURCE_MAPPING = "IA_PointShooting"
 local SECTION_TITLE  = "Likho's Actions"
 
+---@return string?
 local function mapped_name(row)
 	local ok, name = pcall(function() return row.Keybindings[1][KEY_MAPPED]:ToString() end)
 	return ok and name or nil
 end
 
+---@return string?
 local function header_title(header)
 	local ok, title = pcall(function() return header.SectionNameText:GetText():ToString() end)
 	return ok and title or nil
 end
 
---- The first child of container that matches, or nil.
+---@return UObject?
 local function find_child(container, matches)
 	for i = 0, container:GetChildrenCount() - 1 do
 		local child = container:GetChildAt(i)
@@ -73,7 +75,8 @@ local function create_like(source)
 	return lib:Create(source:GetOuter():GetOuter(), source:GetClass(), source:GetOwningPlayer())
 end
 
---- Clone the vanilla row source into a row for a keymap.MAPPINGS entry, not yet on the page. Returns the new row, or nil.
+--- Clone the vanilla row source into a row for a keymap.MAPPINGS entry, not yet on the page.
+---@return UObject?
 local function create_row(source, mapping)
 	local ia = keymap.action(mapping.name)
 	if not ia then
@@ -106,7 +109,8 @@ local function create_row(source, mapping)
 	return row
 end
 
---- The section's widgets in page order, each with the slot layout it takes, built before the page is touched so a failure leaves it unchanged. Nil if the page has no header and spacer to clone.
+--- The section's widgets in page order, each with the slot layout it takes, built before the page is touched so a failure leaves it unchanged.
+---@return { widget: UObject, layout: table, header: boolean?, row: boolean? }[]? # nil if the page has no header and spacer to clone
 local function create_section(container, source)
 	-- The page's first header has no spacer above it. The first spacer separates our section from it.
 	local header_src = find_child(container, function(c) return util.class_name(c) == HEADER_CLASS end)
