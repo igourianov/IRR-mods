@@ -5,19 +5,11 @@ local util = require("util")
 
 local M = {}
 
-local LIBRARY_CDO = "/Script/Test_C.Default__InventoryFunctionLibrary"
 local INPUT_LIB   = "/Script/Engine.Default__KismetInputLibrary"
 local USES_TAG    = "Inventory.Stats.Durability"
 
 --- The uses stat's config class. Its tag, USES_TAG, is shared with weapon and armor durability, so a definition's stats are told apart by this class.
 M.USES_CONFIG = "U_Content_C"
-
---- The inventory component of pc, which holds the main containers and the quick slots, or nil outside a level with a player.
-function M.player_component(pc)
-	local library = StaticFindObject(LIBRARY_CDO)
-	local comp = util.valid(pc) and util.valid(library) and library:GetPlayerInventoryComponent(pc) or nil
-	return util.valid(comp) and comp or nil
-end
 
 --- The main container's items sorted by sub-grid ascending, then by slot descending.
 --- ContainerItems is not kept in grid order, so walking it as is picks an item seemingly at random.

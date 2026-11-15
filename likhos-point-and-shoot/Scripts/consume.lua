@@ -6,6 +6,7 @@
 
 local log       = require("log")
 local util      = require("util")
+local player    = require("player")
 local inventory = require("inventory")
 
 local M = {}
@@ -34,9 +35,8 @@ end
 
 --- The Consume Food/Drink key's press. Game thread.
 function M.press()
-	local pc = FindFirstOf("PlayerController")
-	local pawn = util.valid(pc) and pc.Pawn or nil
-	local comp = util.valid(pawn) and inventory.player_component(pc) or nil
+	local pawn = player.pawn()
+	local comp = pawn and player.inventory()
 	if not comp then
 		log.debug("ConsumeFoodDrink: no pawn or inventory component")
 		return

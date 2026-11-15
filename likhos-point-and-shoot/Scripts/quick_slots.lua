@@ -9,6 +9,7 @@
 local log  = require("log")
 local util = require("util")
 local hook = require("hook")
+local player = require("player")
 local inventory = require("inventory")
 
 local M = {}
@@ -81,11 +82,6 @@ local records_comp = nil
 
 -- The item UpdateQuickSlot takes to clear a slot.
 local EMPTY_ITEM = { ItemUID = { A = 0, B = 0, C = 0, D = 0 } }
-
---- The player's inventory component, which holds the quick slots, or nil outside a level with a player.
-local function player_inventory()
-	return inventory.player_component(FindFirstOf("PlayerController"))
-end
 
 --- Track the live binding of slot index, refill the slot once its recorded item has left the inventory, or clear it while it names an item outside the inventory.
 --- uid is the slot's QuickSlots entry, or nil. item is that item from locate, or nil when the entry is stale.
@@ -187,7 +183,7 @@ local function count_matching(comp, slots)
 end
 
 local function poll()
-	local comp = player_inventory()
+	local comp = player.inventory()
 	local path = comp and util.path(comp) or nil
 	if path ~= records_comp then
 		records, records_comp = {}, path
@@ -236,7 +232,7 @@ end
 --- Clear slot index of the player's inventory while it still names uid.
 --- The poll then finds the slot empty with its item still in the inventory, and leaves it empty.
 local function clear_clicked(index, uid)
-	local comp = player_inventory()
+	local comp = player.inventory()
 	if not comp then return end
 	local slots = comp.QuickSlots
 	for i = 1, #slots do

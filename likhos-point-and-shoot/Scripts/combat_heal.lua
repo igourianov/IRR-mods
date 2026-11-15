@@ -11,6 +11,7 @@
 
 local log       = require("log")
 local util      = require("util")
+local player    = require("player")
 local inventory = require("inventory")
 
 local M = {}
@@ -127,9 +128,8 @@ end
 
 --- The pawn and the player's inventory component, or nil. bind names the bind in log lines.
 local function resolve(bind)
-	local pc = FindFirstOf("PlayerController")
-	local pawn = util.valid(pc) and pc.Pawn or nil
-	local comp = util.valid(pawn) and inventory.player_component(pc) or nil
+	local pawn = player.pawn()
+	local comp = pawn and player.inventory()
 	if not comp then
 		log.debug("%s: no pawn or inventory component", bind)
 		return nil

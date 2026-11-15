@@ -7,6 +7,7 @@
 
 local log     = require("log")
 local util    = require("util")
+local player  = require("player")
 local devices = require("devices")
 local quick_use = require("quick_use")
 local consume = require("consume")
@@ -24,28 +25,6 @@ local TAP_MS = config.tap_ms or 250
 
 --- Device failures log once per session, so a renamed game name doesn't flood the log every press.
 local device_error_logged = false
-
---- The local player's pawn, or nil.
-local function resolve_pawn()
-	local pc = FindFirstOf("PlayerController")
-	if not util.valid(pc) then return nil end
-	local pawn = pc.Pawn
-	if util.valid(pawn) then return pawn end
-	return nil
-end
-
---- The equipped weapon's WeaponComponent, or nil.
-local function resolve_weapon_component(pawn)
-	local inv_lib = StaticFindObject("/Script/Test_C.Default__InventoryFunctionLibrary")
-	if not util.valid(inv_lib) then return nil end
-	return util.component(inv_lib:GetEquippedWeapon(pawn), "/Script/Test_C.WeaponComponent")
-end
-
---- The local player's equipped weapon's WeaponComponent, or nil.
-function M.equipped_weapon_component()
-	local pawn = resolve_pawn()
-	return pawn and resolve_weapon_component(pawn)
-end
 
 --- Call a devices.lua function without ever failing the caller, so a broken device lookup still leaves the rest of the action working.
 local function try_devices(fn, ...)
@@ -69,17 +48,6 @@ local function elapsed_ms(at)
 	return (os.clock() - at) * 1000
 end
 
-local PRESS_VALUE = { X = 1.0, Y = 0.0, Z = 0.0 }
-
---- A one-frame press of the input action at `path`, as if its key went down for one frame.
---- Continuous injection can't be used: its FInputActionValue parameter can't be built from UE4SS Lua.
-function M.inject_press(path)
-	local subsystem = FindFirstOf("EnhancedInputLocalPlayerSubsystem")
-	local ia = StaticFindObject(path)
-	if not (util.valid(subsystem) and util.valid(ia)) then return end
-	subsystem:InjectInputVectorForAction(ia, PRESS_VALUE, {}, {})
-end
-
 --------------------------------------------------------------------------
 -- PointAim: hold to aim straight into point sight (docs/solutions/point-aim-bind.md)
 --------------------------------------------------------------------------
@@ -95,9 +63,9 @@ local point_aim = nil
 
 --- Aiming subobject and the equipped weapon's WeaponComponent, or nil.
 local function resolve_aim_objects()
-	local pawn = resolve_pawn()
+	local pawn = player.pawn()
 	if not pawn then return nil end
-	local wc = resolve_weapon_component(pawn)
+	local wc = player.weapon_component()
 	if not wc then return nil end
 
 	local core_lib = StaticFindObject("/Script/Test_C.Default__FirstPersonCoreFunctionLibrary")
@@ -129,11 +97,11 @@ local function point_aim_press()
 	local flipped = not wc.bIsPointSight
 	if flipped then ads:TriggerPointSight() end
 	point_aim = { flipped = flipped, weapon = wc:GetFullName(), device = try_devices(laser_on, wc) }
-	M.inject_press(IA_AIM)
+	player.inject_press(IA_AIM)
 end
 
 local function point_aim_held()
-	if point_aim then M.inject_press(IA_AIM) end
+	if point_aim then player.inject_press(IA_AIM) end
 end
 
 local function point_aim_release()
@@ -178,7 +146,7 @@ end
 
 local function flashlight_press()
 	flashlight = nil
-	local wc = M.equipped_weapon_component()
+	local wc = player.weapon_component()
 	if not wc then
 		log.debug("Flashlight: no pawn or equipped weapon right now")
 		return
@@ -193,7 +161,7 @@ local function flashlight_release()
 	if not (state and state.device) then return end
 	if elapsed_ms(state.at) < TAP_MS then return end
 
-	local wc = M.equipped_weapon_component()
+	local wc = player.weapon_component()
 	if not wc then return end
 	if wc:GetFullName() ~= state.weapon then
 		log.debug("Flashlight: weapon changed during hold, light left on")
@@ -263,10 +231,10 @@ local function hold_breath_release()
 	local at = hold_breath_at
 	hold_breath_at = nil
 	if not at or elapsed_ms(at) < TAP_MS then return end
-	local pawn = resolve_pawn()
+	local pawn = player.pawn()
 	-- Ended by itself (stamina, an interrupting ability), toggled off by the press or never started: the injected press would toggle a new one on.
 	if not (pawn and hold_breath_active(pawn)) then return end
-	M.inject_press(IA_HOLD_BREATH)
+	player.inject_press(IA_HOLD_BREATH)
 end
 
 --------------------------------------------------------------------------

@@ -4,9 +4,10 @@
 -- The key starts the same ability F does, with the target's hold settings zeroed for that one interaction, so F keeps its hold.
 -- Holds no UObject between calls.
 
-local log  = require("log")
-local util = require("util")
-local hook = require("hook")
+local log    = require("log")
+local util   = require("util")
+local hook   = require("hook")
+local player = require("player")
 
 local M = {}
 
@@ -57,10 +58,10 @@ end
 
 --- The local PlayerController, its pawn's ability component and the SGA_Interact class, or nil while any is missing.
 local function interact_parts()
-	local pc = FindFirstOf("PlayerController")
+	local pc = player.controller()
 	local sga_class = StaticFindObject(SGA_INTERACT)
-	if not (util.valid(pc) and util.valid(sga_class)) then return nil end
-	local comp = util.component(pc.Pawn, ABILITY_COMP)
+	if not (pc and util.valid(sga_class)) then return nil end
+	local comp = util.component(player.pawn(), ABILITY_COMP)
 	if not comp then return nil end
 	return pc, comp, sga_class
 end

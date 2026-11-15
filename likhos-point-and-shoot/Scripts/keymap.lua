@@ -5,8 +5,9 @@
 -- The controls menu row (menu.lua) rebinds a key and the game saves it. input.lua reads the key and polls it.
 -- See docs/solutions/point-aim-keybind-menu.md.
 
-local log  = require("log")
-local util = require("util")
+local log    = require("log")
+local util   = require("util")
+local player = require("player")
 
 local M = {}
 
@@ -73,8 +74,8 @@ local function construct(class_path, outer, name)
 end
 
 local function user_settings()
-	local subsystem = FindFirstOf("EnhancedInputLocalPlayerSubsystem")
-	if not util.valid(subsystem) then return nil end
+	local subsystem = player.input_subsystem()
+	if not subsystem then return nil end
 	local settings = subsystem:GetUserSettings()
 	if not util.valid(settings) then return nil end
 	return settings, subsystem

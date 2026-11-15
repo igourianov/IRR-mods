@@ -6,7 +6,7 @@
 
 local log     = require("log")
 local util    = require("util")
-local actions = require("actions")
+local player  = require("player")
 local hook    = require("hook")
 
 local M = {}
@@ -72,7 +72,7 @@ local function on_post(context)
 	-- A moved index means the notch zoomed. The magnifier flips only at the end stop.
 	if called:GetFullName() ~= before.sight or called.MagnificationIndex ~= before.index then return end
 
-	local wc = actions.equipped_weapon_component()
+	local wc = player.weapon_component()
 	if not wc then return end
 	local current = wc:GetCurrentSightComponent()
 	if not (util.valid(current) and current:GetFullName() == before.sight) then return end
@@ -92,7 +92,7 @@ local function on_post(context)
 	local target = before.increment and UNFOLDED or FOLDED
 	if mode == target then return end
 
-	actions.inject_press(IA_TOGGLE_MAGNIFIER)
+	player.inject_press(IA_TOGGLE_MAGNIFIER)
 	pending = { sight = name, target = target, at = os.clock() }
 	log.debug("magnifier: flipping %s to %s", name, target)
 end

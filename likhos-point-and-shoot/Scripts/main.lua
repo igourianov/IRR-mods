@@ -5,6 +5,7 @@
 
 local log      = require("log")
 local util     = require("util")
+local player   = require("player")
 local input    = require("input")
 local triggers = require("triggers")
 local actions  = require("actions")
@@ -64,7 +65,8 @@ local function init()
 		return
 	end
 
-	input.watch_player_controller(function()
+	player.watch(function()
+		triggers.reset()
 		actions.reset()
 		magnifier.reset()
 		-- This callback runs inside the PlayerController's construction. Build and register the mod's input objects a tick later.
@@ -84,7 +86,7 @@ local function init()
 	if register_binds() > 0 then start_tick_loop() end
 
 	RegisterConsoleCommandHandler("kb_status", function()
-		log.info("player controller: %s", input.get_player_controller() and "acquired" or "none")
+		log.info("player controller: %s", player.controller() and "acquired" or "none")
 		for _, b in ipairs(config.binds) do
 			log.info("  %-28s %-12s %s", b.id, keymap.describe(b.mapping), b.enabled and "on" or "off")
 		end

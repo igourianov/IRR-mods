@@ -1,7 +1,7 @@
--- input.lua : PlayerController lifecycle and mapped key polling.
+-- input.lua : mapped key polling.
 
 local log      = require("log")
-local util     = require("util")
+local player   = require("player")
 local triggers = require("triggers")
 local context  = require("context")
 local keymap   = require("keymap")
@@ -10,38 +10,6 @@ local M = {}
 
 local registered = {}   -- bind.id -> true
 local key_down = {}     -- bind.id -> key state seen on the previous poll
-local player_controller = nil
-
---------------------------------------------------------------------------
--- PlayerController lifecycle
---------------------------------------------------------------------------
-
---- The PlayerController survives respawns and the pawn does not.
-function M.watch_player_controller(on_ready)
-	-- The callback receives the UObject itself, not a RemoteUnrealParam. No :get().
-	-- It also fires for each Blueprint subclass's class default object as the class loads.
-	-- Those are templates, not live controllers, so skip them by name.
-	NotifyOnNewObject("/Script/Engine.PlayerController", function(pc)
-		if not util.valid(pc) then return end
-		if pc:GetFName():ToString():find("^Default__") then return end
-
-		player_controller = pc
-		triggers.reset()
-
-		log.info("PlayerController acquired: %s", pc:GetFullName())
-		if on_ready then util.safe("on_ready", on_ready, pc) end
-	end)
-end
-
-function M.get_player_controller()
-	if util.valid(player_controller) then return player_controller end
-	local pc = FindFirstOf("PlayerController")
-	if util.valid(pc) then
-		player_controller = pc
-		return pc
-	end
-	return nil
-end
 
 --------------------------------------------------------------------------
 -- Bind registration
@@ -60,7 +28,7 @@ end
 
 --- Turn key state changes into press and release events. Game thread, every tick.
 function M.poll(binds)
-	local pc = M.get_player_controller()
+	local pc = player.controller()
 	if not pc then return end
 
 	local profile = keymap.profile()
