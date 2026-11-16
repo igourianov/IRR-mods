@@ -15,9 +15,10 @@ local hooks = hook.new("tile counts", "tile counts keep decimals")
 
 local HOOK_FN = item_tile.CLASS .. ":K2_UpdateItemCount"
 
--- U_Battery_C is the USB hacking devices' use count, shown as the remaining percentage.
+-- U_Battery_C is the USB hacking devices' use count, U_Durability_C the condition of weapons and some gadgets.
+-- Both start at a maximum of 100, so the value itself is shown with %.
+-- A repair lowers a weapon's maximum, so a ratio to the drawn maximum would hide that wear behind 100%.
 local BATTERY_CONFIG = "U_Battery_C"
--- U_Durability_C is the condition of weapons and some gadgets, shown as a percentage too.
 local CONDITION_CONFIG = "U_Durability_C"
 
 local function uses_format(tile)
@@ -48,26 +49,23 @@ local function round_numbers(block)
 	block:SetText(FText(whole))
 end
 
--- Finds no number in a tile it already rewrote, as the maximum text is then empty, so a repeat call is a no-op.
+-- Finds no number in the maximum text of a tile it already rewrote, as that is then empty, so a repeat single use rewrite is a no-op.
 local function block_number(block)
 	if not util.valid(block) then return nil end
 	local number = block:GetText():ToString():match("%d+[%.,]?%d*")
 	return number and to_number(number)
 end
 
-local function show_percent(tile)
-	local remaining = block_number(tile.ItemCapacity)
-	local max = block_number(tile.ItemMaxCapacity)
-	if not remaining or not max or max <= 0 then return end
-	tile.ItemCapacity:SetText(FText(round(remaining / max * 100) .. "%"))
-	tile.ItemMaxCapacity:SetText(FText(""))
-end
-
 local function rewrite_tile(path, format)
 	local tile = StaticFindObject(path)
 	if not util.valid(tile) then return end
 	if format == "percent" then
-		show_percent(tile)
+		-- A repeat call reads back the whole number it wrote, so writes the same text.
+		local value = block_number(tile.ItemCapacity)
+		if value then
+			tile.ItemCapacity:SetText(FText(round(value) .. "%"))
+			tile.ItemMaxCapacity:SetText(FText(""))
+		end
 	elseif block_number(tile.ItemMaxCapacity) == 1 then
 		-- A single use item still unused shows no count. A spent one shows ~ instead of 0/1.
 		tile.ItemCapacity:SetText(FText((block_number(tile.ItemCapacity) or 0) > 0 and "" or "~"))
