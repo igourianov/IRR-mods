@@ -17,12 +17,16 @@ local HOOK_FN = item_tile.CLASS .. ":K2_UpdateItemCount"
 
 -- U_Battery_C is the USB hacking devices' use count, shown as the remaining percentage.
 local BATTERY_CONFIG = "U_Battery_C"
+-- U_Durability_C is the condition of weapons and some gadgets, shown as a percentage too.
+local CONDITION_CONFIG = "U_Durability_C"
 
 local function uses_format(tile)
 	local definition = tile.ContainerItem.ItemDefinition
 	if not util.valid(definition) then return nil end
 	if inventory.config_stat(definition, inventory.USES_CONFIG) then return "whole" end
 	if inventory.config_stat(definition, BATTERY_CONFIG) then return "percent" end
+	-- A tile in an equipment slot shows condition as a bar, left vanilla.
+	if not tile.bEquipped and inventory.config_stat(definition, CONDITION_CONFIG) then return "percent" end
 	return nil
 end
 

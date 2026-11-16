@@ -37,6 +37,7 @@ return {
 
 	-- Items that count uses, like medical items and keys, show them as whole numbers on inventory tiles.
 	-- Single use items show no count until used. USB hacking devices show their remaining uses as a percentage.
+	-- Weapons and other items with condition show it as a percentage in the inventory. Equipment slots keep the vanilla bar.
 	-- Set false for the vanilla decimals.
 	whole_uses = true,
 

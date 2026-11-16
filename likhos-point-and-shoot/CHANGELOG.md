@@ -1,5 +1,6 @@
 # Unreleased
 * increased mod stability on UE4SS hot reload (less CTD)
+* weapon condition shows as a percentage in the inventory, e.g. `95%` instead of `95.3 / 100.0`. Equipment slots keep the vanilla bar
 
 # 2.0.203
 * fixed the controls menu showing every vanilla key as unbound in raid. The mod's keybinds now wait for the game's own to load

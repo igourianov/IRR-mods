@@ -16,7 +16,7 @@ Tactical shortcuts, control tweaks and inventory management improvements.
 - **Magnifier binding:** mouse scroll folds and unfolds the EOTech+Magnifier combo, the same way it zooms an LPVO.
 - **Low ready by default:** the gun lowers as soon as an action ends.
 - **Objective markers:** bright, longer range markers on quest objectives.
-- **Item use counts:** less visual clutter in the inventory.
+- **Item use counts and condition:** less visual clutter in the inventory. Weapon and USB hack device condition shows as a percentage.
 
 ## Point Shooting
 
