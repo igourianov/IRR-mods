@@ -1,7 +1,7 @@
--- world/objective_marker.lua : the markers of quest objectives (placement spots, mission phones, quest item pickups and mission boxes) have a ring in a color that stands out and show from farther away.
--- Design: docs/solutions/plant-spot-marker.md, reworked for quest pickups and range by docs/solutions/objective-marker-range.md.
+-- world/objective_marker.lua : the markers of quest objectives (placement spots, mission phones, quest item pickups and mission boxes) have a ring in a color that stands out and show from farther away. Every interaction marker shows through walls.
+-- Design: docs/solutions/plant-spot-marker.md, reworked for quest pickups and range by docs/solutions/objective-marker-range.md, through walls by docs/solutions/objective-marker-walls.md.
 --
--- Every game name here comes from those two docs.
+-- Every game name here comes from those docs.
 -- Holds no UObject between calls. Targets are passed by path.
 
 local log    = require("lib.log")
@@ -16,6 +16,10 @@ local hooks = hook.new("objective marker", "objective markers stay vanilla")
 
 local TARGET_CLASS = "/Script/Test_C.InteractionTarget"
 local PICKUP_CLASS = "/Script/Test_C.PickUpActor"
+local MANAGER_CLASS = "/Script/Test_C.InteractionManager"
+
+-- Occlusion tolerance in cm, far beyond any marker radius.
+local SEE_THROUGH_CM = 100
 
 -- The gear icon of placement spots and mission phones.
 local PLANT_ICON  = "T_IRR_Interaction_ItemInteractionIcon"
@@ -90,6 +94,16 @@ local function decorate(path)
 	log.debug("objective marker: decorated %s, outer %.0f", path, target.OuterInteractionRadius)
 end
 
+-- The manager traces to each target and collapses its marker when the hit lands farther than TolerateHitDistance from it (vanilla 40 cm).
+-- Far past any marker radius, no wall hides a marker. The radii still decide when a marker shows and how close F reaches.
+-- One value per manager, so it applies to every marker, not objectives only.
+local function see_through_walls(path)
+	local manager = StaticFindObject(path)
+	if not util.valid(manager) then return end
+	manager.TolerateHitDistance = SEE_THROUGH_CM
+	log.debug("objective marker: %s sees through walls", path)
+end
+
 local function scan()
 	-- FindAllOf may match the exact class only, so both the native class and its Blueprint subclass are listed.
 	local seen = {}
@@ -99,6 +113,15 @@ local function scan()
 			if not seen[path] then
 				seen[path] = true
 				decorate(path)
+			end
+		end
+	end
+	for _, class_name in ipairs({ "InteractionManager", "BP_InteractionManager_C" }) do
+		for _, manager in ipairs(FindAllOf(class_name) or {}) do
+			local path = util.path(manager)
+			if not seen[path] then
+				seen[path] = true
+				see_through_walls(path)
 			end
 		end
 	end
@@ -117,7 +140,12 @@ function M.install()
 			local path = util.path(target)
 			ExecuteInGameThreadWithDelay(CLASSIFY_DELAY_MS, hooks.guard(function() decorate(path) end))
 		end)
-		log.info("objective marker: watching %s", TARGET_CLASS)
+		-- The manager is a PlayerController component, rebuilt with it on every level load.
+		NotifyOnNewObject(MANAGER_CLASS, function(manager)
+			local path = util.path(manager)
+			ExecuteInGameThreadWithDelay(CLASSIFY_DELAY_MS, hooks.guard(function() see_through_walls(path) end))
+		end)
+		log.info("objective marker: watching %s and %s", TARGET_CLASS, MANAGER_CLASS)
 	end
 	hooks.try(scan)
 end

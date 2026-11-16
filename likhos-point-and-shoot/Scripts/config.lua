@@ -28,7 +28,8 @@ return {
 	low_ready_default = true,
 
 	-- The marker on a quest objective has a bright blue ring, a color rare in the game, so it stands out: a placement spot where a bomb or bug is planted, a mission phone, a quest item to pick up and a mission box.
-	-- Set false for the vanilla pale markers.
+	-- Every interaction marker, not only objectives, shows through walls within its range, and F reaches it through them at its usual distance.
+	-- Set false for the vanilla pale markers hidden by walls.
 	plant_marker = true,
 	-- The ring's color, "#RRGGBB" as in an image editor.
 	plant_marker_color = "#33B5FF",

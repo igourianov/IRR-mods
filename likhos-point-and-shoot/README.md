@@ -15,7 +15,7 @@ Tactical shortcuts, control tweaks and inventory management improvements.
 - **Quick slot auto refill:** a quick slot refills with the same item type after use.
 - **Magnifier binding:** mouse scroll folds and unfolds the EOTech+Magnifier combo, the same way it zooms an LPVO.
 - **Low ready by default:** the gun lowers as soon as an action ends.
-- **Objective markers:** bright, longer range markers on quest objectives.
+- **Objective markers:** significantly improved range and visiblity.
 - **Item use counts and condition:** less visual clutter in the inventory. Weapon and USB hack device condition shows as a percentage.
 
 ## Point Shooting
@@ -67,7 +67,7 @@ Quest objectives are marked with a bright blue ring instead of vanilla's pale gr
 - Quest items to pick up, such as documents, USB drives and key cards.
 - Mission boxes, which hold a mission's items.
 
-Other interaction markers stay vanilla.
+Every interaction marker, objective or not, shows through walls and the surface it sits on, so a quest item that clipped into a table is still marked. A marker shows only within its range as before, and `F` uses it through a wall at the usual distance. Other interaction markers keep their vanilla color and range.
 
 # Install UE4SS (required)
 
