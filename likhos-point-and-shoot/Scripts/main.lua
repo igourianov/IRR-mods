@@ -75,7 +75,7 @@ local function init()
 	if config.magnifier_zoom then magnifier.install() end
 	if config.low_ready_default then require("weapon.low_ready").install() end
 	if config.plant_marker then require("world.objective_marker").install() end
-	if config.whole_uses then require("items.whole_uses").install() end
+	if config.whole_uses then require("items.tile_counts").install() end
 	if config.quick_sell then require("items.quick_sell").install() end
 	if config.quick_slot_refill then require("items.quick_slots").install() end
 

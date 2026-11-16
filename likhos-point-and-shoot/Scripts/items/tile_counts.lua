@@ -1,6 +1,6 @@
--- items/whole_uses.lua : an item that counts uses shows them as whole numbers on its inventory tile (docs/solutions/medic-uses-display.md).
+-- items/tile_counts.lua : an inventory tile's count text, as whole use counts or a percentage (docs/solutions/weapon-condition-display.md).
 --
--- Every game name here comes from docs/solutions/medic-uses-display.md and docs/solutions/usb-uses-display.md.
+-- Every game name here comes from docs/solutions/medic-uses-display.md, docs/solutions/usb-uses-display.md and docs/solutions/weapon-condition-display.md.
 -- The native ItemWidget writes the uses, a float stat, into the tile with decimals. This rewrites that text once the game has drawn it.
 -- Holds no UObject between calls.
 
@@ -11,7 +11,7 @@ local item_tile = require("items.item_tile")
 
 local M = {}
 
-local hooks = hook.new("whole uses", "use counts keep decimals")
+local hooks = hook.new("tile counts", "tile counts keep decimals")
 
 local HOOK_FN = item_tile.CLASS .. ":K2_UpdateItemCount"
 
