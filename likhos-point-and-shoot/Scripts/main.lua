@@ -93,4 +93,6 @@ local function init()
 	log.info("ready. console command: kb_status")
 end
 
-util.safe("init", init)
+-- On Ctrl+R UE4SS runs this file off the game thread while the game thread keeps running the mod's hooks and queued actions against the same Lua state, which corrupts it.
+-- Init runs as one game-thread action, so nothing of the mod's runs on the game thread until it returns.
+ExecuteInGameThread(function() util.safe("init", init) end)

@@ -1,3 +1,6 @@
+# Unreleased
+* increased mod stability on UE4SS hot reload (less CTD)
+
 # 2.0.203
 * fixed the controls menu showing every vanilla key as unbound in raid. The mod's keybinds now wait for the game's own to load
 

@@ -12,19 +12,26 @@ local INPUT_SUBSYSTEM = "EnhancedInputLocalPlayerSubsystem"
 
 local controller = nil
 
---- Call on_ready(pc) for every live PlayerController as it is constructed.
+--- Call on_ready(pc) for the live PlayerController, if any, and for every one constructed after.
 function M.watch(on_ready)
+	local function ready(pc)
+		controller = pc
+		log.info("PlayerController acquired: %s", pc:GetFullName())
+		util.safe("on_ready", on_ready, pc)
+	end
+
 	-- The callback receives the UObject itself, not a RemoteUnrealParam. No :get().
 	-- It also fires for each Blueprint subclass's class default object as the class loads.
 	-- Those are templates, not live controllers, so skip them by name.
 	NotifyOnNewObject("/Script/Engine.PlayerController", function(pc)
 		if not util.valid(pc) then return end
 		if pc:GetFName():ToString():find("^Default__") then return end
-
-		controller = pc
-		log.info("PlayerController acquired: %s", pc:GetFullName())
-		util.safe("on_ready", on_ready, pc)
+		ready(pc)
 	end)
+
+	-- Init runs as a game-thread action, which on reload, and at cold start possibly, comes after the controller is built.
+	local pc = M.controller()
+	if pc then ready(pc) end
 end
 
 ---@return UObject?

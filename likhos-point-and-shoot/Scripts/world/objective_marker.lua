@@ -119,7 +119,7 @@ function M.install()
 		end)
 		log.info("objective marker: watching %s", TARGET_CLASS)
 	end
-	ExecuteInGameThread(hooks.guard(scan))
+	hooks.try(scan)
 end
 
 return M

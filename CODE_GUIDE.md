@@ -32,6 +32,14 @@ Bind by name (`/Script/Test_C.SomeClass:SomeFunction`), resolved lazily. A game 
 
 `main.lua` is re-executed on Ctrl+R. Guard anything that must happen once (registrations, the tick loop) so a reload does not double-register.
 
+On Ctrl+R UE4SS runs `main.lua` off the game thread while the game thread keeps running the mod's hooks and queued actions against the same Lua state. Init that runs there races them and corrupts the state. `main.lua` runs init as one game-thread action:
+
+```lua
+ExecuteInGameThread(function() util.safe("init", init) end)
+```
+
+Init therefore can run after the first PlayerController is built, so code that waits for one also handles one that already exists.
+
 ## Error handling
 
 Wrap every boundary (key handler, tick, hook body) in `util.safe`. An uncaught Lua error inside a hook can take the game down with it.
