@@ -1,3 +1,6 @@
+# 2.1.99
+* rebuilt for game patch 1.4.0.4
+
 # 2.1.98
 * updated for game version 1.4.0.3
 * reverted Morphine, the MFAK's Inject and Painkillers to vanilla, since the game now refreshes an active dose and hides the fracture screen distortion for the MFAK's Inject itself
