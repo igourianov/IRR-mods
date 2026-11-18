@@ -103,6 +103,16 @@ In-game console: `kb_status`.
 - New entries go under a `# Unreleased` heading at the top of the mod's `CHANGELOG.md`, never under a version number. Every debug build bumps the patch, so a number written during work goes stale.
 - Before publishing, rename `# Unreleased` to the version in `mod.txt` after the last build. `publish.ps1` refuses a heading that is not a bare version, so an unrenamed `# Unreleased` stops the publish.
 
+## Game version
+
+The human readable game version, used in changelog entries (`1.4.0.4`), is `ProjectVersion` in the game's `DefaultGame.ini` inside `pakchunk0`. The exe carries no version.
+
+```powershell
+.\tools\repak\repak.exe get "<game dir>\Test_C\Content\Paks\pakchunk0-Windows.pak" Test_C/Config/DefaultGame.ini | Select-String ProjectVersion
+```
+
+The Steam build ID, used for `game_build` in a pak mod's `mod.txt`, is `buildid` in `<steam library>\steamapps\appmanifest_2116120.acf`.
+
 ## Log level
 
 A mod's `Scripts/config.lua` is committed with `log_level = "info"`. Setting `"debug"` for a test in game is fine, but set it back to `"info"` before committing unless the user asks to commit another level.
