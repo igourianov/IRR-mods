@@ -1,3 +1,6 @@
+# Unreleased
+* delivery mission drop-off boxes are now marked as objectives
+
 # 2.1.221
 * increased interaction markers' tolerance for showing through walls: pickups clipping into tables are now easier to see
 * weapon condition shows as a percentage in the inventory

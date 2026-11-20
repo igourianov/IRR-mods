@@ -65,7 +65,7 @@ Quest objectives are marked with a bright blue ring instead of vanilla's pale gr
 - Placement spots, where you plant a bomb, bug or similar item.
 - Mission phones.
 - Quest items to pick up, such as documents, USB drives and key cards.
-- Mission boxes, which hold a mission's items.
+- Mission boxes, which hold or accept mission items.
 
 Every interaction marker, objective or not, shows through walls and the surface it sits on, so a quest item that clipped into a table is still marked. A marker shows only within its range as before, and `F` uses it through a wall at the usual distance. Other interaction markers keep their vanilla color and range.
 

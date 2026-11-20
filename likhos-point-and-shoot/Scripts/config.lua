@@ -27,7 +27,7 @@ return {
 	-- Works only with auto low ready turned on in the gameplay settings. Set false for the game's own auto low ready.
 	low_ready_default = true,
 
-	-- The marker on a quest objective has a bright blue ring, a color rare in the game, so it stands out: a placement spot where a bomb or bug is planted, a mission phone, a quest item to pick up and a mission box.
+	-- The marker on a quest objective has a bright blue ring, a color rare in the game, so it stands out: a placement spot where a bomb or bug is planted, a mission phone, a quest item to pick up, a mission box and a delivery box.
 	-- Every interaction marker, not only objectives, shows through walls within its range, and F reaches it through them at its usual distance.
 	-- Set false for the vanilla pale markers hidden by walls.
 	plant_marker = true,

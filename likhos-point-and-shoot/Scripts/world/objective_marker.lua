@@ -24,8 +24,8 @@ local SEE_THROUGH_CM = 100
 -- The gear icon of placement spots and mission phones.
 local PLANT_ICON  = "T_IRR_Interaction_ItemInteractionIcon"
 local QUEST_ITEM  = "Inventory.Items.Quest."
--- Spawned by a mission with its items inside. Its icon is the one every loot container shows, so it is told apart by class.
-local MISSION_BOX = "BP_MissionBox_C"
+-- Spawned by a mission: the box with its items inside and the delivery box they are dropped into. Their icon is the one every loot container shows, so they are told apart by class.
+local MISSION_BOXES = { BP_MissionBox_C = true, BP_MissionSecureContainer_C = true }
 -- Every display setting of an option, so the ring keeps the color while held, repeated or waiting.
 local DISPLAY_SETTINGS = { "DefaultDisplaySetting", "HoldDisplaySetting", "RepeatDisplaySetting", "WaitDisplaySetting" }
 
@@ -65,7 +65,7 @@ local function is_objective(target)
 	if shows_plant_icon(target.InteractionOptions) then return true end
 	local owner = target:GetOwner()
 	if not util.valid(owner) then return false end
-	if util.class_name(owner) == MISSION_BOX then return true end
+	if MISSION_BOXES[util.class_name(owner)] then return true end
 	local pickup_class = StaticFindObject(PICKUP_CLASS)
 	if not (util.valid(pickup_class) and owner:IsA(pickup_class)) then return false end
 	local holder = owner.InventoryComponent
