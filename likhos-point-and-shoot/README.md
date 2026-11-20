@@ -1,12 +1,13 @@
 # Likho's Point and Shoot
 
-Tactical shortcuts, control tweaks and inventory management improvements.
+Tactical shortcuts, control tweaks and inventory QoL.
 
 ## Features
 
 - **Point Shooting + Laser (Hold):** new keybind that goes straight into point shooting and turns on the laser.
 - **Flashlight (Hold/Toggle):** new keybind for the weapon light, without the radial menu. Follows the same NVG rules as the laser.
 - **Hold Breath:** adds hold to the vanilla toggle key. Releasing it lets the breath out, and a tap still toggles.
+- **Switch Fire Mode (Tap/Hold):** new keybind that replaces the vanilla **Switch Fire Mode**: tap to switch, hold to see the selected fire mode without switching. Unbind the vanilla key.
 - **Interact (Instant):** new keybind that opens containers without the hold delay. Locked containers still take the unlock time, but without holding the key. The vanilla **Interact** is unaffected.
 - **Smart Heal (Tap/Hold):** new keybind: tap for the fastest painkiller, hold to treat bleeds, fractures and missing health.
 - **Use Adrenaline:** new keybind that injects adrenaline from anywhere in the inventory.

@@ -39,6 +39,16 @@ Activate the first laser on the gun: a visible laser with NVG off, an IR laser w
 		description = "Activate the first flashlight on the gun (contextual to NVG). Hold for momentary activation. Tap to toggle.",
 	},
 	{
+		name = "LikhosSwitchFireMode",
+		display = "Switch Fire Mode (Tap/Hold)",
+		description = [[
+Replaces vanilla Switch Fire Mode. Unbind the vanilla key.
+
+Tap: switch to the next fire mode.
+
+Hold: show the selected fire mode without switching.]],
+	},
+	{
 		name = "LikhosInteractInstant",
 		display = "Interact (Instant)",
 		description = "Interact without holding down the button. Locked containers still take time to unlock.",

@@ -17,6 +17,7 @@ return {
 	-- Flashlight: released inside this window, the light it turned on stays on until the next press. Held past it, the light goes off on release.
 	-- Smart Heal: released inside this window, it takes the fastest painkiller. Held past it, it treats a heavy bleed, bleed or fracture, else starts an IV at once.
 	-- Hold Breath: released inside this window, the breath stays held until the next press. Held past it, breath is let out on release.
+	-- Switch Fire Mode (Tap/Hold): released inside this window, it switches the fire mode. Held past it, it shows the current fire mode without switching.
 	tap_ms = 250,
 
 	-- The zoom input folds and unfolds the magnifier on a hybrid sight: scroll forward unfolds, scroll back folds.
@@ -73,6 +74,13 @@ return {
 			enabled = true,
 			mapping = "IA_HoldBreath",   -- Settings > Controls > Hold Breath (vanilla key)
 			action  = "HoldBreath",   -- tap to toggle as in vanilla, hold to hold breath only while held
+			block_in_ui = true,
+		},
+		{
+			id      = "fire_mode",
+			enabled = true,
+			mapping = "LikhosSwitchFireMode",   -- Settings > Controls > Switch Fire Mode (Tap/Hold). Unbind the vanilla Switch Fire Mode key.
+			action  = "FireMode",   -- tap to switch on release, hold to show the current fire mode
 			block_in_ui = true,
 		},
 		{

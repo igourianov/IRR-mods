@@ -1,4 +1,7 @@
-# Unreleased
+# 2.2.237
+* added the Switch Fire Mode (Tap/Hold) keybind that allows checking current mode without switching
+* moved fire mode card to the center (same place as ammo check) to make it easier to see
+* reusing inventory animation for firemode check
 * delivery mission drop-off boxes are now marked as objectives
 
 # 2.1.221
