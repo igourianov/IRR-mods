@@ -74,13 +74,13 @@ In-raid ammo boxes now make it easier to find the ammo type your equipped gun us
 
 ## Installation
 
-Extract the zip into `PROJECT QUARANTINE\Test_C\Content\Paks`. It places `likhos_rearmed_P.pak` in `Paks\~mods`.
+Extract the zip into `PROJECT QUARANTINE\Test_C\Content\Paks`. You should end up with `PROJECT QUARANTINE\Test_C\Content\Paks\~mods\likhos_rearmed_P.pak`.
 
 The mod doesn't need UE4SS.
 
 ## Uninstall
 
-Delete `Paks\~mods\likhos_rearmed_P.pak`. Weapons, ammo and attachments already in your stash stay there and go back to their vanilla class, caliber and stats.
+Delete `likhos_rearmed_P.pak`. Weapons, ammo and attachments already in your stash stay there and go back to their vanilla class, caliber and stats.
 
 ## Compatibility
 
