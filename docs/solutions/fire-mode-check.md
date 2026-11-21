@@ -32,7 +32,7 @@ Verified in `UE4SS_ObjectDump.txt` (2026-11-18) and in the assets extracted from
 - The card is `/Game/Blueprints/InventorySystem/Widgets/WeaponUI/W_ShowFireMode.W_ShowFireMode_C`, a `ShowMagCapacityWidget`, with `OnWeaponFireModeChanged_Event(NewFireMode: GameplayTag)`, `OnWeaponEquipped_Event` and `FireModeElements`.
 - `WeaponComponent:GetFireMode()` returns `EFireMode` (`/Script/EasyBallistics`: `FM_Auto` 0, `FM_Semiauto` 1, `FM_Burst` 2, others).
 - `GeneralFunctionLibrary:GetGeneralSettings()` returns `GeneralSettings`, with `AutoFireModeTag`, `SemiAutoFireModeTag` and `BurstFireModeTag`.
-- HUD layout (`W_InGame`, `W_WeaponUI`, `W_StaminaAndHealthBars` assets): `W_InGame_C`'s root overlay holds `W_StaminaAndHealthBars` at the bottom center and `W_WeaponUI` filling the screen. `/Game/Blueprints/FirstPersonCoreComponent/W_WeaponUI.W_WeaponUI_C`'s root `Overlay_1` holds `W_ShowMagCapacity` (centered, bottom, 150 bottom padding) and `VerticalBox_0` (right, bottom, 150 bottom padding), which stacks `W_ShowFireMode`, `W_ShowMagnificationLevel` and a spacer. `W_WeaponUI_C` has the properties `W_ShowFireMode`, `W_ShowMagCapacity` and `W_ShowMagnificationLevel`. `W_ShowFireMode_C` has a `Construct` function.
+- HUD layout (`W_InGame`, `W_WeaponUI`, `W_StaminaAndHealthBars` assets): `W_InGame_C`'s root overlay holds `W_StaminaAndHealthBars` at the bottom center and `W_WeaponUI` filling the screen. `/Game/Blueprints/FirstPersonCoreComponent/W_WeaponUI.W_WeaponUI_C`'s root `Overlay_1` holds `W_ShowMagCapacity` (centered, bottom, 150 bottom padding) and `VerticalBox_0` (right, bottom, 150 bottom padding), which stacks `W_ShowFireMode`, `W_ShowMagnificationLevel` and a spacer. `W_WeaponUI_C` has the properties `W_ShowFireMode`, `W_ShowMagCapacity` and `W_ShowMagnificationLevel`. `W_ShowFireMode_C` has a `Construct` function. `W_InGame_C` has the property `W_WeaponUI`. `/Game/ThirdParty/CMG/Framework/Components/PlayerComponents/BP_UMS_MissionComponent.BP_UMS_MissionComponent_C` has `InGameWidget` (`W_InGame_C`), and `BL_UMS_Library_C:GetMissionComponent` finds it with `GetComponentByClass` on the PlayerController. The card itself has no property naming its HUD or owner: `ShowMagCapacityWidget` exposes none and `W_ShowFireMode_C` holds only its elements.
 - The inventory pose (`/Game/Blueprints/SimpleGameplayAbilitySystem/Abilities/SGA_OpenInventory.SGA_OpenInventory_C` bytecode): on open it waits, in 0.2 s steps, until the character `Mesh`'s `GetLinkedAnimGraphInstanceByTag("Combat")` reports no `IsAnyMontagePlaying`. Then it calls `/Script/Test_C.AsyncAction_PlayMontage:CreateProxyObjectForPlayCharacterMontage(Actor, Weapon, LinkedAnimGraph, MontageSection, CharacterMontages, PlayRate, StopPreviousMontage, SyncAnimLength, Predict)` with the character, the equipped weapon actor, the weapon data asset's `GetLinkedAnimGraph()`, `None`, `GetNoMagMontageSet().HandOffMontageSet`, 1, false, false and true, and calls `Activate()` on the returned proxy. On close it does the same with `HandOnMontageSet` and `StopPreviousMontage` true, but only while its own open flag is set. The weapon data asset is `WeaponComponent:GetWeaponDataAsset()`. `NoMagMontageSet` holds `HandOffMontageSet`, `HandOnMontageSet` and `NoMagCheckMontageSet`, each a `CharacterMontageSet` of `TP_Animation`, `FP_Animation` and `Weapon_Animation` montages.
 
 Assumptions, unverified:
@@ -45,6 +45,7 @@ Assumptions, unverified:
 - A6. Moving a built card into another panel keeps it working: the card's own logic and the base class's show and hide still apply to it in its new slot.
 - A7. The hand-off montage holds its last pose and stays the active montage of the weapon's linked anim graph (`Combat`, `ABP_Procedurals_FP_C`) until another montage replaces it. Seen in game: on release `GetCurrentActiveMontage` there is `AM_FP_AK74M_Hand_Off_Montage` while `Montage_IsPlaying` on it is false, and without a hand-on montage the hand stays off.
 - A8. The proxy the factory returns to the mod plays its montages as it does for the ability, with nothing of the mod's bound to its delegates.
+- A9. `IsVisible` is false on an earlier level's HUD, whose Slate widgets are gone, and true on the HUD on screen. Seen in game: the old HUD's card had visibility `SelfHitTestInvisible` and `IsVisible` false, and the check finds the live card in the hideout and in a raid loaded from it.
 
 ## Scope
 
@@ -55,7 +56,7 @@ Owned:
 - `likhos-point-and-shoot/Scripts/main.lua`: installing the module.
 - `likhos-point-and-shoot/Scripts/config.lua`: the `fire_mode` bind and its line in the `tap_ms` description.
 - `likhos-point-and-shoot/README.md`: the Features line.
-- `likhos-point-and-shoot/CHANGELOG.md`: the `# Unreleased` entry.
+- `likhos-point-and-shoot/CHANGELOG.md`: the feature's entries.
 - `likhos-point-and-shoot/mod.txt`: minor version bump for a new feature.
 
 Context only: `core/input.lua` polling and the context gate, `core/triggers.lua` hold state, `core/actions.lua`, `core/player.lua` (`inject_press`, `weapon_component`), `controls/menu.lua` rows, the vanilla handler, ability and card widget.
@@ -69,7 +70,7 @@ Context only: `core/input.lua` polling and the context gate, `core/triggers.lua`
 `weapon/fire_mode.lua` follows `weapon/hold_breath.lua`: it holds no UObject between calls and defines its action in `install`.
 
 - `tap`: a one-frame `IA_SwitchFireMode` press through `player.inject_press` (A1).
-- `hold`, when the key is still down past `tap_ms`: it resolves the equipped weapon's component through `player.weapon_component`, takes its current mode's tag (A3) and calls `OnWeaponFireModeChanged_Event` on the live `W_ShowFireMode_C` of the current PlayerController's HUD (A2). Without an equipped weapon or a live card widget it does nothing.
+- `hold`, when the key is still down past `tap_ms`: it resolves the equipped weapon's component through `player.weapon_component`, takes its current mode's tag (A3) and calls `OnWeaponFireModeChanged_Event` on the `W_ShowFireMode_C` of the HUD on screen (A2). An earlier level's HUD outlives its level off screen and reports the current PlayerController as its owning player (seen in game after a hideout to raid load), so the owner does not tell them apart. `Widget:IsVisible` on the HUD's top widget does (A9). `Widget:IsInViewport` is false for every HUD, the live one included, and the hideout's PlayerController has no `BP_UMS_MissionComponent_C` to read the HUD from (both seen in game). Without an equipped weapon or a live card widget it does nothing.
 - `held`, after `hold` has shown the card: it shows it again at a fixed refresh interval, shorter than the card's vanilla timer, so the card stays up until the release (A5). The time of the last show is a plain value, dropped on release and on level load.
 - The pose: from `hold` on, once the Combat linked anim graph plays no montage, the hold plays the equipped weapon's hand-off montage set through `AsyncAction_PlayMontage` with the inventory ability's arguments (A8). It starts once per hold. On release, if the equipped weapon's hand-off montage is still the active montage of the weapon's linked anim graph (A7), it plays the hand-on set with the inventory ability's close arguments, as the closing inventory does. A montage that cut in or a swapped weapon leaves the release with nothing to undo. The montages are resolved again on release from the equipped weapon, and only a flag that the pose is pending or started is kept, dropped on release and on level load.
 
@@ -84,9 +85,9 @@ Flow:
 
 The player sees a tap switch the fire mode as with the vanilla key, a fraction of a second later, on release instead of press. A hold shows which mode is selected for as long as it lasts, on any weapon, with the inventory's hands-off pose and no switch.
 
-`README.md`'s Features list has a **Switch Fire Mode (Tap/Hold)** line saying the new keybind switches on a tap, shows the selected mode on a hold with the inventory's hands-off pose and replaces the vanilla key, which should be unbound.
+`README.md`'s Features list has a **Switch Fire Mode (Tap/Hold)** line saying the new keybind switches on a tap, shows the selected mode on a hold and replaces the vanilla key, which should be unbound. The hands-off pose is left out of it.
 
-`CHANGELOG.md` has the feature under `# Unreleased`. `mod.txt`'s minor version is one higher than before the feature, patch unchanged.
+`CHANGELOG.md` has the feature under the version it was published with, and the fix for an earlier level's HUD under `# Unreleased`. `mod.txt`'s minor version is one higher than before the feature, patch unchanged.
 
 ## Tradeoffs
 

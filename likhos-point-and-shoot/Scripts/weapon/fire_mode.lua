@@ -95,24 +95,31 @@ local function end_pose()
 	log.debug("fire mode: hand on")
 end
 
----@return UObject? # the fire mode card of the current PlayerController's HUD
-local function live_card(pc)
-	local owner = pc:GetFullName()
+--- The top widget holding `widget`, its HUD: each nested widget's outer is its parent widget's WidgetTree.
+local function hud_root(widget)
+	local root = widget
+	local outer = root:GetOuter()
+	while util.valid(outer) and util.class_name(outer) == "WidgetTree" do
+		root = outer:GetOuter()
+		outer = root:GetOuter()
+	end
+	return root
+end
+
+---@return UObject? # the fire mode card of the HUD on screen
+local function live_card()
 	for _, widget in ipairs(FindAllOf(CARD_WIDGET) or {}) do
-		-- A level's HUD outlives its level, owned by that level's controller.
-		if util.valid(widget) then
-			local owning = widget:GetOwningPlayer()
-			if util.valid(owning) and owning:GetFullName() == owner then return widget end
-		end
+		-- An earlier level's HUD outlives its level off screen and reports the current controller as its owning player. Its Slate widgets are gone, so IsVisible is false.
+		-- IsInViewport is false for the live HUD too, and the hideout's controller has no mission component to read the HUD from.
+		if util.valid(widget) and hud_root(widget):IsVisible() then return widget end
 	end
 	return nil
 end
 
 local function show()
-	local pc = player.controller()
 	local wc = player.weapon_component()
 	local library = StaticFindObject(GENERAL_LIBRARY)
-	if not (pc and wc and util.valid(library)) then return end
+	if not (wc and util.valid(library)) then return end
 
 	local mode = wc:GetFireMode()
 	local property = MODE_TAGS[mode]
@@ -121,7 +128,7 @@ local function show()
 		return
 	end
 	local settings = library:GetGeneralSettings()
-	local widget = live_card(pc)
+	local widget = live_card()
 	if not (util.valid(settings) and widget) then
 		log.debug("fire mode: settings %s, card %s", tostring(util.valid(settings)), tostring(widget ~= nil))
 		return

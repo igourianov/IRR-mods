@@ -1,3 +1,6 @@
+# 2.2.248
+* fixed holding Switch Fire Mode (Tap/Hold) not showing the fire mode card after loading from the hideout into a raid (was looking up stale HUD)
+
 # 2.2.237
 * added the Switch Fire Mode (Tap/Hold) keybind that allows checking current mode without switching
 * moved fire mode card to the center (same place as ammo check) to make it easier to see
