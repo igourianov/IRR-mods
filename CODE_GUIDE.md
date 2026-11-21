@@ -30,6 +30,8 @@ Bind by name (`/Script/Test_C.SomeClass:SomeFunction`), resolved lazily. A game 
 
 ## Hot reload
 
+Executed by Ctrl + a key defind in `UE4SS-settings.ini` as `HotReloadKey` (default R).
+
 `main.lua` is re-executed on Ctrl+R. Guard anything that must happen once (registrations, the tick loop) so a reload does not double-register.
 
 On Ctrl+R UE4SS runs `main.lua` off the game thread while the game thread keeps running the mod's hooks and queued actions against the same Lua state. Init that runs there races them and corrupts the state. `main.lua` runs init as one game-thread action:
