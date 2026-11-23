@@ -16,6 +16,7 @@ Tactical shortcuts, control tweaks and inventory QoL.
 - **Quick slot auto refill:** a quick slot refills with the same item type after use.
 - **Magnifier binding:** mouse scroll folds and unfolds the EOTech+Magnifier combo, the same way it zooms an LPVO.
 - **Low ready by default:** the gun lowers as soon as an action ends.
+- **Sprint cancels crouch:** Sprint while crouched and moving stands you up into a full sprint. Run keeps the faster crouch walk.
 - **Objective markers:** significantly improved range and visiblity.
 - **Item use counts and condition:** less visual clutter in the inventory. Weapon and USB hack device condition shows as a percentage.
 

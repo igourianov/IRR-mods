@@ -1,3 +1,6 @@
+# Unreleased
+* sprint (double tap run) now overrides crouch, so you can panic gtfo when discovered sneaking about
+
 # 2.2.248
 * fixed holding Switch Fire Mode (Tap/Hold) not showing the fire mode card after loading from the hideout into a raid (was looking up stale HUD)
 

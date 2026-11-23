@@ -28,6 +28,10 @@ return {
 	-- Works only with auto low ready turned on in the gameplay settings. Set false for the game's own auto low ready.
 	low_ready_default = true,
 
+	-- Sprint while crouched and moving stands the player up into a full sprint. Run keeps the faster crouch walk.
+	-- Set false for the vanilla behavior, where Sprint stays crouched.
+	sprint_cancels_crouch = true,
+
 	-- The marker on a quest objective has a bright blue ring, a color rare in the game, so it stands out: a placement spot where a bomb or bug is planted, a mission phone, a quest item to pick up, a mission box and a delivery box.
 	-- Every interaction marker, not only objectives, shows through walls within its range, and F reaches it through them at its usual distance.
 	-- Set false for the vanilla pale markers hidden by walls.
