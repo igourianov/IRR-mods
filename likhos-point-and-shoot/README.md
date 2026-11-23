@@ -9,6 +9,7 @@ Tactical shortcuts, control tweaks and inventory QoL.
 - **Hold Breath:** adds hold to the vanilla toggle key. Releasing it lets the breath out, and a tap still toggles.
 - **Switch Fire Mode (Tap/Hold):** new keybind that replaces the vanilla **Switch Fire Mode**: tap to switch, hold to see the selected fire mode without switching. Unbind the vanilla key.
 - **Interact (Instant):** new keybind that opens containers without the hold delay. Locked containers still take the unlock time, but without holding the key. The vanilla **Interact** is unaffected.
+- **Smart Grenade (Tap/Hold/Double Tap):** new keybind that equips a grenade by type: tap for frag, hold for smoke or gas, double tap for flashbang.
 - **Smart Heal (Tap/Hold):** new keybind: tap for the fastest painkiller, hold to treat bleeds, fractures and missing health.
 - **Use Adrenaline:** new keybind that injects adrenaline from anywhere in the inventory.
 - **Consume Food/Drink:** new keybind to consume first food or drink item from anywhere in the inventory.
@@ -30,6 +31,18 @@ It additionally activates the first laser module it finds equipped on the gun. C
 
 - **NVG off:** the first visible laser.
 - **NVG on:** the first IR laser. If the weapon has no IR laser, the first visible laser.
+
+## Smart Grenade
+
+New keybind **Smart Grenade (Tap/Hold/Double Tap)**, a smarter alternative to vanilla's **Grenade Equip** that lets you choose the grenade type. It only equips the grenade, so you throw it as usual.
+
+Like vanilla, it takes grenades from your rig, armored rig or pockets, and ignores the backpack. Within a type, the most expensive grenade goes first.
+
+- **Tap:** frag (RGO, F-1, then M67). It equips 200 ms after release, to tell it apart from a double tap.
+- **Hold:** smoke or gas (RGR Gas, then RGD Smoke).
+- **Double tap:** flashbang.
+
+Pressing for the type already in your hand does nothing. If you carry none of the requested type, nothing happens, so you never end up holding the wrong kind of grenade.
 
 ## Smart Heal
 

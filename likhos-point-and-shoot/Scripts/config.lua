@@ -18,7 +18,12 @@ return {
 	-- Smart Heal: released inside this window, it takes the fastest painkiller. Held past it, it treats a heavy bleed, bleed or fracture, else starts an IV at once.
 	-- Hold Breath: released inside this window, the breath stays held until the next press. Held past it, breath is let out on release.
 	-- Switch Fire Mode (Tap/Hold): released inside this window, it switches the fire mode. Held past it, it shows the current fire mode without switching.
+	-- Smart Grenade: released inside this window, it is a tap or the first half of a double tap. Held past it, it equips a smoke or gas grenade.
 	tap_ms = 250,
+
+	-- How soon after a tap's release a second press counts as a double tap, milliseconds. Used by Smart Grenade.
+	-- A tap equips its frag only once this window has passed, so a higher value delays every frag.
+	double_tap_ms = 200,
 
 	-- The zoom input folds and unfolds the magnifier on a hybrid sight: scroll forward unfolds, scroll back folds.
 	-- Set false for vanilla zoom.
@@ -113,6 +118,13 @@ return {
 			enabled = true,
 			mapping = "LikhosUseAdrenaline",   -- Settings > Controls > Use Adrenaline
 			action  = "UseAdrenaline",     -- inject an Adrenaline Injector from anywhere in the inventory
+			block_in_ui = true,
+		},
+		{
+			id      = "smart_grenade",
+			enabled = true,
+			mapping = "LikhosSmartGrenade",   -- Settings > Controls > Smart Grenade (Tap/Hold/Double Tap)
+			action  = "SmartGrenade",     -- from the rig or pockets, most expensive first. Tap: frag. Hold: smoke or gas. Double tap: flashbang
 			block_in_ui = true,
 		},
 	},

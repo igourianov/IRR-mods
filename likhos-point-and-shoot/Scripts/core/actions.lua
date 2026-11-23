@@ -12,8 +12,15 @@ local defined = {}
 --- Define action `name` with a Lua function per phase it acts on (core/triggers.lua), and optionally reset, which drops its state on level load.
 --- press and release run on the key's press and release, held every tick while it is down.
 --- hold runs once when the key is still down past tap_ms. On release, hold_release runs after a hold, tap otherwise.
+--- double_tap runs on a second press inside double_tap_ms of a tap's release. Defining it delays that action's tap until the window has passed.
 function M.define(name, phases)
 	defined[name] = phases
+end
+
+--- Whether action `name` has a function for phase.
+function M.defines(name, phase)
+	local spec = defined[name]
+	return spec ~= nil and spec[phase] ~= nil
 end
 
 --- Actions found undefined this session, so the error logs once rather than every tick.

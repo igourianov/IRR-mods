@@ -10,6 +10,10 @@ local USES_TAG    = "Inventory.Stats.Durability"
 --- The uses stat's config class. Its tag, USES_TAG, is shared with weapon and armor durability, so a definition's stats are told apart by this class.
 M.USES_CONFIG = "U_Content_C"
 
+-- Settings classes of a slot's container: its own item grid, or a place for one equipped item.
+local SPATIAL_SETTINGS = "InventorySpatialContainerSettings"
+local EQUIP_SETTINGS   = "InventoryEquipToContainerSettings"
+
 --- The main container's items sorted by sub-grid ascending, then by slot descending.
 --- ContainerItems is not kept in grid order, so walking it as is picks an item seemingly at random.
 local function grid_order(container)
@@ -24,10 +28,11 @@ local function grid_order(container)
 	return sorted
 end
 
---- Every item of comp, nested storage included: `for item in inventory.items(comp, grid)`.
+--- Every item of comp, nested storage included: `for item in inventory.items(comp, grid, only)`.
 --- MainContainers is flat and holds each container item's storage as its own entry. With grid, each container's items come in grid order, else in ContainerItems order.
+--- With only, a set from M.slot_storage, just the items directly in those containers.
 --- The items are the ones read from the property, so they can be passed to a use context. A ContainerItem returned by one UFunction crashes the game when passed to another, still on UE4SS 1217, and UE4SS before 1217 crashes converting a returned ContainerItem to Lua.
-function M.items(comp, grid)
+function M.items(comp, grid, only)
 	local containers = comp.MainContainers
 	local container_count = #containers
 	local i, j, item_count = 0, 0, 0
@@ -36,12 +41,39 @@ function M.items(comp, grid)
 		while j >= item_count do
 			i = i + 1
 			if i > container_count then return nil end
-			items = grid and grid_order(containers[i]) or containers[i].ContainerItems
-			j, item_count = 0, #items
+			local container = containers[i]
+			j, item_count = 0, 0
+			if not only or only[util.guid_str(container.MainContainerUID)] then
+				items = grid and grid_order(container) or container.ContainerItems
+				item_count = #items
+			end
 		end
 		j = j + 1
 		return items[j]
 	end
+end
+
+--- The main containers storing what the player's slots hold, as a set of util.guid_str UIDs for M.items and M.usable.
+--- slots is a set of default container classes, like U_Rig_C. A slot with its own grid counts itself. A slot holding equipment counts the equipped item's storage, which is the main container under that item's UID.
+---@return table<string, boolean>
+function M.slot_storage(comp, slots)
+	local ids = {}
+	local containers = comp.MainContainers
+	for i = 1, #containers do
+		local container = containers[i]
+		local elements = container.ContainerElements
+		-- MainContainers interleaves each slot with the storage of what it holds, so a slot is told by its one element, whose settings are a subobject of the slot's default container.
+		local settings = #elements == 1 and elements[1].ContainerSettings or nil
+		local outer = util.valid(settings) and settings:GetOuter() or nil
+		local kind = util.valid(outer) and slots[util.class_name(outer)] and util.class_name(settings) or nil
+		if kind == SPATIAL_SETTINGS then
+			ids[util.guid_str(container.MainContainerUID)] = true
+		elseif kind == EQUIP_SETTINGS then
+			local equipped = container.ContainerItems
+			for j = 1, #equipped do ids[util.guid_str(equipped[j].ItemUID)] = true end
+		end
+	end
+	return ids
 end
 
 function M.item_id(definition)
@@ -52,9 +84,10 @@ function M.has_prefix(definition, prefix)
 	return M.item_id(definition):sub(1, #prefix) == prefix
 end
 
---- The items of comp in grid order whose ItemIdentifier starts with one of prefixes and that have uses left: `for item, uses in inventory.usable(comp, prefixes)`.
-function M.usable(comp, prefixes)
-	local next_item = M.items(comp, true)
+--- The items of comp in grid order whose ItemIdentifier starts with one of prefixes and that have uses left: `for item, uses in inventory.usable(comp, prefixes, only)`.
+--- only limits them to the containers of a set from M.slot_storage.
+function M.usable(comp, prefixes, only)
+	local next_item = M.items(comp, true, only)
 	return function()
 		for item in next_item do
 			local definition = item.ItemDefinition

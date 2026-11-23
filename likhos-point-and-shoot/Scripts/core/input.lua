@@ -51,6 +51,9 @@ function M.poll(binds)
 			-- A menu opened mid-hold. Release now; the next press starts a fresh hold.
 			triggers.on_release(bind)
 		end
+
+		-- A tap waiting out its double tap window must not fire into a menu opened meanwhile.
+		if triggers.tap_pending(bind) and not allowed(bind, pc) then triggers.drop_tap(bind) end
 	end
 end
 

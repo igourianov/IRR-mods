@@ -54,6 +54,18 @@ Hold: show the selected fire mode without switching.]],
 		description = "Interact without holding down the button. Locked containers still take time to unlock.",
 	},
 	{
+		name = "LikhosSmartGrenade",
+		display = "Smart Grenade (Tap/Hold/Double Tap)",
+		description = [[
+Smarter alternative to Grenade Equip. Predictable grenade type selection.
+
+Tap: frag grenade.
+
+Hold: smoke or gas.
+
+Double tap: flashbang.]],
+	},
+	{
 		name = "LikhosCombatHeal",
 		display = "Smart Heal (Tap/Hold)",
 		description = [[

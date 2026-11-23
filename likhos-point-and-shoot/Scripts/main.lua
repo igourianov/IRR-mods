@@ -72,6 +72,7 @@ local function init()
 	require("weapon.fire_mode").install()
 	require("items.food_drink").install()
 	require("items.smart_heal").install()
+	require("items.smart_grenade").install()
 	require("world.instant_interact").install()
 	if config.magnifier_zoom then magnifier.install() end
 	if config.low_ready_default then require("weapon.low_ready").install() end
