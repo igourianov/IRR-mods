@@ -1,11 +1,12 @@
--- items/smart_heal.lua : a Smart Heal tap takes the fastest painkiller carried, a hold treats a condition or starts an IV (docs/solutions/medical-rework.md).
--- The Use Adrenaline key shares its item search with a single stamina step (docs/solutions/adrenaline-bind.md).
+-- items/consumables.lua : the Smart Heal and Adrenaline/Food keys.
+-- A Smart Heal tap takes the fastest painkiller carried, a hold treats a condition or starts an IV (docs/solutions/medical-rework.md).
+-- An Adrenaline/Food tap shares Smart Heal's item search with a single stamina step (docs/solutions/adrenaline-bind.md). Its hold uses the first usable food or drink (docs/solutions/eat-food-bind.md).
 --
--- Tap: one painkiller step, whatever the health or an active dose. A new dose refreshes the temporary health pool, so wasting one is the player's choice.
+-- Smart Heal tap: one painkiller step, whatever the health or an active dose. A new dose refreshes the temporary health pool, so wasting one is the player's choice.
 -- Hold steps in order: heavy bleed, bleed, fracture, IV.
 -- Fracture goes before the IV: health stays missing while an IV heals, so a later fracture step would wait out every IV carried.
 -- An item treats a step through a use context whose actions carry the step's stat tag, so the tag decides, not the item's name.
--- Every game name here comes from docs/solutions/combat-heal.md (Recon), except the heal amount path in effect_amount, from the CXXHeaderDump of 2026-11-11.
+-- Every medical game name here comes from docs/solutions/combat-heal.md (Recon), except the heal amount path in effect_amount, from the CXXHeaderDump of 2026-11-11. The food ones come from docs/solutions/eat-food-bind.md (Recon).
 -- Only reads game state to pick the item. The one call that changes anything is the item's own use.
 -- Holds no UObject between calls.
 
@@ -19,6 +20,9 @@ local M = {}
 
 local MEDICAL       = { "Inventory.Items.Medical." }
 local USE_TIME_TAG  = "Inventory.Stats.Usage Time"
+-- ItemIdentifier tag prefixes of food and drink, outside MEDICAL.
+local PROVISIONS    = { "Inventory.Items.Provisions.Food.", "Inventory.Items.Provisions.Drinks." }
+local FOOD_CONTEXT  = "U_UseInventoryItem_C"
 
 --- Action stat tag -> the treatment it gives. Heals over time (IVs) serve a hold only.
 local TREATMENTS = {
@@ -27,7 +31,7 @@ local TREATMENTS = {
 	["Inventory.Stats.Stop Wound"]       = "bleed",
 	["Inventory.Stats.Stop Fracture"]    = "fracture",
 	["Inventory.Stats.Heal Over Time"]   = "heal",
-	-- Use Adrenaline only (docs/solutions/adrenaline-bind.md). Food carries it too but is never a candidate.
+	-- Adrenaline/Food tap only (docs/solutions/adrenaline-bind.md). Food carries it too but is never a candidate.
 	["Inventory.Stats.Stamina Boost"]    = "stamina",
 }
 
@@ -201,7 +205,28 @@ local function hold()
 	run("CombatHealHold", steps, collect(comp), pawn)
 end
 
---- Define the CombatHeal and UseAdrenaline actions.
+--- Use the first usable food or drink item. Game thread.
+local function eat()
+	local pawn, comp = resolve("AdrenalineFoodHold")
+	if not pawn then return end
+
+	for item in inventory.usable(comp, PROVISIONS) do
+		local definition = item.ItemDefinition
+		local contexts = definition.ItemContexts
+		for i = 1, #contexts do
+			local context = contexts[i]
+			-- No item widget: the bind has none, unlike the context menu.
+			if util.valid(context) and util.class_name(context) == FOOD_CONTEXT and context:IsValidContext(pawn, nil, item) then
+				log.debug("AdrenalineFoodHold: using %s", definition:GetFullName())
+				context:Execute(pawn, nil, item)
+				return
+			end
+		end
+	end
+	log.debug("AdrenalineFoodHold: no usable food or drink")
+end
+
+--- Define the CombatHeal and AdrenalineFood actions.
 function M.install()
 	-- Tap for a painkiller, hold to treat a condition or start an IV. The hold fires as the tap window passes, so its item starts without waiting for release.
 	actions.define("CombatHeal", {
@@ -209,9 +234,10 @@ function M.install()
 		hold = hold,
 	})
 
-	-- The injector's effect replaces an active one, so a press during a boost restarts it.
-	actions.define("UseAdrenaline", {
-		press = function() use("UseAdrenaline", "stamina") end,
+	-- Tap to inject adrenaline, hold to eat or drink. The injector's effect replaces an active one, so a tap during a boost restarts it.
+	actions.define("AdrenalineFood", {
+		tap  = function() use("AdrenalineFood", "stamina") end,
+		hold = eat,
 	})
 end
 

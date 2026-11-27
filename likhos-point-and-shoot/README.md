@@ -11,8 +11,7 @@ Tactical shortcuts, control tweaks and inventory QoL.
 - **Smart Fire Mode (Tap/Hold/Double Tap):** new keybind that selects a fire mode directly: tap for semi, double tap for burst, hold for auto. Alternative to the above.
 - **Smart Grenade (Tap/Hold/Double Tap):** new keybind that equips a grenade by type: tap for frag, hold for smoke or gas, double tap for flashbang.
 - **Smart Heal (Tap/Hold):** new keybind: tap for the fastest painkiller, hold to treat bleeds, fractures and missing health.
-- **Use Adrenaline:** new keybind that injects adrenaline from anywhere in the inventory.
-- **Consume Food/Drink:** new keybind to consume first food or drink item from anywhere in the inventory.
+- **Adrenaline/Food (Tap/Hold):** new keybind that uses items from anywhere in the inventory: tap to inject adrenaline, hold to consume the first food or drink item.
 - **Interact (Instant):** new keybind that opens containers without the hold delay. Locked containers still take the unlock time, but without holding the key. The vanilla **Interact** is unaffected.
 - **Quick sell:** `Shift+Click` sells an item in the hideout.
 - **Quick slot auto refill:** a quick slot refills with the same item type after use.

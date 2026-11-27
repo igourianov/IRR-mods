@@ -83,14 +83,15 @@ Tap: consume pain medication (fastest first).
 Hold: treat bleed/fracture conditions, otherwise consume IV if HP is missing.]],
 	},
 	{
+		-- Named before food joined it on hold. Kept so the saved key carries over.
 		name = "LikhosUseAdrenaline",
-		display = "Use Adrenaline",
-		description = "Consume Adrenaline from player's inventory.",
-	},
-	{
-		name = "LikhosConsumeFoodDrink",
-		display = "Consume Food/Drink",
-		description = "Consume food/drink item from player's inventory. Does not consume medical items.",
+		display = "Adrenaline/Food (Tap/Hold)",
+		description = [[
+Uses items from anywhere in player's inventory.
+
+Tap: consume Adrenaline.
+
+Hold: consume food/drink.]],
 	},
 	{
 		name = "LikhosInteractInstant",

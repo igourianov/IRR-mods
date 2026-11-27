@@ -20,6 +20,7 @@ return {
 	-- Switch Fire Mode (Tap/Hold): released inside this window, it switches the fire mode. Held past it, it shows the current fire mode without switching.
 	-- Smart Grenade: released inside this window, it is a tap or the first half of a double tap. Held past it, it equips a smoke or gas grenade.
 	-- Smart Fire Mode: released inside this window, it is a tap or the first half of a double tap. Held past it, it switches to auto.
+	-- Adrenaline/Food: released inside this window, it injects adrenaline. Held past it, it eats or drinks.
 	tap_ms = 250,
 
 	-- How soon after a tap's release a second press counts as a double tap, milliseconds. Used by Smart Grenade and Smart Fire Mode.
@@ -108,13 +109,6 @@ return {
 			block_in_ui = true,
 		},
 		{
-			id      = "consume",
-			enabled = true,
-			mapping = "LikhosConsumeFoodDrink",   -- Settings > Controls > Consume Food/Drink
-			action  = "ConsumeFoodDrink",     -- use the first usable food or drink item in the inventory
-			block_in_ui = true,
-		},
-		{
 			id      = "combat_heal",
 			enabled = true,
 			mapping = "LikhosCombatHeal",   -- Settings > Controls > Smart Heal (Tap/Hold)
@@ -122,10 +116,10 @@ return {
 			block_in_ui = true,
 		},
 		{
-			id      = "adrenaline",
+			id      = "adrenaline_food",
 			enabled = true,
-			mapping = "LikhosUseAdrenaline",   -- Settings > Controls > Use Adrenaline
-			action  = "UseAdrenaline",     -- inject an Adrenaline Injector from anywhere in the inventory
+			mapping = "LikhosUseAdrenaline",   -- Settings > Controls > Adrenaline/Food (Tap/Hold)
+			action  = "AdrenalineFood",     -- from anywhere in the inventory. Tap: an Adrenaline Injector. Hold: the first usable food or drink
 			block_in_ui = true,
 		},
 		{
