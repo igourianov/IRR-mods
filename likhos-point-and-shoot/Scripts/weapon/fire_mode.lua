@@ -3,7 +3,9 @@
 -- The Smart Fire Mode key switches straight to a mode: tap Semi, double tap Burst, hold Auto (docs/solutions/smart-fire-mode.md).
 -- The fire mode card shows where the magazine check card does.
 --
--- The switch is the vanilla one, sent as a one-frame press of the vanilla action. The vanilla switch only cycles forward, so Smart Fire Mode presses until the target is reached.
+-- Switch Fire Mode's switch is the vanilla one, sent as a one-frame press of the vanilla action.
+-- The vanilla switch is made by a notify in the switch animation, which lands on a fixed mode, so it only cycles forward.
+-- Smart Fire Mode switches silently to the mode whose animation lands on the target, then plays that animation.
 -- Holds no UObject between calls.
 
 local log     = require("lib.log")
@@ -27,9 +29,8 @@ local WEAPON_UI = "W_WeaponUI_C"
 local AUTO, SEMI, BURST = 0, 1, 2
 local MODE_TAGS = { [AUTO] = "AutoFireModeTag", [SEMI] = "SemiAutoFireModeTag", [BURST] = "BurstFireModeTag" }
 
--- How often Smart Fire Mode looks for an injected switch to land, and how long it waits for one. The game switches natively after the vanilla ability starts, or not at all when it refuses.
-local SWITCH_POLL_MS = 50
-local SWITCH_WAIT_MS = 1500
+-- Carried by a switch animation, it switches the weapon to its NewFireMode when the animation reaches it, whatever the current mode.
+local SWITCH_NOTIFY = "Notify_SwitchFireMode"
 
 -- The card hides on its own timer a few seconds after it is shown, also while the key is held. Showing it again within that keeps it up.
 local REFRESH_MS = 1000
@@ -45,14 +46,11 @@ local shown_at = nil
 local PENDING, STARTED = "pending", "started"
 local pose = nil
 
--- Bumped by every Smart Fire Mode gesture and level load, so a switch in progress stops waiting once a newer one starts.
-local generation = 0
-
 local function switch()
 	player.inject_press(IA_SWITCH_FIRE_MODE)
 end
 
---- Play one of the weapon's NoMagMontageSet montage sets the way SGA_OpenInventory_C does.
+--- Play one of the weapon's character montage sets the way SGA_OpenInventory_C and SGA_SwitchFireMode_C do.
 local function play_montages(pawn, wc, data, set, stop_previous)
 	local factory = StaticFindObject(PLAY_MONTAGE)
 	local weapon = wc:GetOwner()
@@ -138,7 +136,8 @@ local function mode_tag(settings, mode)
 	return property and { TagName = settings[property].TagName }
 end
 
-local function show()
+--- Show the card with EFireMode value mode selected, the current mode when nil.
+local function show(mode)
 	local wc = player.weapon_component()
 	local settings = general_settings()
 	local widget = live_card()
@@ -147,7 +146,7 @@ local function show()
 		return
 	end
 
-	local mode = wc:GetFireMode()
+	mode = mode or wc:GetFireMode()
 	local tag = mode_tag(settings, mode)
 	if not tag then
 		log.debug("fire mode: no tag for mode %s", tostring(mode))
@@ -157,59 +156,66 @@ local function show()
 	log.debug("fire mode: showed %s", tag.TagName:ToString())
 end
 
---- Press the vanilla switch, wait for the mode to change, and repeat until it is target or no presses are left. Then show the card. Game thread.
-local function press_toward(gen, target, presses)
-	if generation ~= gen then return end
-	local wc = player.weapon_component()
-	local from = wc and wc:GetFireMode()
-	if from == nil or from == target or presses == 0 then
-		show()
-		return
-	end
-
-	switch()
-	local waited = 0
-	local poll
-	local function wait()
-		ExecuteInGameThreadWithDelay(SWITCH_POLL_MS, function() util.safe("smart fire mode", poll) end)
-	end
-	poll = function()
-		if generation ~= gen then return end
-		local now = player.weapon_component()
-		now = now and now:GetFireMode()
-		if now ~= from then
-			press_toward(gen, target, presses - 1)
-			return
+---@return string? # the NewFireMode tag name of the switch notify in montage's animations, nil without one
+local function notify_target(montage)
+	-- The notify sits in the arm animation the montage plays, not on the montage itself.
+	local tracks = montage.SlotAnimTracks
+	for t = 1, #tracks do
+		local segments = tracks[t].AnimTrack.AnimSegments
+		for s = 1, #segments do
+			local anim = segments[s].AnimReference
+			local notifies = util.valid(anim) and anim.Notifies or {}
+			for n = 1, #notifies do
+				local notify = notifies[n].Notify
+				if util.valid(notify) and util.class_name(notify) == SWITCH_NOTIFY then return notify.NewFireMode.TagName:ToString() end
+			end
 		end
-		waited = waited + SWITCH_POLL_MS
-		if waited >= SWITCH_WAIT_MS then
-			log.debug("fire mode: switch from %s did not land", tostring(from))
-			show()
-			return
-		end
-		wait()
 	end
-	wait()
+	return nil
 end
 
---- Switch the equipped weapon to EFireMode value target with vanilla presses, and show the card whether or not it switched.
+--- The weapon's switch montage set whose animation lands on EFireMode value target, and the mode it switches from. nil when none does.
+local function set_into(wc, data, settings, target)
+	local into = mode_tag(settings, target).TagName:ToString()
+	for mode in pairs(MODE_TAGS) do
+		local tag = mode_tag(settings, mode)
+		if mode ~= target and wc:HasFireMode(tag) then
+			-- A mode without a set gets an empty one, so its montage tells a found set rather than the bFound out param.
+			local set = data:GetSwitchFireModeMontageSet(tag, {}).SwitchFireModeAnimSet
+			if util.valid(set.FP_Animation) and notify_target(set.FP_Animation) == into then return set, mode end
+		end
+	end
+	return nil
+end
+
+--- Switch the equipped weapon straight to EFireMode value target, with the switch animation that lands on it, and show the card whether or not it switched.
 local function select_mode(target)
-	generation = generation + 1
 	local wc = player.weapon_component()
 	local settings = general_settings()
-	if not (wc and settings) then
+	local current = wc and wc:GetFireMode()
+	local from = settings and mode_tag(settings, current)
+	local to = settings and mode_tag(settings, target)
+	if not (from and current ~= target and wc:HasFireMode(to)) then
 		show()
 		return
 	end
 
-	-- The vanilla switch cycles through the weapon's modes, so any one of them is at most one fewer press away than there are modes.
-	local modes = 0
-	for mode in pairs(MODE_TAGS) do
-		if wc:HasFireMode(mode_tag(settings, mode)) then modes = modes + 1 end
+	local pawn = player.pawn()
+	local data = wc:GetWeaponDataAsset()
+	local set, before = nil, nil
+	if pawn and util.valid(data) then set, before = set_into(wc, data, settings, target) end
+	if not set then
+		wc:SwitchFireMode(from, to)
+		log.debug("fire mode: switched %s to %s, no animation lands on it", from.TagName:ToString(), to.TagName:ToString())
+		show()
+		return
 	end
-	local presses = wc:HasFireMode(mode_tag(settings, target)) and modes - 1 or 0
-	log.debug("fire mode: select %s of %d modes, %d presses at most", tostring(target), modes, presses)
-	press_toward(generation, target, presses)
+
+	if before ~= current then wc:SwitchFireMode(from, mode_tag(settings, before)) end
+	play_montages(pawn, wc, data, set, false)
+	log.debug("fire mode: %s via %s to %s", from.TagName:ToString(), tostring(before), to.TagName:ToString())
+	-- The animation's notify makes the switch later, so the card names the target rather than the mode the weapon is in now.
+	show(target)
 end
 
 local function hold()
@@ -288,7 +294,6 @@ function M.install()
 		tap        = function() select_mode(SEMI) end,
 		double_tap = function() select_mode(BURST) end,
 		hold       = function() select_mode(AUTO) end,
-		reset      = function() generation = generation + 1 end,
 	})
 
 	if not enabled() then return end

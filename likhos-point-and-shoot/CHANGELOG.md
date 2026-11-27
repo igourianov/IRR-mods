@@ -1,3 +1,6 @@
+# Unreleased
+* fixed Smart Fire Mode playing the switch animation twice on weapons with burst
+
 # 2.5.269
 * added the Smart Fire Mode keybind to select a fire mode directly
 
