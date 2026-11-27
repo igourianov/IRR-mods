@@ -61,11 +61,6 @@ Double tap: burst.
 Hold: auto.]],
 	},
 	{
-		name = "LikhosInteractInstant",
-		display = "Interact (Instant)",
-		description = "Interact without holding down the button. Locked containers still take time to unlock.",
-	},
-	{
 		name = "LikhosSmartGrenade",
 		display = "Smart Grenade (Tap/Hold/Double Tap)",
 		description = [[
@@ -96,6 +91,11 @@ Hold: treat bleed/fracture conditions, otherwise consume IV if HP is missing.]],
 		name = "LikhosConsumeFoodDrink",
 		display = "Consume Food/Drink",
 		description = "Consume food/drink item from player's inventory. Does not consume medical items.",
+	},
+	{
+		name = "LikhosInteractInstant",
+		display = "Interact (Instant)",
+		description = "Interact without holding down the button. Locked containers still take time to unlock.",
 	},
 }
 
