@@ -62,7 +62,9 @@ local function item_treatments(definition)
 			for j = 1, #triggered do
 				local action = triggered[j]
 				if util.valid(action) then
-					for tag in pairs(tag_set(action.EffectStatTags)) do
+					local tags = action.EffectStatTags.GameplayTags
+					for k = 1, #tags do
+						local tag = tags[k].TagName:ToString()
 						local treatment = TREATMENTS[tag]
 						if treatment and not by_treatment[treatment] then
 							by_treatment[treatment] = { context = context, tag = tag }
