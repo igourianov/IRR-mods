@@ -8,7 +8,7 @@ Tactical shortcuts, control tweaks and inventory QoL.
 - **Flashlight (Hold/Toggle):** new keybind for the weapon light, without the radial menu. Follows the same NVG rules as the laser.
 - **Hold Breath:** adds hold to the vanilla toggle key. Releasing it lets the breath out, and a tap still toggles.
 - **Switch Fire Mode (Tap/Hold):** new keybind that replaces the vanilla **Switch Fire Mode**: tap to switch, hold to see the selected fire mode without switching. Unbind the vanilla key.
-- **Smart Fire Mode (Tap/Hold/Double Tap):** new keybind that selects a fire mode directly: tap for semi, double tap for burst, hold for auto.
+- **Smart Fire Mode (Tap/Hold/Double Tap):** new keybind that selects a fire mode directly: tap for semi, double tap for burst, hold for auto. Alternative to the above.
 - **Smart Grenade (Tap/Hold/Double Tap):** new keybind that equips a grenade by type: tap for frag, hold for smoke or gas, double tap for flashbang.
 - **Smart Heal (Tap/Hold):** new keybind: tap for the fastest painkiller, hold to treat bleeds, fractures and missing health.
 - **Use Adrenaline:** new keybind that injects adrenaline from anywhere in the inventory.
