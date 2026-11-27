@@ -1,4 +1,4 @@
-# Unreleased
+# 2.5.269
 * added the Smart Fire Mode keybind to select a fire mode directly
 
 # 2.4.264
