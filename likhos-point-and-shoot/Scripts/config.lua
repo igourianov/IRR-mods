@@ -19,10 +19,11 @@ return {
 	-- Hold Breath: released inside this window, the breath stays held until the next press. Held past it, breath is let out on release.
 	-- Switch Fire Mode (Tap/Hold): released inside this window, it switches the fire mode. Held past it, it shows the current fire mode without switching.
 	-- Smart Grenade: released inside this window, it is a tap or the first half of a double tap. Held past it, it equips a smoke or gas grenade.
+	-- Smart Fire Mode: released inside this window, it is a tap or the first half of a double tap. Held past it, it switches to auto.
 	tap_ms = 250,
 
-	-- How soon after a tap's release a second press counts as a double tap, milliseconds. Used by Smart Grenade.
-	-- A tap equips its frag only once this window has passed, so a higher value delays every frag.
+	-- How soon after a tap's release a second press counts as a double tap, milliseconds. Used by Smart Grenade and Smart Fire Mode.
+	-- A tap acts only once this window has passed, so a higher value delays every frag and every switch to semi.
 	double_tap_ms = 200,
 
 	-- The zoom input folds and unfolds the magnifier on a hybrid sight: scroll forward unfolds, scroll back folds.
@@ -90,6 +91,13 @@ return {
 			enabled = true,
 			mapping = "LikhosSwitchFireMode",   -- Settings > Controls > Switch Fire Mode (Tap/Hold). Unbind the vanilla Switch Fire Mode key.
 			action  = "FireMode",   -- tap to switch on release, hold to show the current fire mode
+			block_in_ui = true,
+		},
+		{
+			id      = "smart_fire_mode",
+			enabled = true,
+			mapping = "LikhosSmartFireMode",   -- Settings > Controls > Smart Fire Mode (Tap/Hold/Double Tap)
+			action  = "SmartFireMode",   -- tap: semi. Double tap: burst. Hold: auto. Shows the fire mode card either way
 			block_in_ui = true,
 		},
 		{

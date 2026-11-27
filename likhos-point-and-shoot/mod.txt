@@ -1,5 +1,5 @@
 [mod]
-version="2.4.264"
+version="2.5.269"
 
 [ue4ss]
 ; UE4SS version this mod was developed and tested against.

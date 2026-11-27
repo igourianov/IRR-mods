@@ -1,3 +1,6 @@
+# Unreleased
+* added the Smart Fire Mode keybind to select a fire mode directly: tap for semi, double tap for burst, hold for auto
+
 # 2.4.264
 * sprint (double tap run) now overrides crouch, so you can panic gtfo when discovered sneaking about
 * added the Smart Grenade keybind to select grenades predictably

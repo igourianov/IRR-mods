@@ -1,8 +1,9 @@
 -- weapon/fire_mode.lua : the Switch Fire Mode (Tap/Hold) key switches the fire mode on a tap and shows the current one on a hold (docs/solutions/fire-mode-check.md).
 -- The hold also takes the support hand off the weapon, with the open inventory's montages, until the release.
+-- The Smart Fire Mode key switches straight to a mode: tap Semi, double tap Burst, hold Auto (docs/solutions/smart-fire-mode.md).
 -- The fire mode card shows where the magazine check card does.
 --
--- The switch is the vanilla one, sent as a one-frame press of the vanilla action.
+-- The switch is the vanilla one, sent as a one-frame press of the vanilla action. The vanilla switch only cycles forward, so Smart Fire Mode presses until the target is reached.
 -- Holds no UObject between calls.
 
 local log     = require("lib.log")
@@ -23,7 +24,12 @@ local CARD_CLASS = "/Game/Blueprints/InventorySystem/Widgets/WeaponUI/W_ShowFire
 local WEAPON_UI = "W_WeaponUI_C"
 
 -- EFireMode value from WeaponComponent:GetFireMode -> the GeneralSettings property holding its tag.
-local MODE_TAGS = { [0] = "AutoFireModeTag", [1] = "SemiAutoFireModeTag", [2] = "BurstFireModeTag" }
+local AUTO, SEMI, BURST = 0, 1, 2
+local MODE_TAGS = { [AUTO] = "AutoFireModeTag", [SEMI] = "SemiAutoFireModeTag", [BURST] = "BurstFireModeTag" }
+
+-- How often Smart Fire Mode looks for an injected switch to land, and how long it waits for one. The game switches natively after the vanilla ability starts, or not at all when it refuses.
+local SWITCH_POLL_MS = 50
+local SWITCH_WAIT_MS = 1500
 
 -- The card hides on its own timer a few seconds after it is shown, also while the key is held. Showing it again within that keeps it up.
 local REFRESH_MS = 1000
@@ -38,6 +44,9 @@ local shown_at = nil
 -- The hands-off pose of this hold: nil, PENDING until it can start, STARTED once its montage plays. Plain values only.
 local PENDING, STARTED = "pending", "started"
 local pose = nil
+
+-- Bumped by every Smart Fire Mode gesture and level load, so a switch in progress stops waiting once a newer one starts.
+local generation = 0
 
 local function switch()
 	player.inject_press(IA_SWITCH_FIRE_MODE)
@@ -116,27 +125,91 @@ local function live_card()
 	return nil
 end
 
+---@return UObject? # the game's GeneralSettings, holding the fire mode tags
+local function general_settings()
+	local library = StaticFindObject(GENERAL_LIBRARY)
+	local settings = util.valid(library) and library:GetGeneralSettings()
+	return util.valid(settings) and settings or nil
+end
+
+---@return table? # the GameplayTag of EFireMode value mode, nil for a mode without one
+local function mode_tag(settings, mode)
+	local property = MODE_TAGS[mode]
+	return property and { TagName = settings[property].TagName }
+end
+
 local function show()
 	local wc = player.weapon_component()
-	local library = StaticFindObject(GENERAL_LIBRARY)
-	if not (wc and util.valid(library)) then return end
+	local settings = general_settings()
+	local widget = live_card()
+	if not (wc and settings and widget) then
+		log.debug("fire mode: weapon %s, settings %s, card %s", tostring(wc ~= nil), tostring(settings ~= nil), tostring(widget ~= nil))
+		return
+	end
 
 	local mode = wc:GetFireMode()
-	local property = MODE_TAGS[mode]
-	if not property then
+	local tag = mode_tag(settings, mode)
+	if not tag then
 		log.debug("fire mode: no tag for mode %s", tostring(mode))
 		return
 	end
-	local settings = library:GetGeneralSettings()
-	local widget = live_card()
-	if not (util.valid(settings) and widget) then
-		log.debug("fire mode: settings %s, card %s", tostring(util.valid(settings)), tostring(widget ~= nil))
+	widget:OnWeaponFireModeChanged_Event(tag)
+	log.debug("fire mode: showed %s", tag.TagName:ToString())
+end
+
+--- Press the vanilla switch, wait for the mode to change, and repeat until it is target or no presses are left. Then show the card. Game thread.
+local function press_toward(gen, target, presses)
+	if generation ~= gen then return end
+	local wc = player.weapon_component()
+	local from = wc and wc:GetFireMode()
+	if from == nil or from == target or presses == 0 then
+		show()
 		return
 	end
 
-	local tag = settings[property]
-	widget:OnWeaponFireModeChanged_Event({ TagName = tag.TagName })
-	log.debug("fire mode: showed %s", tag.TagName:ToString())
+	switch()
+	local waited = 0
+	local poll
+	local function wait()
+		ExecuteInGameThreadWithDelay(SWITCH_POLL_MS, function() util.safe("smart fire mode", poll) end)
+	end
+	poll = function()
+		if generation ~= gen then return end
+		local now = player.weapon_component()
+		now = now and now:GetFireMode()
+		if now ~= from then
+			press_toward(gen, target, presses - 1)
+			return
+		end
+		waited = waited + SWITCH_POLL_MS
+		if waited >= SWITCH_WAIT_MS then
+			log.debug("fire mode: switch from %s did not land", tostring(from))
+			show()
+			return
+		end
+		wait()
+	end
+	wait()
+end
+
+--- Switch the equipped weapon to EFireMode value target with vanilla presses, and show the card whether or not it switched.
+local function select_mode(target)
+	generation = generation + 1
+	local wc = player.weapon_component()
+	local settings = general_settings()
+	if not (wc and settings) then
+		show()
+		return
+	end
+
+	-- The vanilla switch cycles through the weapon's modes, so any one of them is at most one fewer press away than there are modes.
+	local modes = 0
+	for mode in pairs(MODE_TAGS) do
+		if wc:HasFireMode(mode_tag(settings, mode)) then modes = modes + 1 end
+	end
+	local presses = wc:HasFireMode(mode_tag(settings, target)) and modes - 1 or 0
+	log.debug("fire mode: select %s of %d modes, %d presses at most", tostring(target), modes, presses)
+	press_toward(generation, target, presses)
 end
 
 local function hold()
@@ -194,14 +267,15 @@ local function on_card_constructed(context)
 	end))
 end
 
+--- Whether a fire mode bind is enabled, so the card moves to the magazine check spot.
 local function enabled()
 	for _, bind in ipairs(config.binds) do
-		if bind.action == "FireMode" then return bind.enabled end
+		if (bind.action == "FireMode" or bind.action == "SmartFireMode") and bind.enabled then return true end
 	end
 	return false
 end
 
---- Define the FireMode action and place the fire mode cards, built and to be built.
+--- Define the FireMode and SmartFireMode actions and place the fire mode cards, built and to be built.
 function M.install()
 	actions.define("FireMode", {
 		tap = switch,
@@ -209,6 +283,12 @@ function M.install()
 		held = held,
 		release = release,
 		reset = clear,
+	})
+	actions.define("SmartFireMode", {
+		tap        = function() select_mode(SEMI) end,
+		double_tap = function() select_mode(BURST) end,
+		hold       = function() select_mode(AUTO) end,
+		reset      = function() generation = generation + 1 end,
 	})
 
 	if not enabled() then return end

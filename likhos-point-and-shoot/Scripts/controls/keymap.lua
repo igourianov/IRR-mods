@@ -49,6 +49,18 @@ Tap: switch to the next fire mode.
 Hold: show the selected fire mode without switching.]],
 	},
 	{
+		name = "LikhosSmartFireMode",
+		display = "Smart Fire Mode (Tap/Hold/Double Tap)",
+		description = [[
+Switch straight to a fire mode instead of cycling. Shows the selected mode either way.
+
+Tap: semi.
+
+Double tap: burst.
+
+Hold: auto.]],
+	},
+	{
 		name = "LikhosInteractInstant",
 		display = "Interact (Instant)",
 		description = "Interact without holding down the button. Locked containers still take time to unlock.",
