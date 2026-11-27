@@ -88,10 +88,10 @@ return {
 			block_in_ui = true,
 		},
 		{
-			id      = "fire_mode",
+			id      = "switch_fire_mode",
 			enabled = true,
 			mapping = "LikhosSwitchFireMode",   -- Settings > Controls > Switch Fire Mode (Tap/Hold). Unbind the vanilla Switch Fire Mode key.
-			action  = "FireMode",   -- tap to switch on release, hold to show the current fire mode
+			action  = "SwitchFireMode",   -- tap to switch on release, hold to show the current fire mode
 			block_in_ui = true,
 		},
 		{
@@ -102,17 +102,17 @@ return {
 			block_in_ui = true,
 		},
 		{
-			id      = "quick_use",
+			id      = "instant_interact",
 			enabled = true,
 			mapping = "LikhosInteractInstant",   -- Settings > Controls > Interact (Instant)
-			action  = "QuickUse",     -- tap to use what F would, holds completing at once
+			action  = "InstantInteract",     -- tap to use what F would, holds completing at once
 			block_in_ui = true,
 		},
 		{
-			id      = "combat_heal",
+			id      = "smart_heal",
 			enabled = true,
 			mapping = "LikhosCombatHeal",   -- Settings > Controls > Smart Heal (Tap/Hold)
-			action  = "CombatHeal",     -- tap: the fastest painkiller, even over an active dose. Hold: heavy bleed, bleed or fracture with the fastest item, else an IV
+			action  = "SmartHeal",     -- tap: the fastest painkiller, even over an active dose. Hold: heavy bleed, bleed or fracture with the fastest item, else an IV
 			block_in_ui = true,
 		},
 		{

@@ -276,14 +276,14 @@ end
 --- Whether a fire mode bind is enabled, so the card moves to the magazine check spot.
 local function enabled()
 	for _, bind in ipairs(config.binds) do
-		if (bind.action == "FireMode" or bind.action == "SmartFireMode") and bind.enabled then return true end
+		if (bind.action == "SwitchFireMode" or bind.action == "SmartFireMode") and bind.enabled then return true end
 	end
 	return false
 end
 
 --- Define the FireMode and SmartFireMode actions and place the fire mode cards, built and to be built.
 function M.install()
-	actions.define("FireMode", {
+	actions.define("SwitchFireMode", {
 		tap = switch,
 		hold = hold,
 		held = held,

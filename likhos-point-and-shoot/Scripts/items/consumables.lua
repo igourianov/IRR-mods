@@ -184,14 +184,14 @@ end
 
 --- Game thread.
 local function hold()
-	local pawn, comp = resolve("CombatHealHold")
+	local pawn, comp = resolve("SmartHealHold")
 	if not pawn then return end
 	local health_comp = pawn:GetHealthComponent()
 	local health = util.valid(health_comp) and health_comp.Health or nil
 	local ability = pawn:GetAbilityComponent()
 	local tags_comp = util.valid(ability) and ability.GameplayTagsComponent or nil
 	if not (util.valid(health) and util.valid(tags_comp)) then
-		log.debug("CombatHealHold: no health attribute or tags component")
+		log.debug("SmartHealHold: no health attribute or tags component")
 		return
 	end
 
@@ -202,7 +202,7 @@ local function hold()
 	end
 	local missing = health:GetCurrentMaxValue() - health:GetBaseValue()
 	if missing > 0 then steps[#steps + 1] = { treatment = "heal", rank = by_coverage(missing) } end
-	run("CombatHealHold", steps, collect(comp), pawn)
+	run("SmartHealHold", steps, collect(comp), pawn)
 end
 
 --- Use the first usable food or drink item. Game thread.
@@ -226,11 +226,11 @@ local function eat()
 	log.debug("AdrenalineFoodHold: no usable food or drink")
 end
 
---- Define the CombatHeal and AdrenalineFood actions.
+--- Define the SmartHeal and AdrenalineFood actions.
 function M.install()
 	-- Tap for a painkiller, hold to treat a condition or start an IV. The hold fires as the tap window passes, so its item starts without waiting for release.
-	actions.define("CombatHeal", {
-		tap  = function() use("CombatHeal", "painkiller") end,
+	actions.define("SmartHeal", {
+		tap  = function() use("SmartHeal", "painkiller") end,
 		hold = hold,
 	})
 

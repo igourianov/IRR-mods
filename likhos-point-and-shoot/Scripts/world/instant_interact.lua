@@ -82,12 +82,12 @@ local function press()
 	local pc, comp, sga_class = interact_parts()
 	local lib = StaticFindObject(LIB_PATH)
 	if not (pc and util.valid(lib)) then
-		log.debug("QuickUse: no pawn, ability component or interaction classes")
+		log.debug("InstantInteract: no pawn, ability component or interaction classes")
 		return
 	end
 	local manager = lib:GetLocalInteractionManager(pc)
 	if not util.valid(manager) then
-		log.debug("QuickUse: no interaction manager")
+		log.debug("InstantInteract: no interaction manager")
 		return
 	end
 	local target = manager.SelectedTarget
@@ -105,7 +105,7 @@ local function press()
 	-- Nothing is holding, so no finish will come to put the holds back.
 	restore()
 	if not started then
-		log.debug("QuickUse: ability refused")
+		log.debug("InstantInteract: ability refused")
 		return
 	end
 	-- A Tab interaction runs on a delayed start, and SGA_Interact stays active until a release, which only F sends. Left active, it refuses the next start from either key.
@@ -125,9 +125,9 @@ local function on_finish(_, target)
 	if comp then release_ability(comp, sga_class) end
 end
 
---- Define the QuickUse action and hook the interaction end, which puts the zeroed holds back. The class is native.
+--- Define the InstantInteract action and hook the interaction end, which puts the zeroed holds back. The class is native.
 function M.install()
-	actions.define("QuickUse", {
+	actions.define("InstantInteract", {
 		press = hooks.guard(press),
 		-- Drop the override without writing. Level load takes its options with it.
 		reset = function() override = nil end,
