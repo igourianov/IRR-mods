@@ -27,14 +27,14 @@ return {
 	-- Set false to stay crouched on Sprint.
 	sprint_cancels_crouch = true,
 
-	-- Quest objective markers get a colored ring: bomb and bug placement spots, mission phones, quest items, mission boxes and delivery boxes.
+	-- Quest objective markers get a colored ring and show from farther away: bomb and bug placement spots, mission phones, quest items, mission boxes and delivery boxes.
 	-- Every interaction marker shows through walls within its range, and F reaches it through them.
 	-- Set false for vanilla markers.
-	plant_marker = true,
-	-- Ring color, "#RRGGBB".
-	plant_marker_color = "#33B5FF",
-	-- Meters at which an objective marker first shows, where vanilla is shorter. 0 keeps vanilla.
-	plant_marker_range = 10,
+	objective_marker = true,
+	-- Objective ring color, "#RRGGBB". Set to nil to keep vanilla ring.
+	objective_marker_color = "#33B5FF",
+	-- Meters at which an objective marker first shows. Set to nil to keep vanilla distance.
+	objective_marker_range = 10,
 
 	-- Inventory tiles show uses as whole numbers and condition as a percentage.
 	-- Single use items show no count until used. USB hacking devices show uses as a percentage. Equipment slots keep the vanilla bar.
@@ -53,7 +53,7 @@ return {
 	clock_24h = true,
 
 	-- Painkiller temporary health color on the HUD health bar, "#RRGGBB". The bar's overlay lightens it a little.
-	-- Set false for the vanilla faint pink.
+	-- Set to nil to keep vanilla color.
 	temp_health_color = "#ffaa55",
 
 	-- Holding the vanilla Hold Breath key holds breath until release. A tap still toggles.

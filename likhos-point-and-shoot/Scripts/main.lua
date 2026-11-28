@@ -74,7 +74,7 @@ local function init()
 	if config.magnifier_zoom then magnifier.install() end
 	if config.low_ready_default then require("pose.low_ready").install() end
 	if config.sprint_cancels_crouch then require("pose.sprint_stand").install() end
-	if config.plant_marker then require("world.objective_marker").install() end
+	if config.objective_marker then require("world.objective_marker").install() end
 	if config.whole_uses then require("inventory.tile_counts").install() end
 	if config.quick_sell then require("inventory.quick_sell").install() end
 	if config.quick_slot_refill then require("inventory.quick_slots").install() end

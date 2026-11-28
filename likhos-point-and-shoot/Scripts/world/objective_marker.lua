@@ -32,8 +32,8 @@ local DISPLAY_SETTINGS = { "DefaultDisplaySetting", "HoldDisplaySetting", "Repea
 -- A target is constructed before its owner sets it up, and a pickup gets its item after it spawns. Read 2 s later, both are in place.
 local CLASSIFY_DELAY_MS = 2000
 
--- Linear color parsed from config.plant_marker_color and outer radius in cm from config.plant_marker_range, set by install().
-local tint, range = nil, 0
+-- Linear color parsed from config.objective_marker_color and outer radius in cm from config.objective_marker_range, set by install(). A nil tint keeps the vanilla ring, a nil range the vanilla distance.
+local tint, range = nil, nil
 
 -- The spawn watch is registered once. A hot reload only rescans.
 local watching = false
@@ -77,17 +77,21 @@ end
 local function decorate(path)
 	local target = StaticFindObject(path)
 	if not (util.valid(target) and is_objective(target)) then return end
-	if target.OuterInteractionRadius < range then target.OuterInteractionRadius = range end
-	-- Some targets have no sphere of their own, and the outer radius alone sets the distance.
-	local sphere = target.SphereComponent
-	if util.valid(sphere) and sphere.SphereRadius < range then sphere:SetSphereRadius(range, true) end
-	local options = target.InteractionOptions
-	for i = 1, #options do
-		local option = options[i]
-		if util.valid(option) then
-			for _, name in ipairs(DISPLAY_SETTINGS) do
-				local marker_setting = option[name].MarkerSetting
-				marker_setting.BorderColor = { SpecifiedColor = { R = tint.R, G = tint.G, B = tint.B, A = marker_setting.BorderColor.SpecifiedColor.A }, ColorUseRule = 0 }
+	if range then
+		target.OuterInteractionRadius = range
+		-- Some targets have no sphere of their own, and the outer radius alone sets the distance.
+		local sphere = target.SphereComponent
+		if util.valid(sphere) then sphere:SetSphereRadius(range, true) end
+	end
+	if tint then
+		local options = target.InteractionOptions
+		for i = 1, #options do
+			local option = options[i]
+			if util.valid(option) then
+				for _, name in ipairs(DISPLAY_SETTINGS) do
+					local marker_setting = option[name].MarkerSetting
+					marker_setting.BorderColor = { SpecifiedColor = { R = tint.R, G = tint.G, B = tint.B, A = marker_setting.BorderColor.SpecifiedColor.A }, ColorUseRule = 0 }
+				end
 			end
 		end
 	end
@@ -128,12 +132,17 @@ local function scan()
 end
 
 function M.install()
-	tint = parse_color(config.plant_marker_color)
-	if not tint then
-		log.error("objective marker: plant_marker_color '%s' is not a #RRGGBB color, objective markers stay vanilla", tostring(config.plant_marker_color))
-		return
+	local color = config.objective_marker_color
+	tint = color and parse_color(color)
+	if color and not tint then
+		log.error("objective marker: objective_marker_color '%s' is not a #RRGGBB color, objective rings stay vanilla", tostring(color))
 	end
-	range = (tonumber(config.plant_marker_range) or 0) * 100
+	local meters = config.objective_marker_range
+	range = meters and tonumber(meters)
+	if meters and not range then
+		log.error("objective marker: objective_marker_range '%s' is not a number, objective markers keep the vanilla distance", tostring(meters))
+	end
+	range = range and range * 100
 	if not watching then
 		watching = true
 		NotifyOnNewObject(TARGET_CLASS, function(target)
