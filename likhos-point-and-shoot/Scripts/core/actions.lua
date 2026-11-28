@@ -17,10 +17,10 @@ function M.define(name, phases)
 	defined[name] = phases
 end
 
---- Whether action `name` has a function for phase.
+--- Whether action `name` is defined, and with phase given, whether it has a function for it.
 function M.defines(name, phase)
 	local spec = defined[name]
-	return spec ~= nil and spec[phase] ~= nil
+	return spec ~= nil and (phase == nil or spec[phase] ~= nil)
 end
 
 --- Actions found undefined this session, so the error logs once rather than every tick.

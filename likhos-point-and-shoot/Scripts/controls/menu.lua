@@ -75,7 +75,7 @@ local function create_like(source)
 	return lib:Create(source:GetOuter():GetOuter(), source:GetClass(), source:GetOwningPlayer())
 end
 
---- Clone the vanilla row source into a row for a keymap.MAPPINGS entry, not yet on the page.
+--- Clone the vanilla row source into a row for a mod mapping in keymap.BINDS, not yet on the page.
 ---@return UObject?
 local function create_row(source, mapping)
 	local ia = keymap.action(mapping.name)
@@ -130,8 +130,8 @@ local function create_section(container, source)
 
 	local widgets = { { widget = header, layout = slot_layout(header_src.Slot), header = true } }
 	local row_layout = slot_layout(source.Slot)
-	for _, mapping in ipairs(keymap.MAPPINGS) do
-		local row = create_row(source, mapping)
+	for _, mapping in ipairs(keymap.BINDS) do
+		local row = not mapping.vanilla and create_row(source, mapping)
 		if row then table.insert(widgets, { widget = row, layout = row_layout, row = true }) end
 	end
 

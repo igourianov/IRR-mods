@@ -125,9 +125,9 @@ local function on_finish(_, target)
 	if comp then release_ability(comp, sga_class) end
 end
 
---- Define the InstantInteract action and hook the interaction end, which puts the zeroed holds back. The class is native.
+--- Define the Instant Interact action and hook the interaction end, which puts the zeroed holds back. The class is native.
 function M.install()
-	actions.define("InstantInteract", {
+	actions.define("LikhosInteractInstant", {
 		press = hooks.guard(press),
 		-- Drop the override without writing. Level load takes its options with it.
 		reset = function() override = nil end,

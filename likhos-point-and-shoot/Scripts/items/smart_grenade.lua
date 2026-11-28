@@ -89,9 +89,9 @@ local function equip(category)
 	log.debug("SmartGrenade: %s: none usable in the rig or pockets", category)
 end
 
---- Define the SmartGrenade action.
+--- Define the Smart Grenade action.
 function M.install()
-	actions.define("SmartGrenade", {
+	actions.define("LikhosSmartGrenade", {
 		tap        = function() equip("frag") end,
 		hold       = function() equip("smoke") end,
 		double_tap = function() equip("flashbang") end,

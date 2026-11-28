@@ -16,64 +16,64 @@ local TAP_MS = config.tap_ms or 250
 --- A second press within this window after a tap's release is a double tap, milliseconds.
 local DOUBLE_TAP_MS = config.double_tap_ms or 200
 
--- bind.id -> { at, hold, double } while the key is held. at is os.clock() at press, wall time on Windows (docs/solutions/point-aim-bind.md, Recon, Enhanced Input injection). hold is whether `hold` has fired. double is whether this press was a double tap.
+-- bind.name -> { at, hold, double } while the key is held. at is os.clock() at press, wall time on Windows (docs/solutions/point-aim-bind.md, Recon, Enhanced Input injection). hold is whether `hold` has fired. double is whether this press was a double tap.
 local holding = {}
--- bind.id -> os.clock() at the release of a tap waiting out its double tap window.
+-- bind.name -> os.clock() at the release of a tap waiting out its double tap window.
 local pending_tap = {}
 
 --- Called from the game thread when the bound key goes down.
 function M.on_press(bind)
-	local double = pending_tap[bind.id] ~= nil
-	pending_tap[bind.id] = nil
-	holding[bind.id] = { at = os.clock(), hold = false, double = double }
-	actions.invoke(bind.action, "press")
-	if double then actions.invoke(bind.action, "double_tap") end
+	local double = pending_tap[bind.name] ~= nil
+	pending_tap[bind.name] = nil
+	holding[bind.name] = { at = os.clock(), hold = false, double = double }
+	actions.invoke(bind.name, "press")
+	if double then actions.invoke(bind.name, "double_tap") end
 end
 
 --- Called from the game thread when the bound key goes up, or when the context gate starts blocking while it is held.
 --- No-op unless a hold is active.
 function M.on_release(bind)
-	local state = holding[bind.id]
+	local state = holding[bind.name]
 	if not state then return end
-	holding[bind.id] = nil
-	actions.invoke(bind.action, "release")
+	holding[bind.name] = nil
+	actions.invoke(bind.name, "release")
 	if state.double then return end
 	if state.hold then
-		actions.invoke(bind.action, "hold_release")
+		actions.invoke(bind.name, "hold_release")
 		return
 	end
-	if actions.defines(bind.action, "double_tap") then
-		pending_tap[bind.id] = os.clock()
+	if actions.defines(bind.name, "double_tap") then
+		pending_tap[bind.name] = os.clock()
 		return
 	end
-	actions.invoke(bind.action, "tap")
+	actions.invoke(bind.name, "tap")
 end
 
 --- Whether bind has a tap waiting out its double tap window.
 function M.tap_pending(bind)
-	return pending_tap[bind.id] ~= nil
+	return pending_tap[bind.name] ~= nil
 end
 
 --- Forget bind's waiting tap.
 function M.drop_tap(bind)
-	pending_tap[bind.id] = nil
+	pending_tap[bind.name] = nil
 end
 
 --- Called every frame from the game thread.
 function M.tick(binds)
 	for _, bind in ipairs(binds) do
-		local state = holding[bind.id]
+		local state = holding[bind.name]
 		if state then
-			actions.invoke(bind.action, "held")
+			actions.invoke(bind.name, "held")
 			if not state.hold and not state.double and (os.clock() - state.at) * 1000 >= TAP_MS then
 				state.hold = true
-				actions.invoke(bind.action, "hold")
+				actions.invoke(bind.name, "hold")
 			end
 		end
-		local released_at = pending_tap[bind.id]
+		local released_at = pending_tap[bind.name]
 		if released_at and (os.clock() - released_at) * 1000 >= DOUBLE_TAP_MS then
-			pending_tap[bind.id] = nil
-			actions.invoke(bind.action, "tap")
+			pending_tap[bind.name] = nil
+			actions.invoke(bind.name, "tap")
 		end
 	end
 end

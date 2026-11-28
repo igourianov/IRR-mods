@@ -120,9 +120,9 @@ local function release()
 	if state.device then devices.try(devices.off, wc, state.device) end
 end
 
---- Define the PointAim action.
+--- Define the Point Aim action.
 function M.install()
-	actions.define("PointAim", {
+	actions.define("LikhosPointShootingDirect", {
 		press   = press,
 		held    = held,
 		release = release,

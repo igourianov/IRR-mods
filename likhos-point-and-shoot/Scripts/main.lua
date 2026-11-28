@@ -13,20 +13,18 @@ local keymap   = require("controls.keymap")
 local magnifier = require("weapon.magnifier")
 local config   = require("config")
 
---- The binds of config that are enabled and have a mapping. Binds take their keys from the controls menu (controls/keymap.lua) and are polled from the tick loop, so they get a release event.
+--- The binds of controls/keymap.lua whose action a feature module defined, so a feature its config flag leaves out has no bind. Binds take their keys from the controls menu and are polled from the tick loop, so they get a release event.
 local function active_binds()
 	local active = {}
-	for _, bind in ipairs(config.binds) do
-		if not bind.enabled then
-			log.debug("bind '%s' disabled in config", bind.id)
-		elseif not bind.mapping then
-			log.error("bind '%s' has no mapping - ignoring", bind.id)
-		else
+	for _, bind in ipairs(keymap.BINDS) do
+		if actions.defines(bind.name) then
 			active[#active + 1] = bind
-			log.info("registered bind '%s' on mapping %s (polled)", bind.id, bind.mapping)
+			log.info("registered bind '%s' (polled)", bind.name)
+		else
+			log.debug("bind '%s' has no action defined", bind.name)
 		end
 	end
-	log.info("%d of %d bind(s) active", #active, #config.binds)
+	log.info("%d of %d bind(s) active", #active, #keymap.BINDS)
 	return active
 end
 
@@ -68,11 +66,11 @@ local function init()
 	require("controls.menu").install()
 	require("weapon.point_aim").install()
 	require("weapon.flashlight").install()
-	require("weapon.hold_breath").install()
 	require("weapon.fire_mode").install()
 	require("items.consumables").install()
 	require("items.smart_grenade").install()
 	require("world.instant_interact").install()
+	if config.hold_breath then require("weapon.hold_breath").install() end
 	if config.magnifier_zoom then magnifier.install() end
 	if config.low_ready_default then require("weapon.low_ready").install() end
 	if config.sprint_cancels_crouch then require("movement.sprint_stand").install() end
@@ -88,8 +86,8 @@ local function init()
 
 	RegisterConsoleCommandHandler("kb_status", function()
 		log.info("player controller: %s", player.controller() and "acquired" or "none")
-		for _, b in ipairs(config.binds) do
-			log.info("  %-28s %-12s %s", b.id, keymap.describe(b.mapping), b.enabled and "on" or "off")
+		for _, b in ipairs(keymap.BINDS) do
+			log.info("  %-28s %-12s %s", b.name, keymap.describe(b.name), actions.defines(b.name) and "on" or "off")
 		end
 		return true
 	end)

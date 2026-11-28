@@ -273,30 +273,22 @@ local function on_card_constructed(context)
 	end))
 end
 
---- Whether a fire mode bind is enabled, so the card moves to the magazine check spot.
-local function enabled()
-	for _, bind in ipairs(config.binds) do
-		if (bind.action == "SwitchFireMode" or bind.action == "SmartFireMode") and bind.enabled then return true end
-	end
-	return false
-end
-
---- Define the FireMode and SmartFireMode actions and place the fire mode cards, built and to be built.
+--- Define the Switch Fire Mode and Smart Fire Mode actions and place the fire mode cards, built and to be built.
 function M.install()
-	actions.define("SwitchFireMode", {
+	actions.define("LikhosSwitchFireMode", {
 		tap = switch,
 		hold = hold,
 		held = held,
 		release = release,
 		reset = clear,
 	})
-	actions.define("SmartFireMode", {
+	actions.define("LikhosSmartFireMode", {
 		tap        = function() select_mode(SEMI) end,
 		double_tap = function() select_mode(BURST) end,
 		hold       = function() select_mode(AUTO) end,
 	})
 
-	if not enabled() then return end
+	if not config.fire_mode_card then return end
 	hooks.install(CARD_CLASS .. ":Construct", CARD_CLASS, on_card_constructed)
 	for _, card in ipairs(FindAllOf(CARD_WIDGET) or {}) do
 		if util.valid(card) then hooks.try(place, card) end

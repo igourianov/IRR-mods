@@ -26,9 +26,9 @@ local function hold_release()
 	player.inject_press(IA_HOLD_BREATH)
 end
 
---- Define the HoldBreath action.
+--- Define the Hold Breath action.
 function M.install()
-	actions.define("HoldBreath", {
+	actions.define("IA_HoldBreath", {
 		hold_release = hold_release,
 	})
 end

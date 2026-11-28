@@ -1,10 +1,4 @@
 -- config.lua : USER-EDITABLE. Hot-reloadable (Ctrl+R in the UE4SS console).
---
--- The key is set in the game's controls menu on the mapping's row, the mod's own or a vanilla one, and polled every tick, so the action gets a real press and release.
--- What the action does with them is its own: PointAim runs from press until release, Flashlight tells a tap from a hold.
---
--- mapping: a key profile row name, one of the mod's own from controls/keymap.lua or a vanilla one.
--- action:  an action name a feature module defines through actions.define.
 
 return {
 	-- "error" | "warn" | "info" | "debug"
@@ -73,70 +67,11 @@ return {
 	-- Set false for the vanilla color.
 	temp_health_color = "#ffaa55",
 
-	binds = {
-		{
-			id      = "point_aim",
-			enabled = true,
-			mapping = "LikhosPointShootingDirect",   -- Settings > Controls > Point Shooting + Laser (Hold)
-			action  = "PointAim",     -- hold to aim straight into point sight
-			block_in_ui = true,
-		},
-		{
-			id      = "flashlight",
-			enabled = true,
-			mapping = "LikhosFlashlight",   -- Settings > Controls > Flashlight (Hold/Toggle)
-			action  = "Flashlight",   -- tap to leave the light on, hold to light it while held
-			block_in_ui = true,
-		},
-		{
-			-- Set enabled = false for the vanilla toggle.
-			id      = "hold_breath",
-			enabled = true,
-			mapping = "IA_HoldBreath",   -- Settings > Controls > Hold Breath (vanilla key)
-			action  = "HoldBreath",   -- tap to toggle as in vanilla, hold to hold breath only while held
-			block_in_ui = true,
-		},
-		{
-			id      = "switch_fire_mode",
-			enabled = true,
-			mapping = "LikhosSwitchFireMode",   -- Settings > Controls > Switch Fire Mode (Tap/Hold). Unbind the vanilla Switch Fire Mode key.
-			action  = "SwitchFireMode",   -- tap to switch on release, hold to show the current fire mode
-			block_in_ui = true,
-		},
-		{
-			id      = "smart_fire_mode",
-			enabled = true,
-			mapping = "LikhosSmartFireMode",   -- Settings > Controls > Smart Fire Mode (Tap/Hold/Double Tap)
-			action  = "SmartFireMode",   -- tap: semi. Double tap: burst. Hold: auto. Shows the fire mode card either way
-			block_in_ui = true,
-		},
-		{
-			id      = "instant_interact",
-			enabled = true,
-			mapping = "LikhosInteractInstant",   -- Settings > Controls > Interact (Instant)
-			action  = "InstantInteract",     -- tap to use what F would, holds completing at once
-			block_in_ui = true,
-		},
-		{
-			id      = "smart_heal",
-			enabled = true,
-			mapping = "LikhosCombatHeal",   -- Settings > Controls > Smart Heal (Tap/Hold)
-			action  = "SmartHeal",     -- tap: the fastest painkiller, even over an active dose. Hold: heavy bleed, bleed or fracture with the fastest item, else an IV
-			block_in_ui = true,
-		},
-		{
-			id      = "adrenaline_food",
-			enabled = true,
-			mapping = "LikhosUseAdrenaline",   -- Settings > Controls > Adrenaline/Food (Tap/Hold)
-			action  = "AdrenalineFood",     -- from anywhere in the inventory. Tap: an Adrenaline Injector. Hold: the first usable food or drink
-			block_in_ui = true,
-		},
-		{
-			id      = "smart_grenade",
-			enabled = true,
-			mapping = "LikhosSmartGrenade",   -- Settings > Controls > Smart Grenade (Tap/Hold/Double Tap)
-			action  = "SmartGrenade",     -- from the rig or pockets, most expensive first. Tap: frag. Hold: smoke or gas. Double tap: flashbang
-			block_in_ui = true,
-		},
-	},
+	-- The vanilla Hold Breath key also holds: holding it keeps the breath held only while held, a tap still toggles.
+	-- Set false for the vanilla toggle.
+	hold_breath = true,
+
+	-- The fire mode card shows where the magazine check card does.
+	-- Set false to keep it in the lower right.
+	fire_mode_card = true,
 }

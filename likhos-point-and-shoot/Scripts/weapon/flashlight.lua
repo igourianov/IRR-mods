@@ -55,7 +55,7 @@ end
 
 --- Define the Flashlight action.
 function M.install()
-	actions.define("Flashlight", {
+	actions.define("LikhosFlashlight", {
 		press        = press,
 		hold_release = hold_release,
 		reset        = function() pressed = nil end,

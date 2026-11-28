@@ -228,16 +228,16 @@ local function eat()
 	log.debug("AdrenalineFoodHold: no usable food or drink")
 end
 
---- Define the SmartHeal and AdrenalineFood actions.
+--- Define the Smart Heal and Adrenaline/Food actions.
 function M.install()
 	-- Tap for a painkiller, hold to treat a condition or start an IV. The hold fires as the tap window passes, so its item starts without waiting for release.
-	actions.define("SmartHeal", {
+	actions.define("LikhosCombatHeal", {
 		tap  = function() use("SmartHeal", "painkiller") end,
 		hold = hold,
 	})
 
 	-- Tap to inject adrenaline, hold to eat or drink. The injector's effect replaces an active one, so a tap during a boost restarts it.
-	actions.define("AdrenalineFood", {
+	actions.define("LikhosUseAdrenaline", {
 		tap  = function() use("AdrenalineFood", "stamina") end,
 		hold = eat,
 	})

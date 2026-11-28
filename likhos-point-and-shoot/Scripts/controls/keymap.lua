@@ -1,6 +1,6 @@
--- controls/keymap.lua : the mod's player-mappable keys, stored in the game's Enhanced Input user settings.
+-- controls/keymap.lua : the mod's binds and its player-mappable keys, stored in the game's Enhanced Input user settings.
 --
--- Each mapping is a runtime InputAction in a mod InputMappingContext, registered with EnhancedInputUserSettings and active at the lowest priority.
+-- Each mod mapping is a runtime InputAction in a mod InputMappingContext, registered with EnhancedInputUserSettings and active at the lowest priority.
 -- Nothing listens to the actions.
 -- The controls menu row (controls/menu.lua) rebinds a key and the game saves it. core/input.lua reads the key and polls it.
 -- See docs/solutions/point-aim-keybind-menu.md.
@@ -22,9 +22,12 @@ local VANILLA_ACTION = "IA_Fire"
 local RETRY_MS = 100
 local RETRY_LIMIT = 300
 
--- In the order of their rows on the controls page.
--- name: the key profile row name. display: the row label. description: shown in the controls page's setting info panel when the row is hovered. Plain text, the panel is a rich text block.
-M.MAPPINGS = {
+-- Mod mappings in the order of their rows on the controls page.
+-- name: the key profile row name. The saved key is stored under it, so renaming it drops the user's key.
+-- It also names the action a feature module defines through actions.define. A bind whose action is not defined is not polled.
+-- display: the row label. description: shown in the controls page's setting info panel when the row is hovered. Plain text, the panel is a rich text block.
+-- vanilla: the row is the game's own, so the mod builds no InputAction or row for it.
+M.BINDS = {
 	{
 		name = "LikhosPointShootingDirect",
 		display = "Point Shooting + Laser (Hold)",
@@ -98,6 +101,10 @@ Hold: consume food/drink.]],
 		display = "Interact (Instant)",
 		description = "Interact without holding down the button. Locked containers still take time to unlock.",
 	},
+	{
+		name = "IA_HoldBreath",
+		vanilla = true,
+	},
 }
 
 local function action_name(mapping)
@@ -165,14 +172,16 @@ function M.register()
 	if not imc then
 		local transient = StaticFindObject(OUTER)
 		imc = construct("/Script/EnhancedInput.InputMappingContext", transient, IMC_NAME)
-		for _, mapping in ipairs(M.MAPPINGS) do
-			local ia = construct("/Script/EnhancedInput.InputAction", transient, action_name(mapping.name))
-			local pmks = construct("/Script/EnhancedInput.PlayerMappableKeySettings", ia, "PlayerMappableKeySettings")
-			pmks.Name = FName(mapping.name)
-			pmks.DisplayName = FText(mapping.display)
-			ia.PlayerMappableKeySettings = pmks
-			-- Unbound by default. The mapping inherits the action's mappable settings.
-			imc:MapKey(ia, { KeyName = FName("None") })
+		for _, mapping in ipairs(M.BINDS) do
+			if not mapping.vanilla then
+				local ia = construct("/Script/EnhancedInput.InputAction", transient, action_name(mapping.name))
+				local pmks = construct("/Script/EnhancedInput.PlayerMappableKeySettings", ia, "PlayerMappableKeySettings")
+				pmks.Name = FName(mapping.name)
+				pmks.DisplayName = FText(mapping.display)
+				ia.PlayerMappableKeySettings = pmks
+				-- Unbound by default. The mapping inherits the action's mappable settings.
+				imc:MapKey(ia, { KeyName = FName("None") })
+			end
 		end
 		log.info("keymap: built %s", imc:GetFullName())
 	end

@@ -1,6 +1,7 @@
 # Unreleased
 * added feature to show ingame clocks in 24h format
 * temporary health from painkillers shows now has most distinct color
+* keybinds refactoring
 
 # 2.5.296
 * fixed point shooting breaking with the vanilla aim mode set to toggle
