@@ -1,4 +1,4 @@
--- items/quick_sell.lua : Shift+Click on an item in the hideout sells it, as Sell from its context menu does (docs/solutions/hideout-quick-sell.md).
+-- inventory/quick_sell.lua : Shift+Click on an item in the hideout sells it, as Sell from its context menu does (docs/solutions/hideout-quick-sell.md).
 --
 -- Every game name here comes from that solution doc.
 -- Shift+Click goes through vanilla's Sell context, which is not offered in raid, so Shift+Click there stays vanilla's drop.
@@ -7,7 +7,7 @@
 local log  = require("lib.log")
 local util = require("lib.util")
 local hook = require("lib.hook")
-local item_tile = require("items.item_tile")
+local item_tile = require("inventory.item_tile")
 
 local M = {}
 

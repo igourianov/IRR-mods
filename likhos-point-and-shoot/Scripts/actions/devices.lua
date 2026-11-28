@@ -1,4 +1,4 @@
--- weapon/devices.lua : which tactical device suits the player's vision (docs/solutions/flashlight-bind.md).
+-- actions/devices.lua : which tactical device suits the player's vision (docs/solutions/flashlight-bind.md).
 --
 -- Every game name here comes from the Recon sections of docs/solutions/point-aim-auto-laser.md (lasers) and docs/solutions/point-aim-devices.md (lights, night vision).
 -- Works on a WeaponComponent handed in by the caller and holds no UObject between calls.

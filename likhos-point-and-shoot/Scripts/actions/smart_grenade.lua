@@ -1,4 +1,4 @@
--- items/smart_grenade.lua : the Smart Grenade key equips a grenade by category from the rig or pockets: tap for frag, hold for smoke, double tap for flashbang (docs/solutions/smart-grenade.md).
+-- actions/smart_grenade.lua : the Smart Grenade key equips a grenade by category from the rig or pockets: tap for frag, hold for smoke, double tap for flashbang (docs/solutions/smart-grenade.md).
 --
 -- Every game name here comes from docs/solutions/smart-grenade.md (Recon).
 -- A gesture for the category already in hand does nothing.
@@ -8,8 +8,8 @@
 local log       = require("lib.log")
 local util      = require("lib.util")
 local player    = require("core.player")
-local inventory = require("items.inventory")
-local actions   = require("core.actions")
+local inventory = require("inventory.inventory")
+local registry  = require("core.registry")
 
 local M = {}
 
@@ -91,7 +91,7 @@ end
 
 --- Define the Smart Grenade action.
 function M.install()
-	actions.define("LikhosSmartGrenade", {
+	registry.define("LikhosSmartGrenade", {
 		tap        = function() equip("frag") end,
 		hold       = function() equip("smoke") end,
 		double_tap = function() equip("flashbang") end,

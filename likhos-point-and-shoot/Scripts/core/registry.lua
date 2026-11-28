@@ -1,4 +1,4 @@
--- core/actions.lua : action name -> the functions that run its phases.
+-- core/registry.lua : action name -> the functions that run its phases.
 -- Each bind feature defines its own actions when it is loaded, so this module knows none of them.
 
 local log  = require("lib.log")

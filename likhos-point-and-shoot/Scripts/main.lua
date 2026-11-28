@@ -8,16 +8,16 @@ local util     = require("lib.util")
 local player   = require("core.player")
 local input    = require("core.input")
 local triggers = require("core.triggers")
-local actions  = require("core.actions")
-local keymap   = require("controls.keymap")
-local magnifier = require("weapon.magnifier")
+local registry = require("core.registry")
+local keymap   = require("keybinds.map")
+local magnifier = require("actions.magnifier")
 local config   = require("config")
 
---- The binds of controls/keymap.lua whose action a feature module defined, so a feature its config flag leaves out has no bind. Binds take their keys from the controls menu and are polled from the tick loop, so they get a release event.
+--- The binds of keybinds/map.lua whose action a feature module defined, so a feature its config flag leaves out has no bind. Binds take their keys from the controls menu and are polled from the tick loop, so they get a release event.
 local function active_binds()
 	local active = {}
 	for _, bind in ipairs(keymap.BINDS) do
-		if actions.defines(bind.name) then
+		if registry.defines(bind.name) then
 			active[#active + 1] = bind
 			log.info("registered bind '%s' (polled)", bind.name)
 		else
@@ -57,28 +57,28 @@ local function init()
 
 	player.watch(function()
 		triggers.reset()
-		actions.reset()
+		registry.reset()
 		magnifier.reset()
 		-- This callback runs inside the PlayerController's construction. Build and register the mod's input objects a tick later.
 		-- A hot reload needs no call: the registration lives in the engine's user settings, not in Lua.
 		ExecuteInGameThreadWithDelay(1, function() util.safe("keymap register", keymap.when_live, "controller") end)
 	end)
-	require("controls.menu").install()
-	require("weapon.point_aim").install()
-	require("weapon.flashlight").install()
-	require("weapon.fire_mode").install()
-	require("items.consumables").install()
-	require("items.smart_grenade").install()
+	require("keybinds.menu").install()
+	require("actions.point_aim").install()
+	require("actions.flashlight").install()
+	require("actions.fire_mode").install()
+	require("actions.consumables").install()
+	require("actions.smart_grenade").install()
 	require("world.instant_interact").install()
-	if config.hold_breath then require("weapon.hold_breath").install() end
+	if config.hold_breath then require("actions.hold_breath").install() end
 	if config.magnifier_zoom then magnifier.install() end
-	if config.low_ready_default then require("weapon.low_ready").install() end
-	if config.sprint_cancels_crouch then require("movement.sprint_stand").install() end
+	if config.low_ready_default then require("pose.low_ready").install() end
+	if config.sprint_cancels_crouch then require("pose.sprint_stand").install() end
 	if config.plant_marker then require("world.objective_marker").install() end
-	if config.whole_uses then require("items.tile_counts").install() end
-	if config.quick_sell then require("items.quick_sell").install() end
-	if config.quick_slot_refill then require("items.quick_slots").install() end
-	if config.clock_24h then require("world.clock").install() end
+	if config.whole_uses then require("inventory.tile_counts").install() end
+	if config.quick_sell then require("inventory.quick_sell").install() end
+	if config.quick_slot_refill then require("inventory.quick_slots").install() end
+	if config.clock_24h then require("hud.clock").install() end
 	if config.temp_health_color then require("hud.temp_health").install() end
 
 	local binds = active_binds()
@@ -87,7 +87,7 @@ local function init()
 	RegisterConsoleCommandHandler("kb_status", function()
 		log.info("player controller: %s", player.controller() and "acquired" or "none")
 		for _, b in ipairs(keymap.BINDS) do
-			log.info("  %-28s %-12s %s", b.name, keymap.describe(b.name), actions.defines(b.name) and "on" or "off")
+			log.info("  %-28s %-12s %s", b.name, keymap.describe(b.name), registry.defines(b.name) and "on" or "off")
 		end
 		return true
 	end)

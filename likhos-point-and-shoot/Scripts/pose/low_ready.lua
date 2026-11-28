@@ -1,4 +1,4 @@
--- weapon/low_ready.lua : low ready is the weapon's resting position (docs/solutions/low-ready-default.md).
+-- pose/low_ready.lua : low ready is the weapon's resting position (docs/solutions/low-ready-default.md).
 --
 -- Every game name here comes from docs/solutions/low-ready-default.md.
 -- Starts low ready itself after every ability end, since the game's own auto low ready never lowers the gun while the character moves.

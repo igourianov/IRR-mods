@@ -4,7 +4,7 @@ local log      = require("lib.log")
 local util     = require("lib.util")
 local player   = require("core.player")
 local triggers = require("core.triggers")
-local keymap   = require("controls.keymap")
+local keymap   = require("keybinds.map")
 
 local M = {}
 

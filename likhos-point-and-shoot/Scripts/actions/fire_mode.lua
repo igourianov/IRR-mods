@@ -1,4 +1,4 @@
--- weapon/fire_mode.lua : the Switch Fire Mode (Tap/Hold) key switches the fire mode on a tap and shows the current one on a hold (docs/solutions/fire-mode-check.md).
+-- actions/fire_mode.lua : the Switch Fire Mode (Tap/Hold) key switches the fire mode on a tap and shows the current one on a hold (docs/solutions/fire-mode-check.md).
 -- The hold also takes the support hand off the weapon, with the open inventory's montages, until the release.
 -- The Smart Fire Mode key switches straight to a mode: tap Semi, double tap Burst, hold Auto (docs/solutions/smart-fire-mode.md).
 -- The fire mode card shows where the magazine check card does.
@@ -8,12 +8,12 @@
 -- Smart Fire Mode switches silently to the mode whose animation lands on the target, then plays that animation.
 -- Holds no UObject between calls.
 
-local log     = require("lib.log")
-local util    = require("lib.util")
-local player  = require("core.player")
-local actions = require("core.actions")
-local hook    = require("lib.hook")
-local config  = require("config")
+local log      = require("lib.log")
+local util     = require("lib.util")
+local player   = require("core.player")
+local registry = require("core.registry")
+local hook     = require("lib.hook")
+local config   = require("config")
 
 local M = {}
 
@@ -275,14 +275,14 @@ end
 
 --- Define the Switch Fire Mode and Smart Fire Mode actions and place the fire mode cards, built and to be built.
 function M.install()
-	actions.define("LikhosSwitchFireMode", {
+	registry.define("LikhosSwitchFireMode", {
 		tap = switch,
 		hold = hold,
 		held = held,
 		release = release,
 		reset = clear,
 	})
-	actions.define("LikhosSmartFireMode", {
+	registry.define("LikhosSmartFireMode", {
 		tap        = function() select_mode(SEMI) end,
 		double_tap = function() select_mode(BURST) end,
 		hold       = function() select_mode(AUTO) end,

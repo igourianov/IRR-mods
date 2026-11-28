@@ -1,4 +1,4 @@
--- items/consumables.lua : the Smart Heal and Adrenaline/Food keys.
+-- actions/consumables.lua : the Smart Heal and Adrenaline/Food keys.
 -- A Smart Heal tap takes the fastest painkiller carried, a hold treats a condition or starts an IV (docs/solutions/medical-rework.md).
 -- An Adrenaline/Food tap shares Smart Heal's item search with a single stamina step (docs/solutions/adrenaline-bind.md). Its hold uses the first usable food or drink (docs/solutions/eat-food-bind.md).
 --
@@ -13,8 +13,8 @@
 local log       = require("lib.log")
 local util      = require("lib.util")
 local player    = require("core.player")
-local inventory = require("items.inventory")
-local actions   = require("core.actions")
+local inventory = require("inventory.inventory")
+local registry  = require("core.registry")
 
 local M = {}
 
@@ -231,13 +231,13 @@ end
 --- Define the Smart Heal and Adrenaline/Food actions.
 function M.install()
 	-- Tap for a painkiller, hold to treat a condition or start an IV. The hold fires as the tap window passes, so its item starts without waiting for release.
-	actions.define("LikhosCombatHeal", {
+	registry.define("LikhosCombatHeal", {
 		tap  = function() use("SmartHeal", "painkiller") end,
 		hold = hold,
 	})
 
 	-- Tap to inject adrenaline, hold to eat or drink. The injector's effect replaces an active one, so a tap during a boost restarts it.
-	actions.define("LikhosUseAdrenaline", {
+	registry.define("LikhosUseAdrenaline", {
 		tap  = function() use("AdrenalineFood", "stamina") end,
 		hold = eat,
 	})

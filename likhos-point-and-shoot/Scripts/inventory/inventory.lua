@@ -1,4 +1,4 @@
--- items/inventory.lua : item reads shared by the consumable binds, the quick slots and the inventory tiles.
+-- inventory/inventory.lua : item reads shared by the consumable binds, the quick slots and the inventory tiles.
 -- Holds no UObject between calls.
 
 local util = require("lib.util")

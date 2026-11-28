@@ -1,4 +1,4 @@
--- weapon/magnifier.lua : the zoom input folds and unfolds a hybrid sight's magnifier (docs/solutions/magnifier-zoom.md).
+-- actions/magnifier.lua : the zoom input folds and unfolds a hybrid sight's magnifier (docs/solutions/magnifier-zoom.md).
 --
 -- Every game name here comes from docs/solutions/magnifier-zoom.md.
 -- Scroll forward at the zoom's end stop unfolds, scroll back folds. The vanilla Toggle Magnifier input does the flip.

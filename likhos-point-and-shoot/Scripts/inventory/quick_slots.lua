@@ -1,4 +1,4 @@
--- items/quick_slots.lua : a quick slot binds an item definition. Once its item leaves the inventory it rebinds to another item of the same definition from the inventory (docs/solutions/quick-slot-refill.md, docs/solutions/quick-slot-whole-inventory.md, docs/solutions/quick-slot-type-bind.md).
+-- inventory/quick_slots.lua : a quick slot binds an item definition. Once its item leaves the inventory it rebinds to another item of the same definition from the inventory (docs/solutions/quick-slot-refill.md, docs/solutions/quick-slot-whole-inventory.md, docs/solutions/quick-slot-type-bind.md).
 -- A quick slot naming an item that is no longer in the inventory, with none of its definition left, is cleared (docs/solutions/quick-slot-left-inventory.md).
 -- A bare left click on a quick slot's tile clears the slot (docs/solutions/quick-slot-click-clear.md).
 --
@@ -10,8 +10,8 @@ local log  = require("lib.log")
 local util = require("lib.util")
 local hook = require("lib.hook")
 local player = require("core.player")
-local inventory = require("items.inventory")
-local item_tile = require("items.item_tile")
+local inventory = require("inventory.inventory")
+local item_tile = require("inventory.item_tile")
 
 local M = {}
 

@@ -1,14 +1,14 @@
--- weapon/point_aim.lua : hold to aim straight into point sight, with the laser that suits the player's vision on, in either vanilla aim mode (docs/solutions/point-aim-bind.md).
+-- actions/point_aim.lua : hold to aim straight into point sight, with the laser that suits the player's vision on, in either vanilla aim mode (docs/solutions/point-aim-bind.md).
 --
 -- Aim goes through the vanilla aim input, so it combines with the vanilla aim key as a second key bound to it would.
 -- Every game name here comes from docs/solutions/point-aim-bind.md (Recon), the UE4SS object dump and debug logging of the controller settings.
 -- Holds no UObject between calls.
 
-local log     = require("lib.log")
-local util    = require("lib.util")
-local player  = require("core.player")
-local devices = require("weapon.devices")
-local actions = require("core.actions")
+local log      = require("lib.log")
+local util     = require("lib.util")
+local player   = require("core.player")
+local devices  = require("actions.devices")
+local registry = require("core.registry")
 
 local M = {}
 
@@ -122,7 +122,7 @@ end
 
 --- Define the Point Aim action.
 function M.install()
-	actions.define("LikhosPointShootingDirect", {
+	registry.define("LikhosPointShootingDirect", {
 		press   = press,
 		held    = held,
 		release = release,

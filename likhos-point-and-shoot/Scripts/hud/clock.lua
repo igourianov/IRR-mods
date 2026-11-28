@@ -1,4 +1,4 @@
--- world/clock.lua : every in-game clock shows 24 hour time (docs/solutions/military-time.md).
+-- hud/clock.lua : every in-game clock shows 24 hour time (docs/solutions/military-time.md).
 --
 -- Every game name here comes from docs/solutions/military-time.md.
 -- The game's widgets format every clock through one native function that takes a 24 hour flag. Forcing the flag covers them all, the deploy screen's insertion times included.

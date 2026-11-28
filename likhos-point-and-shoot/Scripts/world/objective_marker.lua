@@ -8,7 +8,7 @@ local log    = require("lib.log")
 local util   = require("lib.util")
 local hook   = require("lib.hook")
 local config = require("config")
-local inventory = require("items.inventory")
+local inventory = require("inventory.inventory")
 
 local M = {}
 

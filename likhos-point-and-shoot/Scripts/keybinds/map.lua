@@ -1,8 +1,8 @@
--- controls/keymap.lua : the mod's binds and its player-mappable keys, stored in the game's Enhanced Input user settings.
+-- keybinds/map.lua : the mod's binds and its player-mappable keys, stored in the game's Enhanced Input user settings.
 --
 -- Each mod mapping is a runtime InputAction in a mod InputMappingContext, registered with EnhancedInputUserSettings and active at the lowest priority.
 -- Nothing listens to the actions.
--- The controls menu row (controls/menu.lua) rebinds a key and the game saves it. core/input.lua reads the key and polls it.
+-- The controls menu row (keybinds/menu.lua) rebinds a key and the game saves it. core/input.lua reads the key and polls it.
 -- See docs/solutions/point-aim-keybind-menu.md.
 
 local log    = require("lib.log")
@@ -24,7 +24,7 @@ local RETRY_LIMIT = 300
 
 -- Mod mappings in the order of their rows on the controls page.
 -- name: the key profile row name. The saved key is stored under it, so renaming it drops the user's key.
--- It also names the action a feature module defines through actions.define. A bind whose action is not defined is not polled.
+-- It also names the action a feature module defines through registry.define. A bind whose action is not defined is not polled.
 -- display: the row label. description: shown in the controls page's setting info panel when the row is hovered. Plain text, the panel is a rich text block.
 -- vanilla: the row is the game's own, so the mod builds no InputAction or row for it.
 M.BINDS = {

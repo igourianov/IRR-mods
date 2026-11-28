@@ -1,4 +1,4 @@
--- items/tile_counts.lua : an inventory tile's count text, as whole use counts or a percentage (docs/solutions/weapon-condition-display.md).
+-- inventory/tile_counts.lua : an inventory tile's count text, as whole use counts or a percentage (docs/solutions/weapon-condition-display.md).
 --
 -- Every game name here comes from docs/solutions/medic-uses-display.md, docs/solutions/usb-uses-display.md and docs/solutions/weapon-condition-display.md.
 -- The native ItemWidget writes the uses, a float stat, into the tile with decimals. This rewrites that text once the game has drawn it.
@@ -6,8 +6,8 @@
 
 local util = require("lib.util")
 local hook = require("lib.hook")
-local inventory = require("items.inventory")
-local item_tile = require("items.item_tile")
+local inventory = require("inventory.inventory")
+local item_tile = require("inventory.item_tile")
 
 local M = {}
 

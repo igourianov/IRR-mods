@@ -4,11 +4,11 @@
 -- The key starts the same ability F does, with the target's hold settings zeroed for that one interaction, so F keeps its hold.
 -- Holds no UObject between calls.
 
-local log     = require("lib.log")
-local util    = require("lib.util")
-local hook    = require("lib.hook")
-local player  = require("core.player")
-local actions = require("core.actions")
+local log      = require("lib.log")
+local util     = require("lib.util")
+local hook     = require("lib.hook")
+local player   = require("core.player")
+local registry = require("core.registry")
 
 local M = {}
 
@@ -127,7 +127,7 @@ end
 
 --- Define the Instant Interact action and hook the interaction end, which puts the zeroed holds back. The class is native.
 function M.install()
-	actions.define("LikhosInteractInstant", {
+	registry.define("LikhosInteractInstant", {
 		press = hooks.guard(press),
 		-- Drop the override without writing. Level load takes its options with it.
 		reset = function() override = nil end,

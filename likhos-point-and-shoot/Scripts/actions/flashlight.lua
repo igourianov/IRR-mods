@@ -1,11 +1,11 @@
--- weapon/flashlight.lua : tap to leave the light that suits the player's vision on, hold to light it while held (docs/solutions/flashlight-bind.md).
+-- actions/flashlight.lua : tap to leave the light that suits the player's vision on, hold to light it while held (docs/solutions/flashlight-bind.md).
 --
 -- Holds no UObject between calls.
 
-local log     = require("lib.log")
-local player  = require("core.player")
-local devices = require("weapon.devices")
-local actions = require("core.actions")
+local log      = require("lib.log")
+local player   = require("core.player")
+local devices  = require("actions.devices")
+local registry = require("core.registry")
 
 local M = {}
 
@@ -55,7 +55,7 @@ end
 
 --- Define the Flashlight action.
 function M.install()
-	actions.define("LikhosFlashlight", {
+	registry.define("LikhosFlashlight", {
 		press        = press,
 		hold_release = hold_release,
 		reset        = function() pressed = nil end,

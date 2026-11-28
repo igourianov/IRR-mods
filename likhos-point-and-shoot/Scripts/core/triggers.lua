@@ -5,9 +5,9 @@
 -- A key still down once tap_ms has passed is a hold: `hold` fires once from the tick, and release then fires `hold_release`. A key released earlier fires `tap` on release.
 -- An action defining `double_tap` has its `tap` wait out the double tap window after the release. A press inside the window fires `double_tap` instead, and that press makes no `tap` or `hold`.
 
-local log     = require("lib.log")
-local actions = require("core.actions")
-local config  = require("config")
+local log      = require("lib.log")
+local registry = require("core.registry")
+local config   = require("config")
 
 local M = {}
 
@@ -26,8 +26,8 @@ function M.on_press(bind)
 	local double = pending_tap[bind.name] ~= nil
 	pending_tap[bind.name] = nil
 	holding[bind.name] = { at = os.clock(), hold = false, double = double }
-	actions.invoke(bind.name, "press")
-	if double then actions.invoke(bind.name, "double_tap") end
+	registry.invoke(bind.name, "press")
+	if double then registry.invoke(bind.name, "double_tap") end
 end
 
 --- Called from the game thread when the bound key goes up, or when the context gate starts blocking while it is held.
@@ -36,17 +36,17 @@ function M.on_release(bind)
 	local state = holding[bind.name]
 	if not state then return end
 	holding[bind.name] = nil
-	actions.invoke(bind.name, "release")
+	registry.invoke(bind.name, "release")
 	if state.double then return end
 	if state.hold then
-		actions.invoke(bind.name, "hold_release")
+		registry.invoke(bind.name, "hold_release")
 		return
 	end
-	if actions.defines(bind.name, "double_tap") then
+	if registry.defines(bind.name, "double_tap") then
 		pending_tap[bind.name] = os.clock()
 		return
 	end
-	actions.invoke(bind.name, "tap")
+	registry.invoke(bind.name, "tap")
 end
 
 --- Whether bind has a tap waiting out its double tap window.
@@ -64,16 +64,16 @@ function M.tick(binds)
 	for _, bind in ipairs(binds) do
 		local state = holding[bind.name]
 		if state then
-			actions.invoke(bind.name, "held")
+			registry.invoke(bind.name, "held")
 			if not state.hold and not state.double and (os.clock() - state.at) * 1000 >= TAP_MS then
 				state.hold = true
-				actions.invoke(bind.name, "hold")
+				registry.invoke(bind.name, "hold")
 			end
 		end
 		local released_at = pending_tap[bind.name]
 		if released_at and (os.clock() - released_at) * 1000 >= DOUBLE_TAP_MS then
 			pending_tap[bind.name] = nil
-			actions.invoke(bind.name, "tap")
+			registry.invoke(bind.name, "tap")
 		end
 	end
 end

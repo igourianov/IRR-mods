@@ -1,4 +1,4 @@
--- movement/sprint_stand.lua : a double tap of Run while crouched ends the crouch and starts a sprint (docs/solutions/sprint-cancels-crouch.md).
+-- pose/sprint_stand.lua : a double tap of Run while crouched ends the crouch and starts a sprint (docs/solutions/sprint-cancels-crouch.md).
 --
 -- Every game name here comes from docs/solutions/sprint-cancels-crouch.md.
 -- The game detects the double tap only while standing, because a crouched Run ends on release without its grace time.
