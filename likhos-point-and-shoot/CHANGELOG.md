@@ -1,4 +1,4 @@
-# Unreleased
+# 2.7.309
 * added feature to show ingame clocks in 24h format
 * temporary health from painkillers shows now has more distinct color
 * refactoring
