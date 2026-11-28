@@ -1,4 +1,4 @@
-# Unreleased
+# 2.5.296
 * fixed point shooting breaking with the vanilla aim mode set to toggle
 * fixed Smart Fire Mode playing the switch animation twice on weapons with burst
 * merged Use Adrenaline and Consume Food/Drink into the Adrenaline/Food (Tap/Hold) keybind
