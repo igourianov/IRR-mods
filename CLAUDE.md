@@ -16,7 +16,7 @@ The load-bearing ones:
 
 ## Layout
 
-- `likhos-<name>/`: one mod, with `mod.txt`, `Scripts/` and `README.md`. Only `main.lua` and `config.lua` sit at the root of `Scripts/`. Every other module lives in a domain folder under it and is required by its dotted path, e.g. `require("weapon.devices")`. Point and Shoot's folders are `core/` (player, bind polling and dispatch), `controls/` (key mappings and the controls page), `weapon/`, `items/` and `world/`.
+- `likhos-<name>/`: one mod, with `mod.txt`, `Scripts/` and `README.md`. Only `main.lua` and `config.lua` sit at the root of `Scripts/`. Every other module lives in a domain folder under it and is required by its dotted path, e.g. `require("weapon.devices")`. Point and Shoot's folders are `core/` (player, bind polling and dispatch), `controls/` (key mappings and the controls page), `weapon/`, `items/`, `movement/`, `world/` and `hud/`.
   A mod's `README.bbcode` (gitignored) is regenerated from `README.md` before publishing. Never edit it; edit `README.md` only.
 - `lib/`: Lua modules shared by every Lua mod (`log`, `util`, `hook`). `build.ps1` and `publish.ps1` copy them into each mod's `Scripts/lib/`, required as `require("lib.log")`, so a mod never has its own `Scripts/lib/` folder. Each mod names itself for log lines with `log.setup("<Name>", config.log_level)`.
 - A pak mod (`likhos-rearmed`) has `pak=` in `mod.txt` and the JSON edit lists (`reclass`, `clone`, `retarget`, `stats`, `supported`, `loadouts`, `loot`) that `tools\pak\pak.ps1` stages the pak's files from. `build.ps1` packs it with repak into `dist\` and installs it into `Content\Paks\~mods`.

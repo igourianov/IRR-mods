@@ -81,6 +81,7 @@ local function init()
 	if config.quick_sell then require("items.quick_sell").install() end
 	if config.quick_slot_refill then require("items.quick_slots").install() end
 	if config.clock_24h then require("world.clock").install() end
+	if config.temp_health_color then require("hud.temp_health").install() end
 
 	local binds = active_binds()
 	if #binds > 0 then start_tick_loop(binds) end

@@ -21,6 +21,7 @@ Tactical shortcuts, control tweaks and inventory QoL.
 - **Objective markers:** significantly improved range and visiblity.
 - **Item use counts and condition:** less visual clutter in the inventory. Weapon and USB hack device condition shows as a percentage.
 - **24 hour clock:** in-game clocks show 24 hour time instead of AM/PM.
+- **Temporary health color:** the temporary health a painkiller adds shows on the HUD health bar in its own color, clearly apart from permanent health.
 
 ## Point Shooting
 

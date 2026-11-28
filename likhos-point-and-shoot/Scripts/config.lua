@@ -68,6 +68,11 @@ return {
 	-- Set false for the game's own 12 hour clock.
 	clock_24h = true,
 
+	-- The temporary health a painkiller adds shows on the HUD health bar in this color, "#RRGGBB" as in an image editor, instead of a faint pink.
+	-- The bar's overlay lightens it on screen a little.
+	-- Set false for the vanilla color.
+	temp_health_color = "#ffaa55",
+
 	binds = {
 		{
 			id      = "point_aim",
