@@ -1,77 +1,65 @@
--- config.lua : USER-EDITABLE. Hot-reloadable (Ctrl+R in the UE4SS console).
+-- config.lua: user editable. Hot reloads with Ctrl+R in the UE4SS console.
 
 return {
 	-- "error" | "warn" | "info" | "debug"
 	log_level = "info",
 
-	-- Master switch. Set false to load the mod inert (useful when bisecting a crash after a game patch).
+	-- Set false to load the mod inert, e.g. to bisect a crash after a game patch.
 	enabled = true,
 
-	-- How long a tap/hold key may be held and still count as a tap, milliseconds.
-	-- Flashlight: released inside this window, the light it turned on stays on until the next press. Held past it, the light goes off on release.
-	-- Smart Heal: released inside this window, it takes the fastest painkiller. Held past it, it treats a heavy bleed, bleed or fracture, else starts an IV at once.
-	-- Hold Breath: released inside this window, the breath stays held until the next press. Held past it, breath is let out on release.
-	-- Switch Fire Mode (Tap/Hold): released inside this window, it switches the fire mode. Held past it, it shows the current fire mode without switching.
-	-- Smart Grenade: released inside this window, it is a tap or the first half of a double tap. Held past it, it equips a smoke or gas grenade.
-	-- Smart Fire Mode: released inside this window, it is a tap or the first half of a double tap. Held past it, it switches to auto.
-	-- Adrenaline/Food: released inside this window, it injects adrenaline. Held past it, it eats or drinks.
+	-- Longest press that counts as a tap, milliseconds. A longer press is a hold.
+	-- Used by Flashlight, Smart Heal, Hold Breath, Switch Fire Mode (Tap/Hold), Smart Grenade, Smart Fire Mode and Adrenaline/Food.
 	tap_ms = 250,
 
-	-- How soon after a tap's release a second press counts as a double tap, milliseconds. Used by Smart Grenade and Smart Fire Mode.
-	-- A tap acts only once this window has passed, so a higher value delays every frag and every switch to semi.
+	-- Longest gap after a tap for a second press to count as a double tap, milliseconds. Used by Smart Grenade and Smart Fire Mode.
+	-- A single tap waits out this window, so a higher value delays every frag and every switch to semi.
 	double_tap_ms = 200,
 
-	-- The zoom input folds and unfolds the magnifier on a hybrid sight: scroll forward unfolds, scroll back folds.
+	-- The zoom input unfolds a hybrid sight's magnifier on scroll forward and folds it on scroll back.
 	-- Set false for vanilla zoom.
 	magnifier_zoom = true,
 
-	-- Low ready is the weapon's resting position: the gun lowers as soon as aiming, sprinting, firing or any other action ends.
-	-- Works only with auto low ready turned on in the gameplay settings. Set false for the game's own auto low ready.
+	-- The weapon returns to low ready as soon as aiming, sprinting, firing or any other action ends.
+	-- Needs auto low ready on in the gameplay settings. Set false for the game's own auto low ready.
 	low_ready_default = true,
 
-	-- Sprint while crouched and moving stands the player up into a full sprint. Run keeps the faster crouch walk.
-	-- Set false for the vanilla behavior, where Sprint stays crouched.
+	-- Sprint while crouched and moving stands up into a full sprint. Run keeps the crouch walk.
+	-- Set false to stay crouched on Sprint.
 	sprint_cancels_crouch = true,
 
-	-- The marker on a quest objective has a bright blue ring, a color rare in the game, so it stands out: a placement spot where a bomb or bug is planted, a mission phone, a quest item to pick up, a mission box and a delivery box.
-	-- Every interaction marker, not only objectives, shows through walls within its range, and F reaches it through them at its usual distance.
-	-- Set false for the vanilla pale markers hidden by walls.
+	-- Quest objective markers get a colored ring: bomb and bug placement spots, mission phones, quest items, mission boxes and delivery boxes.
+	-- Every interaction marker shows through walls within its range, and F reaches it through them.
+	-- Set false for vanilla markers.
 	plant_marker = true,
-	-- The ring's color, "#RRGGBB" as in an image editor.
+	-- Ring color, "#RRGGBB".
 	plant_marker_color = "#33B5FF",
-	-- Distance in meters where the marker first shows, for an objective whose vanilla distance is shorter. 0 keeps vanilla.
+	-- Meters at which an objective marker first shows, where vanilla is shorter. 0 keeps vanilla.
 	plant_marker_range = 10,
 
-	-- Items that count uses, like medical items and keys, show them as whole numbers on inventory tiles.
-	-- Single use items show no count until used. USB hacking devices show their remaining uses as a percentage.
-	-- Weapons and other items with condition show it as a percentage in the inventory. Equipment slots keep the vanilla bar.
-	-- Set false for the vanilla decimals.
+	-- Inventory tiles show uses as whole numbers and condition as a percentage.
+	-- Single use items show no count until used. USB hacking devices show uses as a percentage. Equipment slots keep the vanilla bar.
+	-- Set false for vanilla decimals.
 	whole_uses = true,
 
-	-- Shift+Click on an item in the hideout sells it, like Sell from its context menu.
-	-- Set false for the vanilla behavior, where it does nothing.
+	-- Shift+Click sells an item in the hideout.
 	quick_sell = true,
 
-	-- A quick slot whose item leaves the inventory, used up or otherwise, rebinds to another item of the same type from the inventory, partly used ones first.
-	-- A click on a quick slot in the inventory screen clears it.
-	-- A quick slot of a single use item, like an injector or a grenade, shows how many of its type the inventory holds.
-	-- Set false for the vanilla behavior, where the slot empties after one use.
+	-- A quick slot whose item is gone rebinds to another item of the same type, partly used first.
+	-- Clicking a quick slot in the inventory clears it. A single use item's slot shows how many the inventory holds.
+	-- Set false for vanilla, where the slot empties after one use.
 	quick_slot_refill = true,
 
-	-- Every in-game clock shows 24 hour time, including the deploy screen's insertion times.
-	-- Set false for the game's own 12 hour clock.
+	-- Every in-game clock shows 24 hour time, deploy screen included.
 	clock_24h = true,
 
-	-- The temporary health a painkiller adds shows on the HUD health bar in this color, "#RRGGBB" as in an image editor, instead of a faint pink.
-	-- The bar's overlay lightens it on screen a little.
-	-- Set false for the vanilla color.
+	-- Painkiller temporary health color on the HUD health bar, "#RRGGBB". The bar's overlay lightens it a little.
+	-- Set false for the vanilla faint pink.
 	temp_health_color = "#ffaa55",
 
-	-- The vanilla Hold Breath key also holds: holding it keeps the breath held only while held, a tap still toggles.
-	-- Set false for the vanilla toggle.
+	-- Holding the vanilla Hold Breath key holds breath until release. A tap still toggles.
+	-- Set false for toggle only.
 	hold_breath = true,
 
-	-- The fire mode card shows where the magazine check card does.
-	-- Set false to keep it in the lower right.
+	-- The fire mode card shows in the magazine check card's place. Set false to keep it in the lower right.
 	fire_mode_card = true,
 }
