@@ -1,6 +1,6 @@
 # 2.7.309
 * added feature to show ingame clocks in 24h format
-* temporary health from painkillers shows now has more distinct color
+* temporary health from painkillers now has a more distinct color
 * refactoring
 
 # 2.5.296
