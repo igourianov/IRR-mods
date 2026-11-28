@@ -1,3 +1,6 @@
+# Unreleased
+* added feature to show ingame clocks in 24h format
+
 # 2.5.296
 * fixed point shooting breaking with the vanilla aim mode set to toggle
 * fixed Smart Fire Mode playing the switch animation twice on weapons with burst

@@ -20,6 +20,7 @@ Tactical shortcuts, control tweaks and inventory QoL.
 - **Sprint cancels crouch:** Sprint while crouched and moving stands you up into a full sprint. Run keeps the faster crouch walk.
 - **Objective markers:** significantly improved range and visiblity.
 - **Item use counts and condition:** less visual clutter in the inventory. Weapon and USB hack device condition shows as a percentage.
+- **24 hour clock:** in-game clocks show 24 hour time instead of AM/PM.
 
 ## Point Shooting
 

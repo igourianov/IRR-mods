@@ -64,6 +64,10 @@ return {
 	-- Set false for the vanilla behavior, where the slot empties after one use.
 	quick_slot_refill = true,
 
+	-- Every in-game clock shows 24 hour time, including the deploy screen's insertion times.
+	-- Set false for the game's own 12 hour clock.
+	clock_24h = true,
+
 	binds = {
 		{
 			id      = "point_aim",
