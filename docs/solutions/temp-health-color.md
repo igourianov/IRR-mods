@@ -21,9 +21,11 @@ From the UE4SS object dump and the cooked assets in `pakchunk0-Windows.pak`, rea
 
 Confirmed in game:
 
-- A post hook on `W_GeneralStatBar_C:PreConstruct` fires at runtime for the HUD health bar, after the style copy.
+- For a Blueprint (`/Game/...`) function, `RegisterHook`'s first callback runs after the function and a second callback is never called, per the UE4SS docs. Only a `/Script/...` native function gets a pre and a post callback. The `PreConstruct` hook therefore takes its recolor as the first callback.
+- The `W_GeneralStatBar_C:PreConstruct` function object stays the same across level loads, so a hook registered once keeps firing. With the recolor as its first callback, it fires for each new HUD health bar after the style copy, after a level load as well.
+- The HUD is a `W_InGame_C` owned by the game instance. A level load builds a new one, and old ones linger until garbage collected, so several HUD health bars can exist at once.
 - A tint written through reflection into `PB_ProgressBar_Positive.WidgetStyle` shows on screen without any further call.
-- The HUD health bar is told apart from other stat bars by its name `W_HealthBar` and its owning user widget being a `W_StaminaAndHealthBars_C`.
+- The HUD health bar is told apart from other stat bars by its name `W_HealthBar` and its owning user widget being a `W_StaminaAndHealthBars_C`. The inventory screen's `W_PlayerInventory_C` has a `W_HealthBar` of its own, which this check leaves out.
 
 ### Ruled out
 
@@ -49,15 +51,15 @@ Context only: `lib/hook.lua` and `lib/util.lua`, used as they are. `world/object
 
 Recolors the temp health span of the HUD health bar.
 
-- `install()` parses `config.temp_health_color`, hooks the post of `W_GeneralStatBar_C:PreConstruct` through a `lib/hook` group with the class path so the hook waits for the Blueprint class to load, then recolors any HUD health bar that already exists. A hot reload or an init after the HUD was built recolors the live bar. The hook group lives at module load, so a reload doesn't hook twice.
-- The post hook recolors only the HUD health bar. Every other stat bar passes through untouched.
+- `install()` parses `config.temp_health_color`, hooks `W_GeneralStatBar_C:PreConstruct` through a `lib/hook` group with the class path so the hook waits for the Blueprint class to load, then recolors every HUD health bar that already exists. A hot reload or an init after the HUD was built recolors the live bars. The hook group lives at module load, so a reload doesn't hook twice.
+- The hook's one callback, which runs after `PreConstruct`, recolors only HUD health bars. Every other stat bar passes through untouched.
 - Recoloring writes the parsed color into the fill brush tint of the bar's `PB_ProgressBar_Positive`, keeping the vanilla alpha. Since the hook runs after every `PreConstruct`, a rebuild that copies the vanilla style back is recolored again.
 - The color is a `"#RRGGBB"` sRGB string converted to linear, as `world/objective_marker.lua` does for the marker ring. That module and this one each keep their own small parser. An invalid string logs one error and leaves the bar vanilla.
 - Holds no UObject between calls.
 
 ### config.lua
 
-`temp_health_color = "#ffaa55"` with a comment saying what it colors and that `false` keeps the vanilla color. With `false`, `install()` does nothing.
+`temp_health_color = "#ffaa55"` with a comment saying what it colors and that `nil` keeps the vanilla color. With `nil` or `false`, `main.lua` doesn't install the module.
 
 ### main.lua
 
@@ -69,7 +71,7 @@ During a painkiller dose the HUD health bar shows permanent health in vanilla re
 
 ### Docs
 
-- `README.md` lists the recolored temp health and the config setting.
+- `README.md` lists the recolored temp health. Its config setting is covered by the README's general note that every feature can be turned off in `config.lua`.
 - `CHANGELOG.md` has the feature under `# Unreleased`.
 - `mod.txt` minor version is one above the last release, patch kept.
 

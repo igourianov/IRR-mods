@@ -57,7 +57,8 @@ function M.install()
 		log.error("temp health: temp_health_color '%s' is not a #RRGGBB color, temp health stays vanilla", tostring(config.temp_health_color))
 		return
 	end
-	hooks.install(BAR_CLASS .. ":PreConstruct", BAR_CLASS, function() end, function(context)
+	-- A Blueprint function's hook gets one callback, run after the function. A second one is never called.
+	hooks.install(BAR_CLASS .. ":PreConstruct", BAR_CLASS, function(context)
 		recolor(context:get())
 	end)
 	-- A hot reload, or an init after the HUD was built, finds the bar already constructed.
