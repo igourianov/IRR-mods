@@ -31,7 +31,7 @@ M.MAPPINGS = {
 		description = [[
 Hold to go straight into the point shooting pose bypassing aim.
 
-Activate the first laser on the gun: a visible laser with NVG off, an IR laser with NVG on when the gun has one.]],
+Activates the first laser on the gun. Uses IR laser when present and NVG is on.]],
 	},
 	{
 		name = "LikhosFlashlight",
